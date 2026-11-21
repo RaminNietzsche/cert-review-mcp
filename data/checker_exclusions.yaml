@@ -5,3 +5,11 @@
   checker: bugprone-narrowing-conversions
   rules: [EXP45-C, FIO34-C, FLP36-C]
   reason: "Integer narrowing has nothing to do with assignments in conditions (EXP45-C), the EOF/char distinction (FIO34-C) or int-to-float precision (FLP36-C: only the float variants are relevant, and those are kept under FLP34-C)."
+- tool: clangsa
+  checker: optin.core.EnumCastOutOfRange
+  rules: [MEM54-CPP]
+  reason: "An enum value outside its declared range is not a placement-new alignment problem (MEM54-CPP). Flag-enum arithmetic in Ceph (cputrace_flags, ceph_release_t) produced all of the Ceph hits."
+- tool: clangsa
+  checker: core.CallAndMessage
+  rules: [EXP54-CPP, EXP53-CPP]
+  reason: "Calls on a null object pointer or with an uninitialised argument are EXP34-C / EXP33-C. Upstream also lists EXP54-CPP (object lifetime) and EXP53-CPP, which misattributed every Ceph hit."
