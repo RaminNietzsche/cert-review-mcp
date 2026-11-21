@@ -412,3 +412,5 @@ Same rules for every toolset, so the rows differ only by what the added analyzer
 * False positives on compliant examples are mostly mapping noise from general analyzers (for
   example a leak checker mapped to several MEM rules); `--max-rules-per-location` and the
   confidence score rank these below rule-specific findings.
+* For recall on real security bugs (upstream CVE and memory-safety fixes in Ceph, curl, libtiff,
+  expat, libarchive, c-ares and OpenSSL) see [benchmark-real.md](benchmark-real.md).
