@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `explain_finding` MCP tool and `cert-review explain-finding` command: for one finding, the rule
+  summary, why the finding matches (checker mapping, APIs, shared identifiers), the rule's
+  noncompliant/compliant example pair closest to the flagged code, a diff between the two and
+  concrete fix steps. Deterministic and offline. The server now has 10 tools.
+- Baselines: `cert-review baseline create|update` writes `.cert-review-baseline.json` with
+  line-number-free fingerprints (rule, file, hash of the normalized line, hash of its
+  neighbours). `--baseline FILE` on `check` and `diff`, `baseline_path` on the `check_files` and
+  `check_diff` tools, the Action's `baseline` input (and `baselined` output) and the GitLab
+  template's `CERT_REVIEW_BASELINE` report only new findings and count baselined and fixed
+  ones. See `docs/baseline.md`.
+
 ## 1.1.2 (2026-11-21)
 
 ### Added
