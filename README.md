@@ -65,7 +65,7 @@ python3 -m venv .venv && . .venv/bin/activate
 pip install -e '.[dev]'
 sudo apt-get install clang clang-tidy cppcheck       # static layer (optional but recommended)
 pip install semgrep==1.186.0                        # optional: the bundled CERT pattern rules
-pytest                                              # 129 tests
+pytest                                              # 130 tests
 ```
 
 The package reads `data/` and `profiles/` from the checkout (set `CERT_REVIEW_HOME` to point

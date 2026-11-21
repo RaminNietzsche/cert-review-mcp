@@ -24,6 +24,15 @@
 - `tools/eval_accuracy.py` measures each toolset (baseline, + Semgrep, + Infer, + CodeQL) and
   reports corpus-wide recall; CodeQL is evaluated with one database per example.
 
+### Accuracy (CERT examples, docs/accuracy.md)
+
+- Corpus-wide recall (detected noncompliant examples / 708): 15% with clang-tidy, clangsa and
+  cppcheck; 20% with Semgrep added (the image toolchain; in-sample, the rules were written
+  against these examples); 20% with Infer; 28% with CodeQL. False positives on the 840
+  compliant examples: 5, 5, 5 and 28.
+- On the 103 rules the baseline scores: precision/recall 95%/42% before, 96%/46% with Semgrep,
+  88%/54% with all analyzers.
+
 ### Changed
 
 - Docker images grow by about 330 MB (MCP image 787 MB to 1.12 GB, Action image 957 MB to
