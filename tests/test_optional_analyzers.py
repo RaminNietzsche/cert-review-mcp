@@ -146,3 +146,34 @@ def test_extended_tier_counts_optional_analyzers():
     e = CM.rule_entry("EXP34-C")
     assert e["tier_runnable"] in ("deterministic", "partial")
     assert "tier_extended" in e
+
+
+def test_codeql_traced_build_keeps_only_compiler_commands(monkeypatch, tmp_path, only):
+    only("codeql")
+    monkeypatch.setattr(EX, "version", lambda t: "2.27.5")
+    f = tmp_path / "a.c"
+    f.write_text("int x;\n")
+    (tmp_path / "compile_commands.json").write_text(json.dumps([
+        {"directory": str(tmp_path), "file": str(f),
+         "arguments": ["/usr/bin/clang-19", "-fplugin=/tmp/p.so", "-Xclang", "-load", "@rsp",
+                       "-c", str(f), "-o", "a.o"]}]))
+    scripts = []
+
+    def run(cmd, **kw):
+        if cmd[1:3] == ["database", "create"]:
+            script = next(a.split("=", 1)[1] for a in cmd if a.startswith("--command="))
+            scripts.append(Path(script).read_text())
+            return subprocess.CompletedProcess(cmd, 1, "", "stop here")
+        return subprocess.CompletedProcess(cmd, 0, "", "")
+
+    monkeypatch.setattr(EX.subprocess, "run", run)
+    _, st = EX.run_codeql([str(f)], P.load("default"), tmp_path, None)
+    body = scripts[0]
+    assert "/usr/bin/clang-19" in body and "-fsyntax-only" in body
+    assert "-fplugin" not in body and "-load" not in body and "@rsp" not in body
+
+    (tmp_path / "compile_commands.json").write_text(json.dumps([
+        {"directory": str(tmp_path), "file": str(f), "command": f"sh -c 'touch /tmp/x' {f}"}]))
+    scripts.clear()
+    raw, st = EX.run_codeql([str(f)], P.load("default"), tmp_path, None)
+    assert raw == [] and not scripts and "no safe compiler commands" in st.notes[-1]

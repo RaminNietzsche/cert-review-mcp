@@ -23,7 +23,7 @@ OPTIONAL_TOOLS = ("semgrep", "infer", "codeql")
 
 
 def _sanitize_untrusted_tool_output(text: str, limit: int = 300) -> str:
-    """Sanitize external tool output before surfacing it in LLM-visible notes."""
+    """Sanitize external tool output before it is copied into tool status notes."""
     s = (text or "").replace("\r", " ").replace("\n", " ")
     s = re.sub(r"[\x00-\x1f\x7f]", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
@@ -42,6 +42,9 @@ INSTALL_HINT = {
               "`codeql pack download codeql/cert-c-coding-standards "
               "codeql/cert-cpp-coding-standards`)",
 }
+# Compiler drivers allowed in a traced CodeQL build: cc, c++, gcc, g++, clang, clang++,
+# optionally with a target prefix (x86_64-linux-gnu-g++) or a version (clang++-19).
+COMPILER_NAME = re.compile(r"(?:[\w.]+-)*(?:cc|c\+\+|gcc|g\+\+|clang|clang\+\+)(?:-\d+(?:\.\d+)*)?")
 COMPILE_ERROR = re.compile(r"^(?P<file>[^:\s][^:]*):\d+:\d+: (?:fatal )?error: ")
 
 
@@ -249,7 +252,7 @@ def run_codeql(files: list[str], profile: Profile, compdb: Path | None, root: Pa
     raw: list[RawFinding] = []
     budget = min(6 * 3600, max(900, timeout * len(files) // max(1, jobs)))
     with tempfile.TemporaryDirectory(prefix="cert-review-codeql-") as tmp:
-        t = Path(tmp)
+        t = Path(tmp).resolve()  # macOS: /var is a symlink to /private/var
         db = t / "db"
         origin: dict[str, str] = {}
         use_build = compdb is not None and (compdb / "compile_commands.json").exists()
@@ -257,7 +260,6 @@ def run_codeql(files: list[str], profile: Profile, compdb: Path | None, root: Pa
             entries = _compile_entries(files, profile, compdb, root)
             script = t / "build.sh"
             lines = ["#!/bin/sh"]
-            allowed_compilers = {"cc", "gcc", "g++", "clang", "clang++", "c++", "cl"}
             skipped_unsafe = 0
             for e in entries:
                 raw_args = e.get("arguments") or _split(e["command"])
@@ -265,7 +267,7 @@ def run_codeql(files: list[str], profile: Profile, compdb: Path | None, root: Pa
                     skipped_unsafe += 1
                     continue
                 exe_name = Path(str(raw_args[0])).name
-                if exe_name not in allowed_compilers:
+                if not COMPILER_NAME.fullmatch(exe_name):
                     skipped_unsafe += 1
                     continue
                 args = _sanitize_compile_args(raw_args)

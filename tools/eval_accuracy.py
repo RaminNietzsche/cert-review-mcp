@@ -201,7 +201,8 @@ def main() -> int:
     ap.add_argument("--tools", default="core,semgrep,infer,codeql",
                     help="analyzer groups to measure: core (clang-tidy+clangsa+cppcheck), semgrep, "
                          "infer, codeql; missing ones are skipped")
-    ap.add_argument("--out-json", default=str(ROOT / "data/accuracy.json"))
+    ap.add_argument("--out-json", default=str(ROOT / "data/accuracy.json"),
+                    help="results; per-file hits (for --reuse) are written next to it as *.flagged.json")
     ap.add_argument("--out-md", default=str(ROOT / "docs/accuracy.md"))
     ap.add_argument("--reuse", default="",
                     help="take the per-analyzer results of these groups from an earlier --out-json "
@@ -223,7 +224,8 @@ def main() -> int:
     groups = [g.strip() for g in a.tools.split(",") if g.strip()]
     flagged: dict[str, dict] = {}
     statuses, secs = [], {}
-    prev = json.loads(Path(a.out_json).read_text()) if a.reuse and Path(a.out_json).exists() else {}
+    flagged_json = Path(a.out_json).with_suffix(".flagged.json")
+    prev = json.loads(flagged_json.read_text()) if a.reuse and flagged_json.exists() else {}
     reuse = {g.strip() for g in a.reuse.split(",") if g.strip()}
     for g in groups:
         t0 = time.time()
@@ -273,10 +275,17 @@ def main() -> int:
     base_ids = {r["rule"] for r in results[0]["rules"] if r["tier"] != "llm-only"} if results else set()
     out = {"corpus_files": len(files), "source_commit": man["source_commit"],
            "seconds": secs, "tools": statuses, "toolsets": results,
-           "baseline_rules": sorted(base_ids),
-           "flagged": {g: {_rel(k): sorted(v) for k, v in sorted(f.items()) if v}
-                       for g, f in flagged.items()}}
+           "baseline_rules": sorted(base_ids)}
+    if results:
+        # Top-level summary/rules: the toolchain of the Docker images (core + Semgrep).
+        ref = next((r for r in results if r["groups"] == ["core", "semgrep"]), results[0])
+        out["reference_toolset"] = ref["label"]
+        out["summary"], out["rules"] = ref["summary"], ref["rules"]
     Path(a.out_json).write_text(json.dumps(out, indent=1) + "\n")
+    flagged_json.write_text(json.dumps({
+        "seconds": secs, "tools": statuses,
+        "flagged": {g: {_rel(k): sorted(v) for k, v in sorted(f.items()) if v} for g, f in flagged.items()},
+    }) + "\n")
     Path(a.out_md).write_text(render(out, files))
     for r in results:
         print(r["label"], json.dumps(r["summary"]["all_scored"]), json.dumps(r["summary"]["corpus_wide"]))
