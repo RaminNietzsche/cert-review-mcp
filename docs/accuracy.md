@@ -137,4 +137,6 @@ A noncompliant example is *detected* when the engine reports that example's own 
 * The five false positives are mapping noise from general analyzers (for example a leak checker that
   maps to MEM34-C); `--max-rules-per-location` and the confidence score exist to rank these below
   rule-specific findings.
+* For recall on real security bugs (upstream CVE and memory-safety fixes in Ceph, curl, libtiff,
+  expat, libarchive, c-ares and OpenSSL) see [benchmark-real.md](benchmark-real.md).
 

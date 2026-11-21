@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Real-code benchmark: `benchmark/cases.yaml` (upstream security fixes in Ceph, curl, libtiff,
+  expat, libarchive, c-ares and OpenSSL), `tools/run_real_benchmark.py` and
+  [docs/benchmark-real.md](docs/benchmark-real.md).
+
 ## 1.1.2 (2026-11-21)
 
 ### Added

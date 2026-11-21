@@ -49,6 +49,9 @@ Measured precision and recall on the CERT examples: [docs/accuracy.md](docs/accu
 Rule counts versus the official index pages: [docs/rule-counts.md](docs/rule-counts.md).
 Results on a real Ceph subtree: [docs/ceph-trial.md](docs/ceph-trial.md).
 
+Recall on real security fixes (Ceph CVEs and memory-safety fixes, curl, libtiff and others):
+[docs/benchmark-real.md](docs/benchmark-real.md).
+
 ## Install
 
 ```bash
