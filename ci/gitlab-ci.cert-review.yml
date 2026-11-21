@@ -1,0 +1,29 @@
+# EXAMPLE ONLY. Needs Ramin's approval before it is enabled in any project.
+# Runs cert-review on the lines changed by a merge request and uploads SARIF
+# as a Code Quality-style artifact. It never posts MR comments by itself.
+cert-review:
+  stage: test
+  image: debian:trixie-slim
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  variables:
+    GIT_DEPTH: "0"
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git python3 python3-pip python3-venv clang clang-tidy cppcheck
+    - python3 -m venv /tmp/venv && . /tmp/venv/bin/activate
+    - pip install -q /path/to/cert-review-mcp      # or: pip install cert-review-mcp
+  script:
+    - . /tmp/venv/bin/activate
+    - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    - >
+      cert-review diff --repo . --base "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --head HEAD
+      --profile default --format sarif -o cert-review.sarif --fail-on never
+    - >
+      cert-review diff --repo . --base "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --head HEAD
+      --profile default --format markdown -o cert-review.md
+    - cat cert-review.md
+  artifacts:
+    when: always
+    paths: [cert-review.sarif, cert-review.md]
+    expire_in: 2 weeks
+  allow_failure: true

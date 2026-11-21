@@ -1,0 +1,30 @@
+# EXAMPLE ONLY. Needs Ramin's approval before it is copied to .github/workflows/.
+# Runs cert-review on the lines changed by a pull request and uploads SARIF to
+# GitHub code scanning. It does not post review comments.
+name: cert-review
+on:
+  pull_request:
+    paths: ["**/*.c", "**/*.cc", "**/*.cpp", "**/*.h", "**/*.hpp"]
+permissions:
+  contents: read
+  security-events: write
+jobs:
+  cert-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang clang-tidy cppcheck python3-pip
+          pip install cert-review-mcp   # or install from a checkout
+      - name: Review changed lines
+        run: |
+          cert-review diff --repo . --base "origin/${{ github.base_ref }}" --head HEAD \
+            --profile default --format sarif -o cert-review.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: cert-review.sarif
+          category: cert-review
