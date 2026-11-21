@@ -116,6 +116,23 @@ claude mcp add cert-review -- /path/to/cert-review-mcp/.venv/bin/cert-review-mcp
 mkdir -p ~/.claude/skills && cp -r skills/cert-review skills/ceph-cert-review ~/.claude/skills/
 ```
 
+## Use as a GitHub Action
+
+```yaml
+- uses: actions/checkout@v4
+  with: { fetch-depth: 0 }
+- uses: RaminNietzsche/cert-review-mcp@v1
+  with:
+    profile: default            # or ceph
+    fail-on: error
+    upload-sarif: "true"        # SARIF to code scanning
+```
+
+Diff mode on pull requests, SARIF, a job summary, and optional inline review comments
+(`review-comments: "true"`, off by default). A GitLab include template publishes Code Quality
+and SAST reports. Inputs, outputs and examples: [docs/action.md](docs/action.md),
+[examples/github-workflow.yml](examples/github-workflow.yml).
+
 ## MCP tools
 
 | Tool | Purpose |
