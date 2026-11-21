@@ -257,11 +257,26 @@ def run_codeql(files: list[str], profile: Profile, compdb: Path | None, root: Pa
             entries = _compile_entries(files, profile, compdb, root)
             script = t / "build.sh"
             lines = ["#!/bin/sh"]
+            allowed_compilers = {"cc", "gcc", "g++", "clang", "clang++", "c++", "cl"}
+            skipped_unsafe = 0
             for e in entries:
                 raw_args = e.get("arguments") or _split(e["command"])
+                if not raw_args:
+                    skipped_unsafe += 1
+                    continue
+                exe_name = Path(str(raw_args[0])).name
+                if exe_name not in allowed_compilers:
+                    skipped_unsafe += 1
+                    continue
                 args = _sanitize_compile_args(raw_args)
                 lines.append(f"cd {_q(e['directory'])} && " + " ".join(_q(a) for a in _drop_output(args))
                              + " -fsyntax-only || true")
+            if len(lines) == 1:
+                st.available = False
+                st.notes.append("CodeQL traced build blocked: no safe compiler commands found in compile_commands.json")
+                return [], st
+            if skipped_unsafe:
+                st.notes.append(f"CodeQL traced build skipped {skipped_unsafe} non-compiler compile_commands.json entries")
             script.write_text("\n".join(lines) + "\n")
             script.chmod(0o755)
             src_root = project
