@@ -87,11 +87,23 @@ def _inline_ignored(src: _Source, path: str, line: int, rule_id: str) -> bool:
     return False
 
 
+def relpath(path: str, root: Path | None) -> str:
+    base = root or Path.cwd()
+    try:
+        return str(Path(path).resolve().relative_to(base.resolve()))
+    except ValueError:
+        return str(path).lstrip("/")
+
+
 def normalize(raw: list[T.RawFinding], profile: P.Profile, src: _Source | None = None,
-              keep_suppressed: bool = True) -> tuple[list[F.Finding], list[F.Finding]]:
+              root: Path | None = None) -> tuple[list[F.Finding], list[F.Finding]]:
+    """Map raw tool hits to CERT findings. Paths are made absolute so that
+    reports from different tools for the same location merge."""
     src = src or _Source()
     kept, dropped = [], []
     for r in raw:
+        r.file = str(Path(r.file).resolve())
+        rel = relpath(r.file, root)
         lang = T.lang_of(r.file)
         for rid, specific, conf in _rules_for(r.tool, r.checker, lang):
             f = F.make(rid, r.file, r.line, r.col, r.tool, r.checker, r.message, conf, profile)
@@ -101,7 +113,7 @@ def normalize(raw: list[T.RawFinding], profile: P.Profile, src: _Source | None =
             if reason:
                 f.suppressed = f"disabled rule: {reason}"
             else:
-                s = profile.suppression(rid, r.checker, r.file, src.line(r.file, r.line))
+                s = profile.suppression(rid, r.checker, rel, src.line(r.file, r.line))
                 if s:
                     f.suppressed = s["reason"]
                 elif _inline_ignored(src, r.file, r.line, rid):
@@ -126,7 +138,8 @@ def cap_per_location(findings: list[F.Finding], max_rules: int = 2) -> list[F.Fi
     return out
 
 
-def select_files(paths: list[str], profile: P.Profile, lang: str | None = None) -> list[str]:
+def select_files(paths: list[str], profile: P.Profile, lang: str | None = None,
+                 root: Path | None = None) -> list[str]:
     exts = profile.raw.get("file_extensions", {})
     c_ext = set(exts.get("c", [".c"]))
     cpp_ext = set(exts.get("cpp", [".cc", ".cpp", ".h"]))
@@ -138,7 +151,7 @@ def select_files(paths: list[str], profile: P.Profile, lang: str | None = None) 
             ext = c.suffix.lower()
             if ext in c_ext or ext in cpp_ext:
                 s = str(c)
-                if profile.excluded_path(s.lstrip("/")) or profile.excluded_path(s):
+                if profile.excluded_path(relpath(s, root)):
                     continue
                 if lang == "c" and ext not in c_ext:
                     continue
@@ -155,7 +168,7 @@ def check(paths: list[str], profile: P.Profile | str = "default", lang: str | No
           include_suppressed: bool = True) -> Result:
     prof = P.load(profile) if isinstance(profile, str) else profile
     rootp = Path(root).resolve() if root else None
-    files = select_files(paths, prof, lang)
+    files = select_files(paths, prof, lang, rootp)
     # Headers are analysed through the sources that include them; analysing a
     # bare header works for clang-tidy, so keep them when passed explicitly.
     res = Result(profile=prof.name, files=files)
@@ -177,8 +190,8 @@ def check(paths: list[str], profile: P.Profile | str = "default", lang: str | No
         raw += r
         res.tools.append(st)
     # restrict to the files requested (clang-tidy may report headers)
-    raw = [x for x in raw if not prof.excluded_path(x.file.lstrip("/"))]
-    kept, dropped = normalize(raw, prof)
+    raw = [x for x in raw if not prof.excluded_path(relpath(x.file, rootp))]
+    kept, dropped = normalize(raw, prof, root=rootp)
     if changed_lines is not None:
         norm = {str(Path(k).resolve()): v for k, v in changed_lines.items()}
         def in_diff(f: F.Finding) -> bool:
