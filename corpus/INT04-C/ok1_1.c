@@ -1,0 +1,35 @@
+// corpus: INT04-C compliant
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <math.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <wchar.h>
+
+enum { MAX_TABLE_LENGTH = 256 };
+
+char** create_table(void) {
+  const char* const lenstr = getenv("TABLE_SIZE");
+  const size_t length = lenstr ? strtoul(lenstr, NULL, 10) : 0;
+
+  if (length == 0 || length > MAX_TABLE_LENGTH)
+    return NULL;   /* Indicate error to caller */
+
+  const size_t table_size = length * sizeof(char *);
+  char** const table = (char **)malloc(table_size);
+
+  if (table == NULL)
+    return NULL;   /* Indicate error to caller */
+
+  /* Initialize table... */
+  return table;
+}

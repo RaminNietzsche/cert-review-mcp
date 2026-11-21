@@ -1,0 +1,39 @@
+// corpus: FIO44-C noncompliant
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <math.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <wchar.h>
+
+#include <stdio.h>
+#include <string.h>
+ 
+int opener(FILE *file) {
+  int rc;
+  fpos_t offset;
+
+  memset(&offset, 0, sizeof(offset));
+
+  if (file == NULL) { 
+    return -1;
+  }
+
+  /* Read in data from file */
+
+  rc = fsetpos(file, &offset);
+  if (rc != 0 ) {
+    return rc;
+  }
+
+  return 0;
+}

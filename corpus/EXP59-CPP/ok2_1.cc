@@ -1,0 +1,38 @@
+// corpus: EXP59-CPP compliant
+#include <algorithm>
+#include <atomic>
+#include <cassert>
+#include <cerrno>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <exception>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <new>
+#include <random>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
+
+#include <cstddef>
+ 
+struct S {
+  static int i;
+  // ...
+};
+int S::i = 0;
+ 
+extern void store_in_some_buffer(void *buffer, size_t offset, int val);
+ 
+void f() {
+  store_in_some_buffer(&S::i, 0, 42);
+}

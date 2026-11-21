@@ -1,0 +1,29 @@
+// corpus: EXP54-CPP compliant
+#include <algorithm>
+#include <atomic>
+#include <cassert>
+#include <cerrno>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <exception>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <new>
+#include <random>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
+
+//...
+  // Copy the values into the memory.
+  std::copy(i, e, std::raw_storage_iterator<S*, S>(vals));
+// ...

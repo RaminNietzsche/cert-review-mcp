@@ -1,0 +1,26 @@
+// corpus: EXP44-C noncompliant
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <math.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <wchar.h>
+
+#include <stdio.h>
+ 
+void func(void) {
+  int val = 0; 
+  /* ... */ 
+  size_t align = _Alignof(int[++val]);
+  printf("%zu, %d\n", align, val);
+  /* ... */
+}

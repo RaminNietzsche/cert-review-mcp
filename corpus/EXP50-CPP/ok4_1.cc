@@ -1,0 +1,45 @@
+// corpus: EXP50-CPP compliant
+#include <algorithm>
+#include <atomic>
+#include <cassert>
+#include <cerrno>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <exception>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <new>
+#include <random>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
+
+extern void c(int i, int j);
+int glob;
+ 
+int a() {
+  return glob + 10;
+}
+ 
+int b() {
+  glob = 42;
+  return glob;
+}
+ 
+void f() {
+  int a_val, b_val;
+ 
+  a_val = a();
+  b_val = b();
+
+  c(a_val, b_val);
+}
