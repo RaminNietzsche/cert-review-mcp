@@ -1,6 +1,7 @@
 """Run clang-tidy, the Clang Static Analyzer and cppcheck; parse raw output."""
 from __future__ import annotations
 
+import functools
 import json
 import os
 import re
@@ -216,6 +217,21 @@ def checker_variant(checker: str, message: str) -> str:
 csa_variant = checker_variant
 
 
+@functools.lru_cache(maxsize=4)
+def csa_supported(exe: str) -> frozenset[str] | None:
+    """Checker names this clang knows (stable and alpha), or None if it cannot list them.
+    An unknown -analyzer-checker aborts the whole analysis, and the checker map is built
+    against clang 19 while older clangs (e.g. 18) lack some checkers."""
+    names: set[str] = set()
+    for flag in ("-analyzer-checker-help", "-analyzer-checker-help-alpha"):
+        try:
+            out = subprocess.run([exe, "-cc1", flag], capture_output=True, text=True, timeout=30).stdout
+        except (OSError, subprocess.SubprocessError):
+            return None
+        names |= set(re.findall(r"^  ([a-z][\w]*(?:\.[\w]+)+)", out, re.M))
+    return frozenset(names) or None
+
+
 def taint_config() -> Path:
     """Extra taint sources and propagation rules (data/csa-taint.yaml)."""
     return data_dir() / "csa-taint.yaml"
@@ -269,6 +285,12 @@ def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: 
         return [], st
     mapped = CM.checkers_for_tool("clangsa", standards=standards)
     checkers = sorted({c.split("@", 1)[0] for c in mapped})
+    known = csa_supported(exe)
+    if known is not None:
+        missing = [c for c in checkers if c not in known]
+        if missing:
+            st.notes.append(f"not in this clang, skipped: {', '.join(missing)}")
+        checkers = [c for c in checkers if c in known]
     raw: list[RawFinding] = []
     cfg = taint_config()
     taint = any("taint" in c for c in checkers) and cfg.exists()

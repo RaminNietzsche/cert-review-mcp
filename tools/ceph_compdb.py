@@ -21,6 +21,7 @@ from pathlib import Path
 
 EXTRA_DEFS = """
 #define HAVE_SYS_TYPES_H 1
+#define HAVE_LINUX_TYPES_H 1
 #define HAVE_STDINT_H 1
 #define HAVE_UNISTD_H 1
 #define HAVE_PTHREAD_H 1
@@ -99,10 +100,15 @@ def main() -> int:
               "macOS. Run the analysis on Linux, the Docker image or the GitHub Action.", file=sys.stderr)
     incs = [src, src / "include", gen, gen / "include", src / "rapidjson/include",
             src / "dmclock/support/src", src / "dmclock/src", src / "s3select/include",
-            src / "xxHash", src / "BLAKE3/c", src / "fmt/include"]
+            src / "xxHash", src / "BLAKE3/c"]
     flags = [f"-std={a.std}", "-DHAVE_CONFIG_H", "-D_FILE_OFFSET_BITS=64", "-D__linux__=1",
              "-DBOOST_ASIO_DISABLE_THREAD_KEYWORD_EXTENSION", "-Wno-everything", *sysroot]
     flags += [f"-I{p}" for p in incs if p.exists()]
+    # The bundled fmt ships a file named `format`; searched before the system headers it would
+    # replace the standard <format> that newer libstdc++ <chrono> includes. After them,
+    # <fmt/format.h> still resolves.
+    if (src / "fmt/include").exists():
+        flags += ["-idirafter", str(src / "fmt/include")]
     cmds = []
     for d in a.dirs:
         for f in sorted((a.ceph / d).rglob("*.cc")):

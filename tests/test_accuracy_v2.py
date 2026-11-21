@@ -158,3 +158,19 @@ def test_split_is_fixed_and_balanced():
     # pinned so that tuning cannot silently move rules between halves
     assert ev.SPLIT_SALT == "cert-review-split-v1"
     assert halves["ARR38-C"] == "dev" and halves["INT30-C"] == "held-out"
+
+
+def test_csa_supported_without_clang():
+    assert T.csa_supported("/nonexistent/clang") is None
+
+
+@need_clang
+def test_checkers_unknown_to_clang_are_skipped(tmp_path, monkeypatch):
+    known = T.csa_supported(shutil.which("clang"))
+    assert known and "unix.Malloc" in known
+    monkeypatch.setattr(T, "csa_supported", lambda exe: known - {"optin.taint.TaintedAlloc"})
+    p = tmp_path / "t.c"
+    p.write_text(TAINT_SRC)
+    raw, st = T.run_clang_sa([str(p)], P.load("default"), None, tmp_path)
+    assert any("optin.taint.TaintedAlloc" in n for n in st.notes)
+    assert any(r.checker.endswith("@format-string") for r in raw)

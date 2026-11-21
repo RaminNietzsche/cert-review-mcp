@@ -78,3 +78,45 @@ def test_match_by_cwe():
     rid = next(r["id"] for r in R.all_rules().values() if "CWE-476" in (r.get("cwe") or []))
     assert B.matches(rid, {"cert": ["XXX00-C"], "cwe": ["CWE-476"]})
     assert not B.matches("DCL00-C", {"cert": ["EXP34-C"], "cwe": ["CWE-476"]})
+
+
+def _repo_with(tmp_path, files: dict[str, str]):
+    import subprocess
+    wt = tmp_path / "src"
+    wt.mkdir(parents=True)
+    for k, v in files.items():
+        (wt / k).parent.mkdir(parents=True, exist_ok=True)
+        (wt / k).write_text(v)
+    env = ["-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "commit.gpgsign=false"]
+    subprocess.run(["git", "init", "-q", str(wt)], check=True)
+    subprocess.run(["git", *env, "-C", str(wt), "add", "-A"], check=True)
+    subprocess.run(["git", *env, "-C", str(wt), "commit", "-q", "-m", "x"], check=True)
+    sha = subprocess.run(["git", "-C", str(wt), "rev-parse", "HEAD"], capture_output=True,
+                         text=True, check=True).stdout.strip()
+    return wt / ".git", sha
+
+
+def test_tree_cxx_std_from_cmake(tmp_path):
+    git_dir, sha = _repo_with(tmp_path, {"src/CMakeLists.txt": "set(CMAKE_CXX_STANDARD 17)\n"})
+    assert B.tree_cxx_std(git_dir, sha) == "c++17"
+
+
+def test_tree_cxx_std_from_flag_and_missing(tmp_path):
+    git_dir, sha = _repo_with(tmp_path, {"CMakeLists.txt": 'set(CMAKE_CXX_FLAGS "-std=c++1z")\n'})
+    assert B.tree_cxx_std(git_dir, sha) == "c++17"
+    git_dir2, sha2 = _repo_with(tmp_path / "b", {"README": "x\n"})
+    assert B.tree_cxx_std(git_dir2, sha2) is None
+
+
+def test_confident_outcome_ignores_low_confidence_findings():
+    case = {"cert": ["ARR30-C"], "cwe": ["CWE-787"]}
+    old = {"a.c": {10}}
+    vul = {"findings": [{"file": "a.c", "line": 10, "rule": "INT31-C", "checker": "x", "confidence": 0.45},
+                        {"file": "a.c", "line": 11, "rule": "ARR30-C", "checker": "y", "confidence": 0.65}],
+           "partial_files": []}
+    fix = {"findings": [], "partial_files": []}
+    r = B.score(case, vul, fix, old, {"a.c": {10}}, 3)
+    assert r["outcome"] == "detected" and r["outcome_confident"] == "detected"
+    vul["findings"] = vul["findings"][:1]
+    r = B.score(case, vul, fix, old, {"a.c": {10}}, 3)
+    assert r["outcome"] == "wrong-rule" and r["outcome_confident"] == "miss"

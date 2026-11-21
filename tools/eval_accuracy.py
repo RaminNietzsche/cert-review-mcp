@@ -44,7 +44,13 @@ NOTE = """
 
 * **Semgrep figures are in-sample.** The bundled rules in `data/semgrep/` were written while
   looking at these CERT examples, so their recall here overstates what they find in other code.
-  An out-of-sample check on Ceph is in [analyzers.md](analyzers.md).
+  This holds for both halves of the split: those rules predate it. An out-of-sample check on Ceph
+  is in [analyzers.md](analyzers.md).
+* **Dev and held-out rules.** Changes made after the split (the Clang taint and bounds checkers,
+  the message-based split of `bugprone-narrowing-conversions`, the size-arithmetic Semgrep rule)
+  were tuned on dev rules only, and the held-out rows are the check on them. The split is by rule,
+  so a held-out rule (for example INT30-C, INT32-C, STR31-C, FLP34-C) was never looked at during
+  that work, not even through a sibling example.
 * **CodeQL** ran with one database per example and only the queries mapped to that example's
   rule. Whole-program queries (DCL40-C, DCL60-CPP) need two translation units, which a single
   example file does not have.
