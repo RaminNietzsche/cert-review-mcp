@@ -14,8 +14,8 @@ It does three things:
 2. **Runs real analyzers and maps them to rule IDs.** clang-tidy (`cert-*` and mapped checks),
    the Clang Static Analyzer and cppcheck, normalised to one finding schema, de-duplicated,
    filtered by a profile, and optionally limited to changed lines.
-3. **Prepares the rest for an LLM review layer without letting it make things up.** For rules
-   no checker covers, `review_packet` selects code hunks and the few rule texts worth reading;
+3. **Prepares the rest for a manual review layer without letting it make things up.** For rules
+   no checker covers, `build_review_packet` selects code hunks and the few rule texts worth reading;
    `validate_findings` rejects any finding that does not cite an existing rule ID and quote
    that rule's text.
 
@@ -46,16 +46,17 @@ flowchart LR
     R --> K["review packet<br/>hunks and candidate rules"]
     H --> K
     P --> K
-    K --> L["LLM review layer<br/>in the client"]
+    K --> L["manual review<br/>in the client"]
     L --> V["validator<br/>rule ID and verbatim quote"]
     R --> V
   end
-  F --> O["format_review"]
+  F --> O["format_findings"]
   V --> O
   O --> S1["SARIF 2.1.0"]
   O --> S2["GitHub review payload"]
   O --> S3["GitLab discussions"]
   O --> S4["Markdown"]
+  O --> S5["GitLab Code Quality and SAST"]
   subgraph front["Front ends"]
     MCP["MCP server, stdio"] --- CLI["cert-review CLI"]
   end
@@ -137,17 +138,23 @@ and SAST reports. Inputs, outputs and examples: [docs/action.md](docs/action.md)
 
 ## MCP tools
 
+Every tool is read-only: it reads local files and bundled data and runs local analyzers.
+Nothing is written, uploaded or posted. All tools declare MCP annotations, a title and,
+except `format_findings`, an output schema.
+
 | Tool | Purpose |
 |---|---|
-| `list_rules(lang, category, kind, level, detectable, coverage)` | Browse the rules and their coverage tier |
-| `explain_rule(id, profile)` | Full text, examples, risk row, CWE, detection tools, profile notes |
-| `search_rules(query)` | Keyword search over titles, text and examples |
-| `check_file(path, profile, lang, compdb, ...)` | Static findings for files or directories |
-| `check_diff(repo, base, head \| diff_text, profile)` | Static findings on changed lines only |
-| `review_packet(...)` | Hunks plus candidate rule texts for the LLM layer |
-| `validate_findings(findings_json)` | Accept only grounded findings (rule ID + verbatim quote) |
-| `rule_coverage(lang)` | Deterministic / partial / llm-only counts |
-| `format_review(findings, style)` | `github`, `gitlab`, `sarif` or `markdown`; formatting only |
+| `list_rules(lang, category, kind, level, detectable, coverage, limit)` | Filter the rule database; summaries with coverage tier |
+| `search_rules(query, limit, lang)` | Rank rules by keyword relevance (API names, concepts, IDs) |
+| `get_rule(rule_id, profile, include_examples)` | One rule: text, examples, risk row, CWE, checkers, profile notes |
+| `get_rule_coverage(lang, kind, include_ids)` | Rule counts per tier: deterministic / partial / llm-only |
+| `check_files(path, profile, compdb, root, lang, tools, ...)` | Analyzer findings for a file or a directory tree |
+| `check_diff(repo, base, head \| diff_text, profile, compdb, ...)` | Analyzer findings on changed lines only |
+| `build_review_packet(path \| repo + base \| diff_text, ...)` | Code hunks plus candidate rule texts for manual review |
+| `validate_findings(findings, packet, profile)` | Accept only grounded findings (rule ID + verbatim quote) |
+| `format_findings(findings, style, root, warnings)` | `markdown`, `github`, `gitlab`, `sarif`, `codequality` or `gitlab-sast`; formatting only |
+
+MCP tool and parameter names changed after the `v1` release; see [CHANGELOG.md](CHANGELOG.md).
 
 Resources: `rule://EXP34-C`, `profile://ceph`. Prompts: `cert_review`, `ceph_review`.
 

@@ -17,7 +17,7 @@ wrong (crash, overflow, leak, race).>
 Rule: <URL>
 ```
 
-`format_review` produces this shape. Guidelines:
+`format_findings` produces this shape. Guidelines:
 
 - Lead with the consequence, not the rule number.
 - The fix must compile in context. If you are unsure, say what to change in

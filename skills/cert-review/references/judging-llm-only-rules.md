@@ -1,6 +1,6 @@
 # Judging rules no checker covers
 
-`rule_coverage` reports which rules are `llm-only` (no checker mapped) and
+`get_rule_coverage` reports which rules are `llm-only` (no checker mapped) and
 `partial` (only general checkers). For those, the review packet gives you the
 code hunk and candidate rules chosen by token heuristics. The heuristics decide
 what to read, not what is wrong.

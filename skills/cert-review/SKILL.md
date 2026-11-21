@@ -16,31 +16,32 @@ post back afterwards. Drafting and formatting are free; posting is not.
 | Tool | Use |
 |---|---|
 | `check_diff` | Static findings on the changed lines of `base..head`, the working tree, or a pasted diff |
-| `check_file` | Static findings for a file or directory |
-| `review_packet` | Code hunks plus the rule texts worth reading, for rules no checker covers |
+| `check_files` | Static findings for a file or directory |
+| `build_review_packet` | Code hunks plus the rule texts worth reading, for rules no checker covers |
 | `validate_findings` | Rejects findings without a real rule ID or a verbatim rule quote |
-| `format_review` | Markdown, GitHub review, GitLab discussions or SARIF payloads (formatting only) |
-| `explain_rule`, `search_rules`, `list_rules`, `rule_coverage` | Look rules up |
+| `format_findings` | Markdown, GitHub review, GitLab discussions, SARIF or GitLab reports (formatting only) |
+| `get_rule`, `search_rules`, `list_rules`, `get_rule_coverage` | Look rules up |
 
 ## Procedure
 
 1. **Scope.** Prefer the diff (`check_diff`). Whole-file review is for new files.
    Pass `compdb` (a directory with `compile_commands.json`) whenever one exists.
    Choose the profile: `ceph` for Ceph trees, otherwise `default`.
-2. **Static layer.** Run `check_diff`/`check_file`. Treat findings with
+2. **Static layer.** Run `check_diff`/`check_files`. Treat findings with
    `confidence >= 0.5` as leads, not verdicts: open the code and confirm. Findings
    from a rule-specific checker (`cert-*`) are the most reliable; findings from
    general analyzers mapped to a rule need a sanity check. See
    [references/false-positives.md](references/false-positives.md).
-3. **LLM layer.** Call `review_packet`. For each hunk read the candidate rules'
+3. **Manual layer.** Call `build_review_packet` (`run_static: false` if step 2 already ran). For each hunk read the candidate rules'
    texts and decide whether the code really violates one. Follow
    [references/judging-llm-only-rules.md](references/judging-llm-only-rules.md).
    Silence is better than a speculative finding.
 4. **Ground every finding.** Each finding is
    `{rule_id, file, line, message, quote, fix}` where `quote` is copied verbatim
    (at least 20 characters) from that rule's text. Run `validate_findings`;
-   drop what it rejects instead of rewording the quote to fit.
-5. **Draft.** Use `format_review` and the template in
+   drop what it rejects instead of rewording the quote to fit. Pass the packet
+   too, so findings outside its hunks are rejected.
+5. **Draft.** Use `format_findings` (pass the `warnings` from step 2) and the template in
    [references/comment-template.md](references/comment-template.md). Show the
    exact text to the human, with the file and line each comment attaches to.
 6. **Wait.** Only after the human approves the exact text, and names the target
