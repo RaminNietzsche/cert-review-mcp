@@ -217,6 +217,10 @@ def checker_variant(checker: str, message: str) -> str:
 csa_variant = checker_variant
 
 
+# Checkers renamed between clang releases: current name -> name in older clangs.
+CSA_OLD_NAMES = {"alpha.security.taint.GenericTaint": "alpha.security.taint.TaintPropagation"}
+
+
 @functools.lru_cache(maxsize=4)
 def csa_supported(exe: str) -> frozenset[str] | None:
     """Checker names this clang knows (stable and alpha), or None if it cannot list them.
@@ -286,7 +290,12 @@ def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: 
     mapped = CM.checkers_for_tool("clangsa", standards=standards)
     checkers = sorted({c.split("@", 1)[0] for c in mapped})
     known = csa_supported(exe)
+    renamed: dict[str, str] = {}
     if known is not None:
+        for new, old in CSA_OLD_NAMES.items():
+            if new in checkers and new not in known and old in known:
+                checkers = [old if c == new else c for c in checkers]
+                renamed[old] = new
         missing = [c for c in checkers if c not in known]
         if missing:
             st.notes.append(f"not in this clang, skipped: {', '.join(missing)}")
@@ -323,7 +332,7 @@ def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: 
                 m = CSA_LINE.match(line)
                 if not m or m["sev"] != "warning":
                     continue
-                name = csa_variant(m["chk"], m["msg"])
+                name = csa_variant(renamed.get(m["chk"], m["chk"]), m["msg"])
                 if name in mapped:
                     raw.append(RawFinding("clangsa", name, m["file"], int(m["line"]),
                                           int(m["col"]), m["msg"]))

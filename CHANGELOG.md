@@ -22,7 +22,8 @@
 ### Changed
 
 - `clangsa` uses the file's flags from the compilation database (it used guessed flags only) and
-  skips mapped checkers the installed clang does not have, with a note.
+  skips mapped checkers the installed clang does not have, with a note (with clang 18,
+  `GenericTaint` runs under its older name `alpha.security.taint.TaintPropagation`).
 - `bugprone-narrowing-conversions` is mapped by message: integer narrowing to INT31-C at
   confidence 0.45, floating conversions to FLP34-C. Before, every narrowing was reported as both
   INT31-C and FLP34-C.
