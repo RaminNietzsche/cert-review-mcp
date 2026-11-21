@@ -1,0 +1,72 @@
+name: docker-publish
+# Builds the MCP server image (Dockerfile.mcp) for linux/amd64 and linux/arm64
+# and pushes it to Docker Hub as <DOCKERHUB_USERNAME>/cert-review-mcp.
+# Needs repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (an access
+# token with read/write scope). Without them the image is built but not pushed.
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image version tag, e.g. 1.1.0 (latest is also updated)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    env:
+      CAN_PUSH: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+      IMAGE: ${{ secrets.DOCKERHUB_USERNAME || 'local' }}/cert-review-mcp
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version
+        id: v
+        run: |
+          v="${{ inputs.version }}"
+          [ -n "$v" ] || v="${GITHUB_REF_NAME#v}"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - name: "Smoke test (amd64): the server must answer tools/list"
+        run: |
+          docker buildx build -f Dockerfile.mcp --platform linux/amd64 --load -t cert-review-mcp:test .
+          out=$( (printf '%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"ci","version":"0"}}}' \
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'; sleep 5) | docker run -i --rm cert-review-mcp:test | tail -1)
+          n=$(echo "$out" | jq '.result.tools | length')
+          echo "tools/list returned $n tools"
+          test "$n" -ge 9
+
+      - name: Log in to Docker Hub
+        if: env.CAN_PUSH == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push (amd64, arm64)
+        if: env.CAN_PUSH == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.mcp
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.v.outputs.version }}
+            ${{ env.IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.version=${{ steps.v.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: No Docker Hub credentials
+        if: env.CAN_PUSH != 'true'
+        run: echo "::notice::DOCKERHUB_USERNAME/DOCKERHUB_TOKEN are not set; image built and tested but not pushed."

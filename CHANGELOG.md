@@ -37,6 +37,9 @@ Only clients that call the MCP tools by name need updating.
 - `Dockerfile.mcp`: an image that runs the MCP server over stdio (and the CLI with
   `--entrypoint cert-review`), for local use and the Glama registry build.
 - `glama.json`.
+- `.github/workflows/docker-publish.yml`: on a `v*.*.*` tag, builds `Dockerfile.mcp` for
+  linux/amd64 and linux/arm64, checks that it answers `tools/list`, and pushes
+  `<DOCKERHUB_USERNAME>/cert-review-mcp:<version>` and `:latest`.
 
 ### Fixed
 
