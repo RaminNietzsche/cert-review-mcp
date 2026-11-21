@@ -31,3 +31,8 @@ def test_recorded_accuracy_is_consistent():
     assert s["deterministic"]["fp"] == 0          # rule-specific checkers: no FP on compliant examples
     tot = s["deterministic"]["tp"] + s["partial"]["tp"]
     assert tot == s["all_scored"]["tp"]
+    for ts in ACC.get("toolsets", []):
+        t = ts["summary"]
+        assert t["deterministic"]["tp"] + t["partial"]["tp"] == t["all_scored"]["tp"]
+        w = t["corpus_wide"]
+        assert w["tp"] + w["fn"] == w["noncompliant"] and w["fp"] + w["tn"] == w["compliant"]

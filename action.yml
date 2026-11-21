@@ -27,7 +27,7 @@ inputs:
     description: Path to compile_commands.json or its directory. Strongly recommended; without it many files do not parse.
     required: false
   tools:
-    description: 'Comma separated: clang-tidy, clangsa, cppcheck.'
+    description: 'Comma separated: clang-tidy, clangsa, cppcheck, semgrep (bundled CERT rules; in the action image), infer, codeql (not in the action image), or auto (core tools plus semgrep and infer when installed).'
     default: clang-tidy,cppcheck
   min-confidence:
     description: Hide findings below this confidence (0..1).
@@ -38,6 +38,9 @@ inputs:
   fail-on-parse-error:
     description: 'Fail the job when the analysis was partial: a file had compile errors or an analyzer timed out on it.'
     default: 'false'
+  baseline:
+    description: 'Baseline JSON (relative to working-directory) created with `cert-review baseline create`; findings recorded there are not reported, annotated or counted for fail-on.'
+    required: false
   sarif-file:
     description: Where to write the SARIF 2.1.0 report (relative to the workspace).
     default: cert-review.sarif
@@ -75,6 +78,9 @@ outputs:
   errors:
     description: Number of findings with severity error.
     value: ${{ steps.run.outputs.errors }}
+  baselined:
+    description: Number of findings hidden because they are in the baseline.
+    value: ${{ steps.run.outputs.baselined }}
 runs:
   using: composite
   steps:
@@ -102,6 +108,7 @@ runs:
       INPUT_FAIL_ON: ${{ inputs.fail-on }}
       INPUT_FAIL_ON_PARSE_ERROR: ${{ inputs.fail-on-parse-error }}
       INPUT_SARIF_FILE: ${{ inputs.sarif-file }}
+      INPUT_BASELINE: ${{ inputs.baseline }}
       INPUT_REVIEW_COMMENTS: ${{ inputs.review-comments }}
       INPUT_MAX_COMMENTS: ${{ inputs.max-comments }}
       INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
@@ -128,6 +135,7 @@ runs:
         -e INPUT_FAIL_ON \
         -e INPUT_FAIL_ON_PARSE_ERROR \
         -e INPUT_SARIF_FILE \
+        -e INPUT_BASELINE \
         -e INPUT_REVIEW_COMMENTS \
         -e INPUT_MAX_COMMENTS \
         -e INPUT_GITHUB_TOKEN \

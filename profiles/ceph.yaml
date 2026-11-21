@@ -18,6 +18,9 @@ languages:
   c_standard: 11          # src/CMakeLists.txt: CMAKE_C_STANDARD 11, C extensions ON
   cpp_standard: 23        # src/CMakeLists.txt: "require c++23"
   cpp_extensions: false   # CMAKE_CXX_EXTENSIONS OFF
+# Rule sets findings are mapped to: cert (SEI CERT C and C++), misra (MISRA C:2012 and
+# MISRA C++:2023), autosar (AUTOSAR C++14), or individual standard names.
+standards: [cert]
 file_extensions:
   c: [".c"]
   cpp: [".cc", ".cpp", ".h", ".hpp"]

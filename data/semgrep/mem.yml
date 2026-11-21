@@ -1,0 +1,301 @@
+# SEI CERT MEM rules (memory management). See int.yml for the metadata conventions.
+rules:
+  - id: mem30-c-use-after-free
+    languages: [c, cpp]
+    severity: ERROR
+    message: >-
+      `$P` is used after free($P) without being reassigned (MEM30-C).
+    metadata:
+      cert: [MEM30-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              free($P);
+              ...
+          - pattern-inside: |
+              std::free($P);
+              ...
+      - pattern-not-inside: |
+          free($P);
+          ...
+          $P = $X;
+          ...
+      - pattern-not-inside: |
+          std::free($P);
+          ...
+          $P = $X;
+          ...
+      - pattern-either:
+          - pattern: $P->$FLD
+          - pattern: "*$P"
+          - pattern: $P[$I]
+          - pattern: $FN(..., $P, ...)
+      - pattern-not: free($P)
+      - pattern-not: std::free($P)
+      - pattern-not: sizeof(...)
+      - pattern-not-inside: sizeof(...)
+
+  - id: mem30-c-double-free
+    languages: [c, cpp]
+    severity: ERROR
+    message: >-
+      `$P` is passed to free() twice without being reassigned in between (MEM30-C).
+    metadata:
+      cert: [MEM30-C]
+      confidence: high
+    patterns:
+      - pattern: |
+          free($P);
+          ...
+          free($P);
+      - pattern-not: |
+          free($P);
+          ...
+          $P = $X;
+          ...
+          free($P);
+
+  - id: mem30-c-free-in-list-traversal
+    languages: [c, cpp]
+    severity: ERROR
+    message: >-
+      The loop frees `$P` and then advances with `$P->$NEXT`, reading freed memory; save the
+      next pointer before calling free() (MEM30-C).
+    metadata:
+      cert: [MEM30-C]
+      confidence: high
+    pattern-either:
+      - pattern: |
+          for ($T *$P = $INIT; $COND; $P = $P->$NEXT) { ... free($P); ... }
+      - pattern: |
+          for ($P = $INIT; $COND; $P = $P->$NEXT) { ... free($P); ... }
+      - pattern: |
+          for ($T *$P = $INIT; $COND; $P = $P->$NEXT) { ... delete $P; ... }
+      - pattern: |
+          for ($P = $INIT; $COND; $P = $P->$NEXT) { ... delete $P; ... }
+
+  - id: mem50-cpp-use-after-delete
+    languages: [cpp]
+    severity: ERROR
+    message: >-
+      `$P` is used after `delete $P` without being reassigned (MEM50-CPP).
+    metadata:
+      cert: [MEM50-CPP]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              delete $P;
+              ...
+          - pattern-inside: |
+              delete[] $P;
+              ...
+      - pattern-not-inside: |
+          delete $P;
+          ...
+          $P = $X;
+          ...
+      - pattern-not-inside: |
+          delete[] $P;
+          ...
+          $P = $X;
+          ...
+      - pattern-either:
+          - pattern: $P->$FLD
+          - pattern: "*$P"
+          - pattern: $P[$I]
+          - pattern: $FN(..., $P, ...)
+      - pattern-not: delete $P
+      - pattern-not: delete[] $P
+      - pattern-not-inside: sizeof(...)
+
+  - id: mem34-c-free-of-non-heap-memory
+    languages: [c, cpp]
+    severity: ERROR
+    message: >-
+      `$P` does not point to memory returned by malloc(), calloc() or realloc(); freeing or
+      reallocating it is undefined behavior (MEM34-C).
+    metadata:
+      cert: [MEM34-C]
+      confidence: high
+    pattern-either:
+      - pattern: free(&$X)
+      - pattern: free("...")
+      - pattern: realloc(&$X, $N)
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $T $P[$SZ];
+                  ...
+              - pattern-inside: |
+                  $T $P[$SZ] = $INIT;
+                  ...
+              - pattern-inside: |
+                  $T $P[] = $INIT;
+                  ...
+          - pattern-not-inside: |
+              static $T $P[$SZ];
+              ...
+          - pattern-either:
+              - pattern: free($P)
+              - pattern: realloc($P, $N)
+      - patterns:
+          - pattern-inside: |
+              $R $F(...) { ... }
+          - pattern-inside: |
+              $P = "...";
+              ...
+          - pattern-not-inside: |
+              $P = "...";
+              ...
+              $P = $X;
+              ...
+          - pattern: free($P)
+      - pattern: |
+          if ($C) { ... } else { ... $P = "..."; ... }
+          ...
+          free($P);
+      - pattern: |
+          if ($C) { ... $P = "..."; ... } else { ... }
+          ...
+          free($P);
+
+  - id: mem35-c-allocation-sized-by-pointer
+    languages: [c, cpp]
+    severity: ERROR
+    message: >-
+      The allocation for `$P` is sized with sizeof($P), the size of the pointer, instead of
+      sizeof(*$P), the size of the object (MEM35-C).
+    metadata:
+      cert: [MEM35-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: $P = $ALLOC(<... sizeof($P) ...>)
+          - pattern: $P = ($CT) $ALLOC(<... sizeof($P) ...>)
+          - pattern: $T $P = $ALLOC(<... sizeof($P) ...>);
+          - pattern: $T $P = ($CT) $ALLOC(<... sizeof($P) ...>);
+      - metavariable-regex:
+          metavariable: $ALLOC
+          regex: ^(std::)?(malloc|calloc|realloc|aligned_alloc)$
+
+  - id: mem35-c-allocation-element-type-mismatch
+    languages: [c, cpp]
+    severity: ERROR
+    message: >-
+      Memory is cast to a pointer to one arithmetic type but sized with sizeof of a
+      different one, so the buffer can be too small for the elements written to it
+      (MEM35-C).
+    metadata:
+      cert: [MEM35-C]
+      confidence: high
+    patterns:
+      # (T *)malloc(... sizeof(U) ...) with T and U different arithmetic types; char and
+      # void targets are byte buffers and are not reported.
+      - pattern-regex: \(\s*(?P<T>(?:unsigned\s+|signed\s+)?(?:char|short|int|long\s+long|long\s+double|long|float|double|u?int(?:8|16|32|64)_t|size_t))\s*\*\s*\)\s*(?:std::)?(?:malloc|calloc|realloc|aligned_alloc)\s*\((?:[^;()]|\([^;()]*\))*?\bsizeof\s*\(\s*(?!(?P=T)\s*\))(?:unsigned\s+|signed\s+)?(?:char|short|int|long\s+long|long\s+double|long|float|double|u?int(?:8|16|32|64)_t|size_t)\s*\)
+      - pattern-not-regex: \(\s*(?:unsigned\s+|signed\s+)?char\s*\*\s*\)
+
+  - id: mem51-cpp-mismatched-deallocation
+    languages: [cpp]
+    severity: ERROR
+    message: >-
+      `$P` is released with a deallocation function that does not match how it was
+      allocated (new[] needs delete[], new needs delete, malloc needs free, placement new
+      needs an explicit destructor call) (MEM51-CPP).
+    metadata:
+      cert: [MEM51-CPP]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $T *$P = new $U[$N];
+              ...
+              delete $P;
+          - pattern: |
+              $P = new $U[$N];
+              ...
+              delete $P;
+          - pattern: |
+              $T *$P = new $U[$N];
+              ...
+              free($P);
+          - pattern: |
+              $T *$P = new $U[$N];
+              ...
+              std::free($P);
+          - pattern: |
+              $T *$P = new $U(...);
+              ...
+              std::free($P);
+          - pattern: |
+              $T *$P = new $U(...);
+              ...
+              free($P);
+          - pattern: |
+              $T *$P = new $U;
+              ...
+              std::free($P);
+          - pattern: |
+              $T *$P = new $U;
+              ...
+              free($P);
+          - pattern: |
+              $T *$P = $CAST<$CT>(std::malloc(...));
+              ...
+              delete $P;
+          - pattern: |
+              $T *$P = $CAST<$CT>(malloc(...));
+              ...
+              delete $P;
+          - pattern: |
+              $T *$P = ($CT) malloc(...);
+              ...
+              delete $P;
+      # the pattern `delete $P` also matches `delete[] $P`; those are correct here
+      - pattern-not-regex: delete\s*\[\s*\]
+
+  - id: mem51-cpp-delete-of-placement-new
+    languages: [cpp]
+    severity: ERROR
+    message: >-
+      `$P` was constructed with placement new in storage that operator new did not
+      allocate; call its destructor explicitly instead of `delete` (MEM51-CPP).
+    metadata:
+      cert: [MEM51-CPP]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $T *$P = new ($ADDR) $U;
+              ...
+              delete $P;
+          - pattern: |
+              $T *$P = new ($ADDR) $U(...);
+              ...
+              delete $P;
+      - metavariable-regex:
+          metavariable: $ADDR
+          regex: ^(?!(std::)?nothrow$)
+
+  - id: mem51-cpp-smart-pointer-owns-array-without-array-deleter
+    languages: [cpp]
+    severity: ERROR
+    message: >-
+      A smart pointer to a single object takes ownership of an array allocated with new[];
+      it will call delete instead of delete[]. Use std::unique_ptr<T[]> or make_unique<T[]>
+      (MEM51-CPP).
+    metadata:
+      cert: [MEM51-CPP]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: std::unique_ptr<$T> $V{new $U[$N]};
+          - pattern: std::unique_ptr<$T> $V(new $U[$N]);
+          - pattern: std::shared_ptr<$T> $V{new $U[$N]};
+          - pattern: std::shared_ptr<$T> $V(new $U[$N]);
+          - pattern: std::unique_ptr<$T>(new $U[$N])
+          - pattern: std::shared_ptr<$T>(new $U[$N])
+      - metavariable-regex:
+          metavariable: $T
+          regex: ^[^\[]*$

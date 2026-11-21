@@ -17,7 +17,7 @@ jobs:
         with: { python-version: "3.12" }
       - name: Install analyzers
         run: sudo apt-get update && sudo apt-get install -y clang clang-tidy cppcheck
-      - run: pip install -e '.[dev]'
+      - run: pip install -e '.[dev]' semgrep==1.186.0
       - run: pytest -q
 
   action:

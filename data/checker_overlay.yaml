@@ -1,7 +1,8 @@
 # Curated additions to the CodeChecker-derived map. Each entry adds a mapping
 # that is missing or wrong upstream; it never removes one. Entries are checked
 # by the corpus evaluation (docs/accuracy.md) and must name a checker that
-# exists in the supported toolchain.
+# exists in the supported toolchain. Infer entries apply when the optional
+# Infer analyzer is installed (CodeChecker's Infer labels carry no CERT IDs).
 - tool: cppcheck
   checker: doubleFree
   rules: [MEM30-C, MEM50-CPP]
@@ -43,3 +44,117 @@
   checker: bugprone-narrowing-conversions
   rules: [INT31-C, FLP34-C]
   reason: "Narrowing integer or float conversions are INT31-C / FLP34-C; upstream omits INT31-C."
+
+# Infer (https://fbinfer.com) issue types. Infer is optional; see docs/analyzers.md.
+- tool: infer
+  checker: NULLPTR_DEREFERENCE
+  rules: [EXP34-C]
+  reason: "Pulse proves a null pointer is dereferenced on some path."
+- tool: infer
+  checker: NULL_ARGUMENT
+  rules: [EXP34-C]
+  reason: "A null pointer is passed where the callee dereferences it."
+- tool: infer
+  checker: COMPARED_TO_NULL_AND_DEREFERENCED
+  rules: [EXP34-C]
+  reason: "Dereference of a pointer that the code itself treats as possibly null."
+- tool: infer
+  checker: MEMORY_LEAK_C
+  rules: [MEM31-C]
+  reason: "Memory from malloc() and friends is not freed on some path."
+- tool: infer
+  checker: MEMORY_LEAK_CPP
+  rules: [MEM31-C]
+  reason: "Memory from new is not released on some path; CERT C++ has no separate leak rule."
+- tool: infer
+  checker: PULSE_RESOURCE_LEAK
+  rules: [FIO42-C, FIO51-CPP]
+  reason: "A file or other resource is not closed on some path."
+- tool: infer
+  checker: USE_AFTER_FREE
+  rules: [MEM30-C, MEM50-CPP]
+  reason: "Access to memory after free()."
+- tool: infer
+  checker: USE_AFTER_DELETE
+  rules: [MEM50-CPP]
+  reason: "Access to an object after delete."
+- tool: infer
+  checker: USE_AFTER_LIFETIME
+  rules: [EXP54-CPP]
+  reason: "Access to an object outside its lifetime."
+- tool: infer
+  checker: VECTOR_INVALIDATION
+  rules: [CTR51-CPP]
+  reason: "Use of a reference or iterator invalidated by a container modification."
+- tool: infer
+  checker: STACK_VARIABLE_ADDRESS_ESCAPE
+  rules: [DCL30-C]
+  reason: "The address of a stack variable outlives the variable."
+- tool: infer
+  checker: PULSE_UNINITIALIZED_VALUE
+  rules: [EXP33-C, EXP53-CPP]
+  reason: "Read of an uninitialized value."
+- tool: infer
+  checker: BUFFER_OVERRUN_L1
+  rules: [ARR30-C]
+  reason: "InferBO: array access out of bounds (L1 = most certain)."
+- tool: infer
+  checker: BUFFER_OVERRUN_L2
+  rules: [ARR30-C]
+  reason: "InferBO: array access out of bounds."
+- tool: infer
+  checker: BUFFER_OVERRUN_L3
+  rules: [ARR30-C]
+  reason: "InferBO: array access out of bounds."
+- tool: infer
+  checker: BUFFER_OVERRUN_S2
+  rules: [ARR30-C]
+  reason: "InferBO: out-of-bounds access with a symbolic index."
+- tool: infer
+  checker: INTEGER_OVERFLOW_L1
+  rules: [INT30-C, INT32-C]
+  reason: "InferBO: integer overflow or unsigned wrap (L1 = most certain)."
+- tool: infer
+  checker: INTEGER_OVERFLOW_L2
+  rules: [INT30-C, INT32-C]
+  reason: "InferBO: integer overflow or unsigned wrap."
+- tool: infer
+  checker: INFERBO_ALLOC_IS_NEGATIVE
+  rules: [MEM35-C]
+  reason: "Allocation with a negative size."
+- tool: infer
+  checker: INFERBO_ALLOC_MAY_BE_NEGATIVE
+  rules: [MEM35-C]
+  reason: "Allocation whose size may be negative."
+- tool: infer
+  checker: INFERBO_ALLOC_IS_ZERO
+  rules: [MEM04-C]
+  reason: "Zero-length allocation."
+- tool: infer
+  checker: DEAD_STORE
+  rules: [MSC12-C]
+  reason: "A value is written and never read (code without effect)."
+- tool: infer
+  checker: UNREACHABLE_CODE
+  rules: [MSC12-C]
+  reason: "Statement that can never execute."
+- tool: infer
+  checker: THREAD_SAFETY_VIOLATION
+  rules: [CON43-C]
+  reason: "RacerD: unprotected write or read/write race on shared state."
+- tool: infer
+  checker: LOCK_CONSISTENCY_VIOLATION
+  rules: [CON43-C]
+  reason: "RacerD: a field is accessed both with and without its lock."
+- tool: infer
+  checker: GUARDEDBY_VIOLATION
+  rules: [CON43-C]
+  reason: "RacerD: access to a guarded field without its lock."
+- tool: infer
+  checker: DEADLOCK
+  rules: [CON35-C, CON53-CPP, POS51-C]
+  reason: "Starvation analysis: locks acquired in inconsistent order."
+- tool: infer
+  checker: STATIC_INITIALIZATION_ORDER_FIASCO
+  rules: [DCL56-CPP]
+  reason: "A static initializer reads a static object from another translation unit that may not be initialized yet."

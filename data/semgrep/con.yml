@@ -1,0 +1,308 @@
+# SEI CERT CON rules (concurrency). See int.yml for the metadata conventions.
+rules:
+  - id: con34-c-automatic-variable-passed-to-thread
+    languages: [c, cpp]
+    severity: ERROR
+    message: >-
+      The address of automatic variable `$V` is passed to a new thread, and this function
+      never joins it; the thread can read `$V` after the function returns (CON34-C).
+    metadata:
+      cert: [CON34-C]
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              $R $F(...) { ... $T $V; ... }
+          - pattern-inside: |
+              $R $F(...) { ... $T $V = $INIT; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... static $T $V; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... static $T $V = $INIT; ... }
+      - pattern-either:
+          - pattern: thrd_create($TID, $FN, &$V)
+          - pattern: pthread_create($TID, $ATTR, $FN, &$V)
+      - pattern-not-inside: |
+          $R $F(...) { ... thrd_join(...); ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... if (<... thrd_join(...) ...>) $S; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... $RES = thrd_join(...); ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... pthread_join(...); ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... if (<... pthread_join(...) ...>) $S; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... $RES = pthread_join(...); ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... if (<... pthread_join(...) ...>) $S; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... $RES = pthread_join(...); ... }
+
+  - id: pos50-c-automatic-variable-passed-to-pthread
+    languages: [c, cpp]
+    severity: ERROR
+    message: >-
+      The address of automatic variable `$V` is passed to pthread_create(), and this
+      function never joins the thread; it can read `$V` after the function returns
+      (POS50-C).
+    metadata:
+      cert: [POS50-C]
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              $R $F(...) { ... $T $V; ... }
+          - pattern-inside: |
+              $R $F(...) { ... $T $V = $INIT; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... static $T $V; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... static $T $V = $INIT; ... }
+      - pattern: pthread_create($TID, $ATTR, $FN, &$V)
+      - pattern-not-inside: |
+          $R $F(...) { ... pthread_join(...); ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... if (<... pthread_join(...) ...>) $S; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... $RES = pthread_join(...); ... }
+
+  - id: con50-cpp-local-mutex-shared-with-unjoined-threads
+    languages: [cpp]
+    severity: ERROR
+    message: >-
+      Local mutex `$M` is handed to threads that this function does not join; it is
+      destroyed when the function returns while those threads may still lock it
+      (CON50-CPP).
+    metadata:
+      cert: [CON50-CPP]
+      confidence: medium
+    patterns:
+      - pattern-inside: |
+          $R $F(...) { ... std::mutex $M; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... static std::mutex $M; ... }
+      - pattern-either:
+          - pattern: std::thread(..., &$M, ...)
+          - pattern: std::thread $T(..., &$M, ...);
+          - pattern: std::thread $T{..., &$M, ...};
+          - pattern: std::thread(..., std::ref($M), ...)
+      - pattern-not-inside: |
+          $R $F(...) { ... $X.join(); ... }
+
+  - id: con31-c-mutex-destroyed-while-locked
+    languages: [c, cpp]
+    severity: ERROR
+    message: >-
+      `$M` is destroyed while this function still holds it locked (CON31-C).
+    metadata:
+      cert: [CON31-C, POS48-C]
+      confidence: high
+    pattern-either:
+      - patterns:
+          - pattern: |
+              mtx_lock($M);
+              ...
+              mtx_destroy($M);
+          - pattern-not: |
+              mtx_lock($M);
+              ...
+              mtx_unlock($M);
+              ...
+              mtx_destroy($M);
+      - patterns:
+          - pattern: |
+              pthread_mutex_lock($M);
+              ...
+              pthread_mutex_destroy($M);
+          - pattern-not: |
+              pthread_mutex_lock($M);
+              ...
+              pthread_mutex_unlock($M);
+              ...
+              pthread_mutex_destroy($M);
+
+  - id: con39-c-thread-joined-or-detached-twice
+    languages: [c, cpp]
+    severity: ERROR
+    message: >-
+      Thread `$T` is joined or detached a second time (CON39-C).
+    metadata:
+      cert: [CON39-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: |
+              thrd_join($T, ...);
+              ...
+              thrd_join($T, ...);
+          - pattern: |
+              thrd_join($T, ...);
+              ...
+              thrd_detach($T);
+          - pattern: |
+              thrd_detach($T);
+              ...
+              thrd_join($T, ...);
+          - pattern: |
+              thrd_detach($T);
+              ...
+              thrd_detach($T);
+          - pattern: |
+              pthread_join($T, ...);
+              ...
+              pthread_join($T, ...);
+          - pattern: |
+              pthread_join($T, ...);
+              ...
+              pthread_detach($T);
+          - pattern: |
+              pthread_detach($T);
+              ...
+              pthread_join($T, ...);
+      # Joins on separate exit paths (an early return, a goto error label).
+      - pattern-not: |
+          $J($T, ...);
+          ...
+          return ...;
+          ...
+          $K($T, ...);
+      - pattern-not: |
+          thrd_join($T, ...);
+          ...
+          $T = $X;
+          ...
+      - pattern-not: |
+          pthread_join($T, ...);
+          ...
+          $T = $X;
+          ...
+
+  - id: con40-c-atomic-read-modify-write-not-atomic
+    languages: [c, cpp]
+    severity: ERROR
+    message: >-
+      `$A` is loaded and stored as two separate atomic operations, so another thread can
+      change it in between and the update is lost; use a compare-and-exchange loop or an
+      atomic read-modify-write function (CON40-C).
+    metadata:
+      cert: [CON40-C]
+      confidence: high
+    pattern-either:
+      - pattern: atomic_store($A, <... atomic_load($A) ...>)
+      - pattern: atomic_store_explicit($A, <... atomic_load($A) ...>, $O)
+      - pattern: atomic_store_explicit($A, <... atomic_load_explicit($A, $O2) ...>, $O)
+      - pattern: |
+          $V = atomic_load($A);
+          ...
+          atomic_store($A, <... $V ...>);
+      - pattern: |
+          $T $V = atomic_load($A);
+          ...
+          atomic_store($A, <... $V ...>);
+      - pattern: $A.store(<... $A.load() ...>)
+      - pattern: |
+          $T $V = $A.load();
+          ...
+          $A.store(<... $V ...>);
+
+  - id: con40-c-atomic-variable-twice-in-expression
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      Atomic variable `$A` is read more than once in one expression; each read is a separate
+      atomic operation, so the reads can see different values (CON40-C).
+    metadata:
+      cert: [CON40-C]
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              $AT $A = $I;
+              ...
+          - pattern-inside: |
+              $AT $A;
+              ...
+          - pattern-inside: |
+              static $AT $A = $I;
+              ...
+      - metavariable-regex:
+          metavariable: $AT
+          regex: ^(_Atomic\b.*|atomic_(bool|char|schar|uchar|short|ushort|int|uint|long|ulong|llong|ullong|size_t|ptrdiff_t|intptr_t|uintptr_t|int\w*_t|uint\w*_t))$
+      - pattern-either:
+          - pattern: <... $A ...> * <... $A ...>
+          - pattern: <... $A ...> + <... $A ...>
+          - pattern: <... $A ...> - <... $A ...>
+          - pattern: <... $A ...> / <... $A ...>
+          - pattern: $A = <... $A ...>
+          - pattern: $A = !$A
+      - pattern-not-inside: atomic_$FN(...)
+      - pattern-not-inside: $X * $Y * $Z
+
+  - id: con41-c-weak-compare-exchange-outside-loop
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      A weak compare-and-exchange can fail spuriously and must be called in a loop; use the
+      strong form when there is no loop (CON41-C).
+    metadata:
+      cert: [CON41-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: atomic_compare_exchange_weak(...)
+          - pattern: atomic_compare_exchange_weak_explicit(...)
+          - pattern: $X.compare_exchange_weak(...)
+          - pattern: std::atomic_compare_exchange_weak(...)
+      - pattern-not-inside: while ($C) $S;
+      - pattern-not-inside: do $S; while ($C);
+      - pattern-not-inside: for (...) $S;
+      - pattern-not-inside: while ($C) { ... }
+      - pattern-not-inside: do { ... } while ($C);
+
+  - id: con54-cpp-condition-wait-outside-loop
+    languages: [cpp]
+    severity: WARNING
+    message: >-
+      `$CV.$W()` without a predicate is not inside a loop; a spurious wakeup returns before
+      the condition holds. Wait in a loop or pass a predicate (CON54-CPP).
+    metadata:
+      cert: [CON54-CPP]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: $CV.wait($L)
+          - pattern: $CV.wait_for($L, $D)
+          - pattern: $CV.wait_until($L, $D)
+      - metavariable-regex:
+          metavariable: $W
+          regex: .*
+      - pattern-either:
+          - pattern: $CV.$W($L)
+          - pattern: $CV.$W($L, $D)
+      - pattern-not-inside: while ($C) $S;
+      - pattern-not-inside: do $S; while ($C);
+      - pattern-not-inside: for (...) $S;
+      - pattern-not-inside: while ($C) { ... }
+      - pattern-not-inside: do { ... } while ($C);
+
+  - id: con36-c-condition-wait-outside-loop
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      $FN() is not inside a loop that re-checks the condition; a spurious wakeup returns
+      before the condition holds (CON36-C).
+    metadata:
+      cert: [CON36-C, POS53-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: $FN(...)
+      - metavariable-regex:
+          metavariable: $FN
+          regex: ^(cnd_wait|cnd_timedwait|pthread_cond_wait|pthread_cond_timedwait)$
+      - pattern-not-inside: while ($C) $S;
+      - pattern-not-inside: do $S; while ($C);
+      - pattern-not-inside: for (...) $S;
+      - pattern-not-inside: while ($C) { ... }
+      - pattern-not-inside: do { ... } while ($C);

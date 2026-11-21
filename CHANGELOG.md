@@ -4,9 +4,83 @@
 
 ### Added
 
+- MISRA C:2012 (Amendments 1-4, 221 guidelines), MISRA C++:2023 (178) and AUTOSAR C++14
+  (397) next to SEI CERT, in `data/guidelines.json` (built by `tools/build_guidelines.py`
+  from cppcheck 2.17.1's guideline lists and the public AUTOSAR document, plus
+  `data/guideline_overlay.yaml`). No MISRA or AUTOSAR guideline text is bundled: only IDs,
+  classification, AUTOSAR enforcement/target, checker mappings, SEI CERT cross-references and
+  one-line summaries written for this project. See [docs/misra-autosar.md](docs/misra-autosar.md)
+  and [NOTICE](NOTICE).
+- `standard` parameter on `list_rules`, `search_rules` and `get_rule_coverage` (`cert` default,
+  `cert-c`, `cert-cpp`, `misra`, `misra-c-2012`, `misra-cpp-2023`, `autosar`, `autosar-cpp14`,
+  `all`); `classification` filter and `directive` kind on `list_rules`; `get_rule` accepts
+  MISRA/AUTOSAR IDs and short forms and lists CERT cross-references both ways.
+- `standards` parameter on `check_files` and `check_diff` (CLI `--standards`). With
+  `misra-c-2012`, cppcheck runs its MISRA addon on C files; cppcheck, clang-tidy and Clang
+  Static Analyzer findings map to MISRA/AUTOSAR IDs. Findings carry a `standard` field.
+- Profiles: `standards:`, `severity_from_classification:` and `rule_texts:`; new
+  `profiles/misra.yaml` and `profiles/autosar.yaml`.
+- Licensed rule texts: `CERT_REVIEW_MISRA_C_TEXTS`, `CERT_REVIEW_MISRA_CPP_TEXTS`,
+  `CERT_REVIEW_AUTOSAR_TEXTS` or the profile's `rule_texts` load a local copy (cppcheck addon
+  format or one guideline per line), used by `get_rule`, finding messages and
+  `validate_findings`.
+- `tools/measure_guidelines.py` for the coverage table.
+- `explain_finding` MCP tool and `cert-review explain-finding` command: for one finding, the rule
+  summary, why the finding matches (checker mapping, APIs, shared identifiers), the rule's
+  noncompliant/compliant example pair closest to the flagged code, a diff between the two and
+  concrete fix steps. Deterministic and offline. The server now has 10 tools.
+- Baselines: `cert-review baseline create|update` writes `.cert-review-baseline.json` with
+  line-number-free fingerprints (rule, file, hash of the normalized line, hash of its
+  neighbours). `--baseline FILE` on `check` and `diff`, `baseline_path` on the `check_files` and
+  `check_diff` tools, the Action's `baseline` input (and `baselined` output) and the GitLab
+  template's `CERT_REVIEW_BASELINE` report only new findings and count baselined and fixed
+  ones. See `docs/baseline.md`.
+- Optional analyzers, normalised into the same finding schema and checker map:
+  - **Semgrep** with 40 CERT rules shipped in `data/semgrep/` for INT30/33/34/36-C,
+    EXP34/44/45/46-C, EXP52-CPP, MEM30/34/35-C, MEM50/51-CPP, CON31/34/36/39/40/41-C,
+    CON50/54-CPP, POS34/48/50/53-C, ENV30-C, FIO30/34/37-C and STR30-C. Included in both
+    Docker images (amd64 and arm64).
+  - **Infer** (Pulse, InferBO, liveness, RacerD, starvation, SIOF); 28 issue types mapped in
+    `data/checker_overlay.yaml`. Not in the images (about 1.2 GB, no Linux arm64 release).
+  - **CodeQL** with the `codeql/cert-c-coding-standards` and `codeql/cert-cpp-coding-standards`
+    packs (232 queries mapped). Opt-in; not in the images and not run in CI.
+- `tools` (CLI `--tools`, MCP `tools`, Action `tools`) accepts `semgrep`, `infer`, `codeql` and
+  `auto`. The default is now `auto`: the core tools plus Semgrep and Infer when they are on
+  `PATH`. A requested analyzer that is not installed adds a `warnings` entry.
+- `tier_extended` per rule and `extended_toolchain` in `get_rule_coverage`: coverage with Infer
+  and CodeQL installed. `tier_runnable` now counts the reference toolchain of the images,
+  which includes Semgrep.
+- `docs/analyzers.md`: install notes, tiers, what each analyzer covers, a Ceph sanity check of
+  the Semgrep rules.
+- `tools/eval_accuracy.py` measures each toolset (baseline, + Semgrep, + Infer, + CodeQL) and
+  reports corpus-wide recall; CodeQL is evaluated with one database per example.
 - Real-code benchmark: `benchmark/cases.yaml` (upstream security fixes in Ceph, curl, libtiff,
   expat, libarchive, c-ares and OpenSSL), `tools/run_real_benchmark.py` and
   [docs/benchmark-real.md](docs/benchmark-real.md).
+
+### Changed
+
+- `validate_findings`: for MISRA/AUTOSAR without a licensed text file, `quote` is optional and
+  accepted findings are marked `grounding: "rule-id-only"`; SEI CERT still requires a verbatim
+  quote. All accepted findings now carry `grounding`.
+- Formatter headings name the selected standards; SARIF tags use `external/cert/`, `external/misra/` or `external/autosar/` plus the ID.
+- Docker images grow by about 330 MB (MCP image 787 MB to 1.12 GB, Action image 957 MB to
+  1.29 GB, uncompressed, amd64) for Semgrep.
+
+### Fixed
+
+- cppcheck output lines whose ID contains `-` or `.` were dropped by the parser.
+
+### Accuracy (CERT examples, docs/accuracy.md)
+
+- Corpus-wide recall (detected noncompliant examples / 708): 15% with clang-tidy, clangsa and
+  cppcheck; 20% with Semgrep added (the image toolchain; in-sample, the rules were written
+  against these examples); 20% with Infer; 28% with CodeQL. False positives on the 840
+  compliant examples: 5, 5, 5 and 28.
+- On the 103 rules the baseline scores: precision/recall 95%/42% before, 96%/46% with Semgrep,
+  88%/54% with all analyzers.
+
+The default standard selection (CERT only) is unchanged for existing calls, profiles and CI jobs.
 
 ## 1.1.2 (2026-11-21)
 
@@ -24,6 +98,7 @@ No changes to the tools, the CLI or the GitHub Action.
 ## 1.1.1 (2026-11-21)
 
 ### Fixed
+
 
 - `check_diff` and `build_review_packet` with `diff_text` now materialize missing files from the
   patch instead of returning empty results when the MCP host cannot see the local checkout (e.g.
@@ -72,6 +147,7 @@ Only clients that call the MCP tools by name need updating.
   `<DOCKERHUB_USERNAME>/cert-review-mcp:<version>` and `:latest`.
 
 ### Fixed
+
 
 - An analyzer timeout (300 s per file and tool) makes the tool status `partial` and adds a
   warning, like a compile error; it used to appear only under `notes`. `--fail-on-parse-error`

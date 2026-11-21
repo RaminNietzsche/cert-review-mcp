@@ -24,13 +24,14 @@ def test_action_yml_structure():
     assert "github/codeql-action/upload-sarif@v3" in text and "docker build" in text
     # every input is forwarded to the container
     run = [s for s in a["runs"]["steps"] if s.get("id") == "run"][0]
-    for name in ("PROFILE", "MODE", "BASE_REF", "FAIL_ON", "REVIEW_COMMENTS", "GITHUB_TOKEN", "COMPILE_COMMANDS"):
+    for name in ("PROFILE", "MODE", "BASE_REF", "FAIL_ON", "REVIEW_COMMENTS", "GITHUB_TOKEN", "COMPILE_COMMANDS",
+                 "BASELINE"):
         assert f"-e INPUT_{name}" in run["run"] and f"INPUT_{name}" in run["env"]
 
 
 def test_outputs_declared():
     a = yaml.safe_load((ROOT / "action.yml").read_text())
-    assert set(a["outputs"]) == {"sarif-file", "findings", "errors", "partial"}
+    assert set(a["outputs"]) == {"sarif-file", "findings", "errors", "partial", "baselined"}
 
 
 def test_dockerfile_pins_the_measured_toolchain():
@@ -114,6 +115,23 @@ def test_entrypoint_full_mode_on_corpus(tmp_path, monkeypatch):
     sarif = json.loads((tmp_path / "cert-review.sarif").read_text())
     assert sarif["version"] == "2.1.0"
     assert any(r["ruleId"] == "ERR34-C" for r in sarif["runs"][0]["results"])
+
+
+@need_clang_tidy
+def test_entrypoint_baseline_hides_known_findings(tmp_path, monkeypatch):
+    from cert_review import api
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "a.c").write_text((ROOT / "corpus/ERR34-C/nc1_1.c").read_text())
+    res = api.check_file([str(src)], tools=["clang-tidy"], min_confidence=0.5, root=str(tmp_path))
+    assert res["findings"]
+    api.write_baseline(res, str(tmp_path / ".cert-review-baseline.json"))
+    (src / "a.c").write_text("/* shifted */\n\n" + (ROOT / "corpus/ERR34-C/nc1_1.c").read_text())
+    rc, out, summ = _run(tmp_path, {"MODE": "full", "PATHS": "src", "FAIL_ON": "warning", "TOOLS": "clang-tidy",
+                                     "MIN_CONFIDENCE": "0.5", "BASELINE": ".cert-review-baseline.json"},
+                         monkeypatch)
+    assert rc == 0 and "findings=0" in out and f"baselined={len(res['findings'])}" in out
+    assert "already baselined" in summ
 
 
 @need_clang_tidy

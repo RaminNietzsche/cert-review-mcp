@@ -7,7 +7,7 @@ import pytest
 
 from cert_review.mcp_server import build_server
 
-EXPECTED_TOOLS = {"list_rules", "get_rule", "search_rules", "check_files", "check_diff",
+EXPECTED_TOOLS = {"list_rules", "get_rule", "search_rules", "check_files", "check_diff", "explain_finding",
                   "build_review_packet", "validate_findings", "get_rule_coverage", "format_findings"}
 
 
@@ -43,8 +43,9 @@ def test_explain_and_list_in_process():
         return a, b, c
     a, b, c = asyncio.run(go())
     assert a["risk"]["priority"] == "P18" and a["coverage"]["checkers"]
-    assert b["count"] == 18 and all(r["lang"] == "cpp" for r in b["rules"])
-    assert c["total"] == 83
+    want = c["all_mappings"]["deterministic"]   # the filter matches either tier
+    assert b["count"] == want and all(r["lang"] == "cpp" for r in b["rules"])
+    assert c["total"] == 83 and c["runnable_toolchain"]["deterministic"] == 18
 
 
 def test_annotations_and_titles():
@@ -100,8 +101,43 @@ def test_stdio_round_trip():
     ("get_rule", {"rule_id": "XYZ99-C"}, "unknown rule"),
     ("check_files", {"path": "/nonexistent/cert-review"}, "path not found"),
     ("get_rule", {"rule_id": "EXP34-C", "profile": "nope"}, "Available profiles"),
+    ("explain_finding", {"finding": {"rule_id": "XYZ99-C", "code": "x"}}, "unknown rule"),
+    ("explain_finding", {"finding": {"rule_id": "ERR34-C", "file": "/nonexistent/a.c", "line": 1}}, "path not found"),
+    ("check_files", {"path": ".", "baseline_path": "/nonexistent/b.json"}, "path not found"),
 ])
 def test_errors_carry_a_message(tool, args, msg):
     s = build_server()
     with pytest.raises(Exception, match=msg):
         asyncio.run(s.call_tool(tool, args))
+
+
+def test_explain_finding_in_process(tmp_path):
+    f = tmp_path / "a.c"
+    f.write_text("#include <stdlib.h>\nint p(const char *buff) {\n  return atoi(buff);\n}\n")
+    s = build_server()
+
+    async def go():
+        return json.loads(_text(await s.call_tool("explain_finding", {"finding": {
+            "rule_id": "ERR34-C", "file": str(f), "line": 3, "tool": "clang-tidy",
+            "checker": "cert-err34-c", "severity": "warning", "message": "atoi"}})))
+    d = asyncio.run(go())
+    assert d["rule"]["id"] == "ERR34-C" and "strtol" in d["fix"]["summary"]
+    assert d["example"]["noncompliant"]["code"] and d["why"]
+
+
+def test_check_files_with_baseline(tmp_path):
+    from cert_review import baseline as BL
+    f = tmp_path / "a.c"
+    f.write_text("#include <stdlib.h>\nint p(const char *s) { return atoi(s); }\n")
+    bl = tmp_path / BL.DEFAULT_FILE
+    BL.dump(BL.build([{"rule_id": "ERR34-C", "file": str(f), "line": 2}], tmp_path), bl)
+    s = build_server()
+
+    async def go():
+        return json.loads(_text(await s.call_tool("check_files", {
+            "path": str(f), "tools": ["clang-tidy"], "baseline_path": str(bl)})))
+    d = asyncio.run(go())
+    b = d["baseline"]
+    assert b["entries"] == 1 and b["new"] == len(d["findings"])
+    assert all(x["rule_id"] != "ERR34-C" for x in d["findings"])
+    assert b["baselined"] + b["fixed"] == 1

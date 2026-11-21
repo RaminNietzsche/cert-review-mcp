@@ -25,6 +25,19 @@ class Profile:
         return self.raw.get("min_level", "L3")
 
     @property
+    def standards(self) -> tuple[str, ...]:
+        """Standards whose IDs findings are mapped to (profile key `standards`, default cert)."""
+        from .rules import expand_standards
+        return expand_standards(self.raw.get("standards") or ["cert"])
+
+    def classification_severity(self, classification: str | None) -> str:
+        """Finding severity for a MISRA/AUTOSAR classification."""
+        m = self.raw.get("severity_from_classification",
+                         {"mandatory": "error", "required": "warning", "advisory": "note",
+                          "document": "note"})
+        return m.get((classification or "").lower(), "warning")
+
+    @property
     def include_recommendations(self) -> bool:
         return bool(self.raw.get("include_recommendations", False))
 
@@ -41,13 +54,23 @@ class Profile:
         return list((self.raw.get("clang_tidy") or {}).get("checks_extra", []))
 
     def disabled(self, rule_id: str) -> str | None:
+        from .rules import norm_id
+        rid = norm_id(rule_id)
         for d in self.raw.get("disabled_rules", []):
-            if d["id"].upper() == rule_id.upper():
+            if norm_id(str(d["id"])) == rid:
                 return d["reason"]
         return None
 
     def override(self, rule_id: str) -> dict:
-        return (self.raw.get("rule_overrides") or {}).get(rule_id.upper(), {})
+        from .rules import norm_id
+        ov = self.raw.get("rule_overrides") or {}
+        if rule_id.upper() in ov:
+            return ov[rule_id.upper()]
+        rid = norm_id(rule_id)
+        for k, v in ov.items():
+            if norm_id(str(k)) == rid:
+                return v
+        return {}
 
     def excluded_path(self, path: str) -> bool:
         p = path.lstrip("./")
@@ -121,4 +144,6 @@ def load(name_or_path: str = "default") -> Profile:
     if not p.suffix:
         p = profiles_dir() / f"{name_or_path}.yaml"
     raw = yaml.safe_load(p.read_text(encoding="utf-8"))
+    from . import ruletexts
+    ruletexts.set_profile_paths(raw.get("rule_texts"))
     return Profile(name=raw.get("name", p.stem), raw=raw)
