@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cert-review-mcp"
+version = "0.1.0"
+description = "SEI CERT C/C++ code review: rule database, static-analysis engine, MCP server and review skills, tuned for Ceph"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+dependencies = ["PyYAML>=6", "mcp>=1.2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+cert-review = "cert_review.cli:main"
+cert-review-mcp = "cert_review.mcp_server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+cert_review = ["data/*.json", "profiles/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
