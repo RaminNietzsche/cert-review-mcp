@@ -80,8 +80,9 @@ def load_aliases(llvm: Path):
     d = llvm / "clang-tools-extra/docs/clang-tidy/checks/cert"
     for f in sorted(d.glob("*.md")):
         m = re.search(r"\{doc\}`([a-z0-9-]+) <", f.read_text())
-        if m:
-            out.append((f"cert-{f.stem}", f.stem.upper(), m.group(1)))
+        # cert-err33-c has its own documentation instead of an alias stub;
+        # it is still a rule-specific checker registered by the CERT module.
+        out.append((f"cert-{f.stem}", f.stem.upper(), m.group(1) if m else None))
     return out
 
 

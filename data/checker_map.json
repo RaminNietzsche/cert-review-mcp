@@ -29,14 +29,14 @@
  },
  "summary": {
   "c_rule_tier": {
-   "deterministic": 17,
-   "partial": 56,
+   "deterministic": 18,
+   "partial": 55,
    "llm-only": 49,
    "total": 122
   },
   "c_rule_tier_runnable": {
-   "deterministic": 15,
-   "partial": 38,
+   "deterministic": 16,
+   "partial": 37,
    "llm-only": 69,
    "total": 122
   },
@@ -1513,8 +1513,8 @@
    "cert_detectable": true
   },
   "ERR33-C": {
-   "tier": "partial",
-   "tier_runnable": "partial",
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1540,9 +1540,10 @@
      "tool": "clang-tidy",
      "checker": "cert-err33-c",
      "origins": [
-      "codechecker"
+      "codechecker",
+      "clang-tidy-alias"
      ],
-     "specific": false,
+     "specific": true,
      "available": true,
      "severity_hint": "MEDIUM"
     },
