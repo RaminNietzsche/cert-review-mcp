@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import re
 import subprocess
 import sys
@@ -83,11 +84,22 @@ def main() -> int:
                         "--output", str(tmp / f"{name}_options.cc"),
                         "--legacy", str(gen / "include" / f"{name}_legacy_options.h"),
                         "--name", name], check=False, capture_output=True)
+    sysroot = []
+    if platform.system() == "Darwin":
+        try:
+            sdk = subprocess.run(["xcrun", "--show-sdk-path"], capture_output=True, text=True,
+                                 check=True).stdout.strip()
+            sysroot = ["-isysroot", sdk]
+        except (OSError, subprocess.CalledProcessError):
+            print("warning: xcrun --show-sdk-path failed; system headers may be missing", file=sys.stderr)
+        print("note: Ceph needs Linux headers (linux/version.h, ...) and Linux-only Boost.Asio "
+              "features, so files such as src/rgw/radosgw-admin/radosgw-admin.cc cannot be parsed on "
+              "macOS. Run the analysis on Linux, the Docker image or the GitHub Action.", file=sys.stderr)
     incs = [src, src / "include", gen, gen / "include", src / "rapidjson/include",
             src / "dmclock/support/src", src / "dmclock/src", src / "s3select/include",
             src / "xxHash", src / "BLAKE3/c", src / "fmt/include"]
     flags = [f"-std={a.std}", "-DHAVE_CONFIG_H", "-D_FILE_OFFSET_BITS=64", "-D__linux__=1",
-             "-DBOOST_ASIO_DISABLE_THREAD_KEYWORD_EXTENSION", "-Wno-everything"]
+             "-DBOOST_ASIO_DISABLE_THREAD_KEYWORD_EXTENSION", "-Wno-everything", *sysroot]
     flags += [f"-I{p}" for p in incs if p.exists()]
     cmds = []
     for d in a.dirs:
