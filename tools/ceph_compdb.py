@@ -39,6 +39,8 @@ OPTION_VARS = {"ms_bind_retry_count": "3", "ms_bind_retry_delay": "5"}
 
 
 def render_cmake_header(src: Path, subst: dict[str, str]) -> str:
+    if not src.exists():   # older trees lack some templates (e.g. ceph_release.h.in.cmake)
+        return f"/* {src.name} not present in this tree */\n"
     out = []
     for line in src.read_text().splitlines():
         m = re.match(r"#cmakedefine01\s+(\w+)", line)

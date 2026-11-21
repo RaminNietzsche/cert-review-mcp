@@ -65,6 +65,9 @@ Measured precision and recall on the CERT examples: [docs/accuracy.md](docs/accu
 Rule counts versus the official index pages: [docs/rule-counts.md](docs/rule-counts.md).
 Results on a real Ceph subtree: [docs/ceph-trial.md](docs/ceph-trial.md).
 
+Recall on real security fixes (Ceph CVEs and memory-safety fixes, curl, libtiff and others):
+[docs/benchmark-real.md](docs/benchmark-real.md).
+
 ## Install
 
 ```bash
@@ -73,7 +76,7 @@ python3 -m venv .venv && . .venv/bin/activate
 pip install -e '.[dev]'
 sudo apt-get install clang clang-tidy cppcheck       # static layer (optional but recommended)
 pip install semgrep==1.186.0                        # optional: the bundled CERT pattern rules
-pytest                                              # 186 tests
+pytest                                              # 190 tests
 ```
 
 The package reads `data/` and `profiles/` from the checkout (set `CERT_REVIEW_HOME` to point
