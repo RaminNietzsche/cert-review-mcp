@@ -21,8 +21,9 @@ cert-review-mcp = "cert_review.mcp_server:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.setuptools.package-data]
-cert_review = ["data/*.json", "profiles/*.yaml"]
+[tool.setuptools.data-files]
+"share/cert-review/data" = ["data/*.json", "data/*.yaml"]
+"share/cert-review/profiles" = ["profiles/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
