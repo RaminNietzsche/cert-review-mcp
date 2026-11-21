@@ -304,7 +304,10 @@ def run_codeql(files: list[str], profile: Profile, compdb: Path | None, root: Pa
             st.files = len(files)
             return [], st
         if r.returncode != 0 or not sarif.exists():
-            st.notes.append(f"query run failed: {(r.stderr or r.stdout).strip()[-300:]}")
+            st.notes.append(
+                f"query run failed (untrusted tool output): "
+                f"{_sanitize_untrusted_tool_output(r.stderr or r.stdout)}"
+            )
             st.files = len(files)
             return [], st
         doc = json.loads(sarif.read_text())
