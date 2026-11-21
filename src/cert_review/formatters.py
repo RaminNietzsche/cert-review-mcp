@@ -159,6 +159,58 @@ def to_sarif(findings: list[dict], root: str | None = None, tool_name: str = "ce
     }
 
 
+def _fingerprint(f: dict, root: str | None) -> str:
+    import hashlib
+    key = f"{f['rule_id']}:{_rel(f['file'], root)}:{f['line']}:{f['checker']}"
+    return hashlib.sha256(key.encode()).hexdigest()
+
+
+def to_codequality(findings: list[dict], root: str | None = None) -> list[dict]:
+    """GitLab Code Quality (Code Climate) report: gl-code-quality-report.json."""
+    sev = {"error": "critical", "warning": "major", "note": "minor"}
+    return [{
+        "description": f"CERT {f['rule_id']}: {f['message'].strip()}",
+        "check_name": f["rule_id"],
+        "fingerprint": _fingerprint(f, root),
+        "severity": sev.get(f["severity"], "major"),
+        "location": {"path": _rel(f["file"], root).replace(os.sep, "/"),
+                     "lines": {"begin": f["line"]}},
+    } for f in findings]
+
+
+def to_gitlab_sast(findings: list[dict], root: str | None = None) -> dict:
+    """GitLab SAST report (schema 15.x): gl-sast-report.json."""
+    sev = {"error": "High", "warning": "Medium", "note": "Low"}
+    vulns = []
+    for f in findings:
+        r = R.get(f["rule_id"]) or {}
+        ids = [{"type": "cert", "name": f["rule_id"], "value": f["rule_id"], "url": r.get("url")}]
+        ids += [{"type": "cwe", "name": c, "value": c.split("-")[-1],
+                 "url": f"https://cwe.mitre.org/data/definitions/{c.split('-')[-1]}.html"}
+                for c in r.get("cwe", [])]
+        vulns.append({
+            "id": _fingerprint(f, root),
+            "category": "sast",
+            "name": f"{f['rule_id']}: {f.get('title') or r.get('title', '')}",
+            "message": f["message"].strip(),
+            "description": _first_paragraph(r.get("risk_text", "") or r.get("intro", ""), 600),
+            "severity": sev.get(f["severity"], "Medium"),
+            "confidence": "High" if f.get("confidence", 0) >= 0.8 else
+                          "Medium" if f.get("confidence", 0) >= 0.5 else "Low",
+            "scanner": {"id": "cert-review", "name": "cert-review"},
+            "location": {"file": _rel(f["file"], root).replace(os.sep, "/"), "start_line": f["line"]},
+            "identifiers": ids,
+        })
+    return {"version": "15.0.7",
+            "scan": {"analyzer": {"id": "cert-review", "name": "cert-review", "version": __version__,
+                                  "vendor": {"name": "cert-review"}},
+                     "scanner": {"id": "cert-review", "name": "cert-review", "version": __version__,
+                                 "vendor": {"name": "cert-review"}},
+                     "type": "sast", "status": "success",
+                     "start_time": "1970-01-01T00:00:00", "end_time": "1970-01-01T00:00:00"},
+            "vulnerabilities": vulns}
+
+
 def format_review(findings: list[dict], style: str = "markdown", root: str | None = None) -> Any:
     style = style.lower()
     if style == "markdown":
@@ -169,7 +221,11 @@ def format_review(findings: list[dict], style: str = "markdown", root: str | Non
         return to_gitlab_discussions(findings, root)
     if style == "sarif":
         return to_sarif(findings, root)
-    raise ValueError("style must be one of: github, gitlab, sarif, markdown")
+    if style == "codequality":
+        return to_codequality(findings, root)
+    if style == "gitlab-sast":
+        return to_gitlab_sast(findings, root)
+    raise ValueError("style must be one of: github, gitlab, sarif, markdown, codequality, gitlab-sast")
 
 
 def dumps(obj: Any) -> str:

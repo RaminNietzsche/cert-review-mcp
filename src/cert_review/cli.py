@@ -25,7 +25,7 @@ def _common(p: argparse.ArgumentParser) -> None:
     p.add_argument("--compdb", help="directory containing compile_commands.json")
     p.add_argument("--tools", default="clang-tidy,clangsa,cppcheck")
     p.add_argument("--format", default="markdown",
-                   choices=["markdown", "json", "sarif", "github", "gitlab"])
+                   choices=["markdown", "json", "sarif", "github", "gitlab", "codequality", "gitlab-sast"])
     p.add_argument("--output", "-o")
     p.add_argument("--report", help="also write the full result (tool status, suppressed findings) as JSON")
     p.add_argument("--min-confidence", type=float, default=0.0)
