@@ -1,0 +1,56 @@
+cert-review-mcp
+Copyright 2026 Ramin Najarbashi
+
+The code in this repository is licensed under the Apache License 2.0
+(see LICENSE).
+
+NOT AN OFFICIAL PRODUCT
+-----------------------
+This project is not an official CERT(R) or Carnegie Mellon University
+product and is not endorsed by, or affiliated with, Carnegie Mellon
+University or its Software Engineering Institute (SEI).
+
+Third-party content bundled in data/rules.json
+----------------------------------------------
+The file data/rules.json contains text and code examples from the
+SEI CERT C Coding Standard and the SEI CERT C++ Coding Standard.
+
+  Source:   https://github.com/cmu-sei/secure-coding-standards
+  Commit:   73ee7a0dbe778512ba57a5f5ee0017af0ea09239
+  Browsable: https://cmu-sei.github.io/secure-coding-standards/
+
+  (c) 2026 Carnegie Mellon University.
+
+  The SEI CERT Coding Standards text is licensed under the Creative Commons
+  Attribution 4.0 International License (CC BY 4.0):
+  https://creativecommons.org/licenses/by/4.0/
+
+  The code examples contained in the standards are licensed under the MIT
+  license: https://opensource.org/license/mit
+
+Changes made: the Markdown source was parsed into a JSON structure; links
+were reduced to text, HTML table markup was removed, and the examples were
+paired (noncompliant with compliant). No rule wording was changed.
+Rule IDs, titles and risk assessments are reproduced as published.
+
+Carnegie Mellon and CERT are registered trademarks of Carnegie Mellon
+University. The CERT(R) secure coding standards project is based upon work
+funded and supported by the Department of War under Air Force Contract Nos.
+FA8702-15-D-0002 and FA870225DB003 with Carnegie Mellon University for the
+operation of the Software Engineering Institute, a federally funded research
+and development center. The views, opinions and findings contained in the
+CERT secure coding standards are those of their authors and should not be
+construed as an official Government position, policy or decision, unless
+designated by other documentation. DM26-0304.
+
+Because the CERT project is active, improvements to the rules themselves are
+best contributed to the official project:
+https://cmu-sei.github.io/secure-coding-standards/
+
+Checker mappings in data/checker_map.json
+-----------------------------------------
+Derived from (facts only: checker names and rule IDs):
+  * CodeChecker label files (Apache-2.0), https://github.com/Ericsson/codechecker
+  * LLVM clang-tidy cert-* aliases (Apache-2.0 with LLVM exceptions),
+    https://github.com/llvm/llvm-project
+The exact commits are recorded in the file itself.
