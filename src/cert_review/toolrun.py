@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -11,6 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import checkers_map as CM
+from .paths import data_dir
 from .profiles import Profile
 
 CT_LINE = re.compile(r"^(?P<file>.+?):(?P<line>\d+):(?P<col>\d+): (?P<sev>warning|error): "
@@ -108,8 +110,8 @@ def fallback_flags(path: str, lang: str, profile: Profile, root: Path | None) ->
 
 def _checks_for_clang_tidy(profile: Profile, standards=None) -> tuple[list[str], list[str]]:
     """(clang-tidy checks, clang-analyzer checks) that map to the selected standards' rules."""
-    ct = CM.checkers_for_tool("clang-tidy", standards=standards)
-    sa = {f"clang-analyzer-{c}" for c in CM.checkers_for_tool("clangsa", standards=standards)}
+    ct = {c.split("@", 1)[0] for c in CM.checkers_for_tool("clang-tidy", standards=standards)}
+    sa = {f"clang-analyzer-{c.split('@', 1)[0]}" for c in CM.checkers_for_tool("clangsa", standards=standards)}
     return sorted(ct), sorted(sa)
 
 
@@ -124,6 +126,7 @@ def run_clang_tidy(files: list[str], profile: Profile, compdb: Path | None,
     ct, sa = _checks_for_clang_tidy(profile, standards)
     checks = ["-*"] + ct + (sa if with_csa else []) + profile.extra_checks
     checks_arg = ",".join(checks)
+    mapped_ct = set(CM.checkers_for_tool("clang-tidy", standards=standards))
     raw: list[RawFinding] = []
     hf = profile.header_filter
 
@@ -163,35 +166,126 @@ def run_clang_tidy(files: list[str], profile: Profile, compdb: Path | None,
                             st.files_with_errors.append(path)
                     continue
                 for c in chks:
+                    if c in CHECKER_VARIANTS:
+                        c = checker_variant(c, m["msg"])
+                        if c not in mapped_ct:
+                            continue
                     raw.append(RawFinding("clang-tidy", c, m["file"], int(m["line"]),
                                           int(m["col"]), m["msg"]))
     st.raw_findings = len(raw)
     return raw, st
 
 
+# Some checkers report different weaknesses under one name; the message tells them apart.
+# A finding is renamed to "<checker>@<variant>" so that each variant maps to its own rules
+# in the checker map (an unmapped variant is dropped). The first matching pattern wins.
+_FLOAT = r"(?:float|double|long double|_Float\d+|__fp16|__bf16)"
+CHECKER_VARIANTS: dict[str, list[tuple[str, str]]] = {
+    "alpha.security.taint.GenericTaint": [
+        (r"used as a format string", "format-string"),
+        (r"passed to a system call", "system-call"),
+        (r"specify the buffer size", "buffer-size"),
+        (r"", "other"),
+    ],
+    "alpha.security.ArrayBoundV2": [
+        (r"tainted", "tainted"),
+        (r"", "untainted"),
+    ],
+    "alpha.unix.cstring.OutOfBounds": [
+        (r"^String ", "string"),
+        (r"", "memory"),
+    ],
+    # clang-tidy: "narrowing conversion from [constant] 'T1' to [signed type] 'T2' ..."
+    "bugprone-narrowing-conversions": [
+        (rf"from (?:constant )?(?:value )?'?{_FLOAT}'? to (?:\w+ )*'?{_FLOAT}'?", "float-to-float"),
+        (rf"from (?:constant )?(?:value )?'?{_FLOAT}'?", "float-to-int"),
+        (rf"to (?:\w+ )*'{_FLOAT}'", "int-to-float"),
+        (r"", "int-to-int"),
+    ],
+}
+CSA_VARIANTS = CHECKER_VARIANTS
+
+
+def checker_variant(checker: str, message: str) -> str:
+    for rx, name in CHECKER_VARIANTS.get(checker, []):
+        if re.search(rx, message):
+            return f"{checker}@{name}"
+    return checker
+
+
+csa_variant = checker_variant
+
+
+def taint_config() -> Path:
+    """Extra taint sources and propagation rules (data/csa-taint.yaml)."""
+    return data_dir() / "csa-taint.yaml"
+
+
+def csa_compile_args(path: str, profile: Profile, compdb: Path | None,
+                     root: Path | None) -> tuple[list[str], str | None]:
+    """(flags, working directory) for `clang --analyze` on `path`: the file's entry in the
+    compilation database when there is one (compiler, -c, -o and the file itself removed),
+    otherwise the guessed flags."""
+    lang = lang_of(path)
+    if compdb and (compdb / "compile_commands.json").exists():
+        rp = str(Path(path).resolve())
+        try:
+            entries = json.loads((compdb / "compile_commands.json").read_text())
+        except (OSError, ValueError):
+            entries = []
+        for e in entries:
+            f = Path(e.get("file", ""))
+            f = f if f.is_absolute() else Path(e.get("directory", ".")) / f
+            if str(f.resolve()) != rp:
+                continue
+            import shlex
+            args = list(e.get("arguments") or shlex.split(e.get("command", "")))[1:]
+            out, skip = [], False
+            for a in args:
+                if skip:
+                    skip = False
+                    continue
+                if a in ("-o", "-MF", "-MT", "-MQ"):
+                    skip = True
+                    continue
+                if a in ("-c", "-MD", "-MMD") or (a.startswith("-o") and len(a) > 2):
+                    continue
+                if a in (e.get("file"), rp):
+                    continue
+                out.append(a)
+            return out + ["-Wno-everything", "-Qunused-arguments"], e.get("directory")
+    return fallback_flags(path, lang, profile, root), None
+
+
 def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: Path | None,
                  jobs: int = 4, timeout: int = 300,
                  standards=None) -> tuple[list[RawFinding], ToolStatus]:
-    """Standalone `clang --analyze` for mapped checkers (incl. alpha/optin)."""
+    """Standalone `clang --analyze` for mapped checkers (incl. alpha/optin), with the
+    project's compile flags when a compilation database is given."""
     exe = which("clang")
     st = ToolStatus("clangsa", bool(exe), version("clang") if exe else "")
     if not exe:
         st.notes.append("clang not installed")
         return [], st
-    checkers = sorted(CM.checkers_for_tool("clangsa", standards=standards))
-    checker_set = set(checkers)
+    mapped = CM.checkers_for_tool("clangsa", standards=standards)
+    checkers = sorted({c.split("@", 1)[0] for c in mapped})
     raw: list[RawFinding] = []
+    cfg = taint_config()
+    taint = any("taint" in c for c in checkers) and cfg.exists()
 
     def one(path: str):
         lang = lang_of(path)
         cmd = [exe, "--analyze", "-Xanalyzer", "-analyzer-output=text"]
         for c in checkers:
             cmd += ["-Xanalyzer", f"-analyzer-checker={c}"]
-        cmd += ["-x", "c" if lang == "c" else "c++"]
-        cmd += fallback_flags(path, lang, profile, root)
-        cmd.append(path)
+        if taint:
+            cmd += ["-Xanalyzer", "-analyzer-config", "-Xanalyzer",
+                    f"alpha.security.taint.TaintPropagation:Config={cfg}"]
+        flags, cwd = csa_compile_args(path, profile, compdb, root)
+        cmd += ["-x", "c" if lang == "c" else "c++", *flags, path, "-o", os.devnull]
         try:
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+                               cwd=cwd if cwd and Path(cwd).is_dir() else None)
             return path, r.stderr
         except subprocess.TimeoutExpired:
             return path, "TIMEOUT"
@@ -205,8 +299,11 @@ def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: 
                 continue
             for line in out.splitlines():
                 m = CSA_LINE.match(line)
-                if m and m["sev"] == "warning" and m["chk"] in checker_set:
-                    raw.append(RawFinding("clangsa", m["chk"], m["file"], int(m["line"]),
+                if not m or m["sev"] != "warning":
+                    continue
+                name = csa_variant(m["chk"], m["msg"])
+                if name in mapped:
+                    raw.append(RawFinding("clangsa", name, m["file"], int(m["line"]),
                                           int(m["col"]), m["msg"]))
     st.raw_findings = len(raw)
     return raw, st

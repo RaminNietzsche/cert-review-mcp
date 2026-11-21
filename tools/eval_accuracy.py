@@ -20,6 +20,7 @@ across unrelated examples that all define `f()` or `main()`.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -156,6 +157,16 @@ def flagged_by_codeql_isolated(files, jobs):
     return out, [st]
 
 
+SPLIT_SALT = "cert-review-split-v1"
+
+
+def half(rule_id: str) -> str:
+    """Fixed dev / held-out assignment of a rule (and all its examples) by a hash of its ID.
+    Checkers are tuned on dev rules only; held-out rules measure how that generalises."""
+    h = int(hashlib.sha256(f"{SPLIT_SALT}:{rule_id}".encode()).hexdigest(), 16)
+    return "dev" if h % 2 == 0 else "held-out"
+
+
 def score(files, flagged, tools_for_tier):
     per = defaultdict(lambda: {"tp": 0, "fn": 0, "fp": 0, "tn": 0})
     for m in files:
@@ -170,7 +181,7 @@ def score(files, flagged, tools_for_tier):
     for rid, c in sorted(per.items()):
         tier = CM.tier_for_tools(rid, tools_for_tier)
         tp, fn, fp, tn = c["tp"], c["fn"], c["fp"], c["tn"]
-        rows.append({"rule": rid, "tier": tier, "tp": tp, "fn": fn, "fp": fp, "tn": tn,
+        rows.append({"rule": rid, "half": half(rid), "tier": tier, "tp": tp, "fn": fn, "fp": fp, "tn": tn,
                      "precision": tp / (tp + fp) if tp + fp else None,
                      "recall": tp / (tp + fn) if tp + fn else None})
     return rows
@@ -200,6 +211,10 @@ def main() -> int:
     ap.add_argument("--jobs", type=int, default=8)
     ap.add_argument("--limit", type=int, default=0, help="only the first N files (debug)")
     ap.add_argument("--rules", default="", help="comma-separated rule IDs to measure (debug)")
+    ap.add_argument("--half", choices=["all", "dev", "held-out"], default="all",
+                    help="measure only the dev or the held-out half of the rules (see half())")
+    ap.add_argument("--compare", default="",
+                    help="an earlier --out-json to show as the 'before' column")
     ap.add_argument("--tools", default="core,semgrep,infer,codeql",
                     help="analyzer groups to measure: core (clang-tidy+clangsa+cppcheck), semgrep, "
                          "infer, codeql; missing ones are skipped")
@@ -218,6 +233,8 @@ def main() -> int:
     if a.rules:
         want = {r.strip().upper() for r in a.rules.split(",")}
         files = [m for m in files if m["rule"] in want]
+    if a.half != "all":
+        files = [m for m in files if half(m["rule"]) == a.half]
     files = files[:a.limit] if a.limit else files
     if a.from_json:
         Path(a.out_md).write_text(render(json.loads(Path(a.from_json).read_text()), files))
@@ -271,6 +288,11 @@ def main() -> int:
         summary["llm-only(not scored)"] = {"rules": sum(1 for r in rows if r["tier"] == "llm-only")}
         whole = agg(rows)
         summary["corpus_wide"] = whole | {"noncompliant": n_nc, "compliant": n_ok}
+        summary["halves"] = {}
+        for h in ("dev", "held-out"):
+            hr = [r for r in rows if r["half"] == h]
+            summary["halves"][h] = {"all_scored": agg([r for r in hr if r["tier"] != "llm-only"]),
+                                    "corpus_wide": agg(hr)}
         results.append({"label": label, "groups": list(need), "tools": tools,
                         "summary": summary, "rules": rows})
 
@@ -278,6 +300,11 @@ def main() -> int:
     out = {"corpus_files": len(files), "source_commit": man["source_commit"],
            "seconds": secs, "tools": statuses, "toolsets": results,
            "baseline_rules": sorted(base_ids)}
+    if a.compare:
+        before = json.loads(Path(a.compare).read_text())
+        out["compare"] = {"file": Path(a.compare).name,
+                          "halves": {r["label"]: r["summary"].get("halves", {})
+                                     for r in before.get("toolsets", [])}}
     if results:
         # Top-level summary/rules: the toolchain of the Docker images (core + Semgrep).
         ref = next((r for r in results if r["groups"] == ["core", "semgrep"]), results[0])
@@ -292,6 +319,33 @@ def main() -> int:
     for r in results:
         print(r["label"], json.dumps(r["summary"]["all_scored"]), json.dumps(r["summary"]["corpus_wide"]))
     return 0
+
+
+def _render_halves(out) -> list[str]:
+    """Dev / held-out table (see half()), with the --compare run as 'before' when given."""
+    res = [r for r in out["toolsets"] if r["summary"].get("halves")]
+    if not res:
+        return []
+    cmp_ = out.get("compare", {}).get("halves", {})
+    L = ["", "## Dev and held-out rules", "",
+         "Every rule, with all of its examples, is assigned to one half by a hash of its ID "
+         f"(`sha256(\"{SPLIT_SALT}:<rule>\") % 2`). Checkers and mappings were tuned on dev rules "
+         "only; held-out rules show whether that generalises. Precision and recall are corpus-wide "
+         "(every example of the half counts)." +
+         (f" *Before* is `{out['compare']['file']}`." if cmp_ else ""), "",
+         "| Toolset | Half | Rules | TP | FN | FP | TN | Precision | Recall |" +
+         (" Before: precision | Before: recall |" if cmp_ else ""),
+         "|---|---|---|---|---|---|---|---|---|" + ("---|---|" if cmp_ else "")]
+    for r in res:
+        for h in ("dev", "held-out"):
+            v = r["summary"]["halves"][h]["corpus_wide"]
+            row = (f"| {r['label']} | {h} | {v['rules']} | {v['tp']} | {v['fn']} | {v['fp']} | "
+                   f"{v['tn']} | {pct(v['precision'])} | {pct(v['recall'])} |")
+            b = cmp_.get(r["label"], {}).get(h, {}).get("corpus_wide")
+            if cmp_:
+                row += (f" {pct(b['precision'])} | {pct(b['recall'])} ({b['tp']}) |" if b else " | |")
+            L.append(row)
+    return L
 
 
 def render(out, files) -> str:
@@ -323,6 +377,7 @@ def render(out, files) -> str:
         L.append(f"| {r['label']} | {s['rules']} | {s['tp']} | {s['fn']} | {s['fp']} | {s['tn']} | "
                  f"{pct(s['precision'])} | {pct(s['recall'])} | {pct(w['tp'] / w['noncompliant'])} "
                  f"({w['tp']}/{w['noncompliant']}) | {pct(w['fp'] / w['compliant'])} ({w['fp']}/{w['compliant']}) |")
+    L += _render_halves(out)
     base = set(out["baseline_rules"])
     if base and len(res) > 1:
         L += ["", f"### The {len(base)} rules the baseline scores", "",

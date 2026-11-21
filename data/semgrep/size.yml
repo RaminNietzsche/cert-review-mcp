@@ -1,0 +1,99 @@
+rules:
+  # Integer wrap in a size that reaches an allocation, a copy or a read.
+  - id: int30-c-unchecked-size-arithmetic
+    languages: [c, cpp]
+    severity: WARNING
+    options:
+      constant_propagation: false
+    message: >-
+      The size passed to `$SINK` is computed from `$A` and `$B`, two non-constant values with no
+      overflow check on either earlier in the function; a wrap makes the buffer or the copy
+      smaller or larger than intended (INT30-C).
+    metadata:
+      cert: [INT30-C]
+      confidence: medium
+    patterns:
+      - pattern-either:
+          # size computed in the call
+          - pattern: $SINK(<... $A * $B ...>)
+          - pattern: $SINK(<... $A + $B ...>)
+          - pattern: $SINK($X, <... $A * $B ...>)
+          - pattern: $SINK($X, <... $A + $B ...>)
+          - pattern: $SINK($X, $Y, <... $A * $B ...>, ...)
+          - pattern: $SINK($X, $Y, <... $A + $B ...>, ...)
+          - pattern: new $T[<... $A * $B ...>]
+          - pattern: new $T[<... $A + $B ...>]
+          # size computed in the statement before the call
+          - pattern: |
+              $V = <... $A * $B ...>;
+              ...
+              $SINK(..., <... $V ...>, ...);
+          - pattern: |
+              $V = <... $A + $B ...>;
+              ...
+              $SINK(..., <... $V ...>, ...);
+          - pattern: |
+              $TY $V = <... $A * $B ...>;
+              ...
+              $SINK(..., <... $V ...>, ...);
+          - pattern: |
+              $TY $V = <... $A + $B ...>;
+              ...
+              $SINK(..., <... $V ...>, ...);
+      - metavariable-regex:
+          metavariable: $SINK
+          regex: ^(std::)?(malloc|realloc|alloca|aligned_alloc|memcpy|memmove|memset|strncpy|strncat|recv|recvfrom|read|pread|fread|operator new|new)$
+      - metavariable-pattern:
+          metavariable: $A
+          patterns:
+            - pattern-not: sizeof(...)
+            - pattern-not-regex: ^\s*\(?\s*[0-9]
+            - pattern-not-regex: ^\s*[A-Z][A-Z0-9_]*\s*$
+            - pattern-not-regex: \b(strlen|wcslen|strnlen|sizeof)\b
+            - pattern-not-regex: '[&|<>%]'
+      - metavariable-pattern:
+          metavariable: $B
+          patterns:
+            - pattern-not: sizeof(...)
+            - pattern-not-regex: ^\s*\(?\s*[0-9]
+            - pattern-not-regex: ^\s*[A-Z][A-Z0-9_]*\s*$
+            - pattern-not-regex: \b(strlen|wcslen|strnlen|sizeof)\b
+            - pattern-not-regex: '[&|<>%]'
+      - pattern-not-inside: |
+          assert(<... $A ...>);
+          ...
+      - pattern-not-inside: |
+          assert(<... $B ...>);
+          ...
+      - pattern-not-inside: |
+          ceph_assert(<... $A ...>);
+          ...
+      - pattern-not-inside: |
+          ceph_assert(<... $B ...>);
+          ...
+      - pattern-not-inside: |
+          ceph_assert_always(<... $A ...>);
+          ...
+      - pattern-not-inside: |
+          ceph_assert_always(<... $B ...>);
+          ...
+      - pattern-not-inside: |
+          if (<... $A ...>) $S;
+          ...
+      - pattern-not-inside: |
+          if (<... $A ...>) $S; else $E;
+          ...
+      - pattern-not-inside: |
+          if (<... $B ...>) $S;
+          ...
+      - pattern-not-inside: |
+          if (<... $B ...>) $S; else $E;
+          ...
+      - pattern-not-inside: |
+          if (<... $A ...>) $S;
+      - pattern-not-inside: |
+          if (<... $B ...>) $S;
+      - pattern-not-inside: |
+          if (<... $A ...>) $S; else $E;
+      - pattern-not-inside: |
+          if (<... $B ...>) $S; else $E;
