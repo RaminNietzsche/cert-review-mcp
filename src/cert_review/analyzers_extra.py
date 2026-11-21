@@ -20,6 +20,16 @@ from .profiles import Profile
 from .toolrun import RawFinding, ToolStatus, fallback_flags, lang_of, version, which
 
 OPTIONAL_TOOLS = ("semgrep", "infer", "codeql")
+
+
+def _sanitize_untrusted_tool_output(text: str, limit: int = 300) -> str:
+    """Sanitize external tool output before surfacing it in LLM-visible notes."""
+    s = (text or "").replace("\r", " ").replace("\n", " ")
+    s = re.sub(r"[\x00-\x1f\x7f]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s[:limit]
+
+
 CODEQL_SUITES = {
     "c": "codeql/cert-c-coding-standards:codeql-suites/cert-c-default.qls",
     "cpp": "codeql/cert-cpp-coding-standards:codeql-suites/cert-cpp-default.qls",
@@ -278,7 +288,7 @@ def run_codeql(files: list[str], profile: Profile, compdb: Path | None, root: Pa
             st.files = len(files)
             return [], st
         if r.returncode != 0:
-            st.notes.append(f"database creation failed: {(r.stderr or r.stdout).strip()[-300:]}")
+            st.notes.append(f"database creation failed (untrusted tool output): {_sanitize_untrusted_tool_output(r.stderr or r.stdout)}")
             st.files_with_errors.extend(files)
             st.files = len(files)
             return [], st
