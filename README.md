@@ -88,11 +88,11 @@ git clone <this repository> cert-review-mcp && cd cert-review-mcp
 python3 -m venv .venv && . .venv/bin/activate
 pip install -e '.[dev]'
 sudo apt-get install clang clang-tidy cppcheck       # static layer (optional but recommended)
-pytest                                              # 80 tests
+pytest                                              # 105 tests
 ```
 
 The package reads `data/` and `profiles/` from the checkout (set `CERT_REVIEW_HOME` to point
-elsewhere). Python 3.11+; works with the official `mcp` SDK 1.x (`FastMCP`) and 2.x (`MCPServer`).
+elsewhere). Python 3.11+; works with the official `mcp` SDK 1.x (`FastMCP`, 1.15 or later) and 2.x (`MCPServer`).
 
 ### Cursor
 
@@ -111,6 +111,30 @@ elsewhere). Python 3.11+; works with the official `mcp` SDK 1.x (`FastMCP`) and 
 
 Then ask: "Use the cert-review `ceph_review` prompt on my current diff." Copy `skills/` into your
 skills folder to make the review procedure available.
+
+### Docker
+
+`Dockerfile.mcp` builds the MCP server with the analyzers included (no local clang or
+cppcheck needed). Mount your project at the same absolute path it has on the host:
+
+```bash
+docker build -f Dockerfile.mcp -t cert-review-mcp .
+```
+
+```json
+{
+  "mcpServers": {
+    "cert-review": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-v", "/home/me/proj:/home/me/proj:ro", "cert-review-mcp"]
+    }
+  }
+}
+```
+
+The same `mcpServers` block works in Claude Desktop and Cursor. Release tags also publish
+multi-arch images to Docker Hub as `<DOCKERHUB_USERNAME>/cert-review-mcp`. Details, the CLI
+from the image, and a `tools/list` check: [docs/docker.md](docs/docker.md).
 
 ### Claude Code
 

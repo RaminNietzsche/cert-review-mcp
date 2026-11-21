@@ -34,7 +34,7 @@ Only clients that call the MCP tools by name need updating.
 - `build_review_packet(compdb=...)`, so the static pass inside it can use a compilation database.
 - `format_findings(warnings=...)` carries partial-analysis warnings into markdown, GitHub and
   SARIF output; `codequality` and `gitlab-sast` styles are listed.
-- `Dockerfile.mcp`: an image that runs the MCP server over stdio (and the CLI with
+- `Dockerfile.mcp` and [docs/docker.md](docs/docker.md): an image that runs the MCP server over stdio (and the CLI with
   `--entrypoint cert-review`), for local use and the Glama registry build.
 - `glama.json`.
 - `.github/workflows/docker-publish.yml`: on a `v*.*.*` tag, builds `Dockerfile.mcp` for
