@@ -1,11 +1,19 @@
-"""Access to data/checker_map.json and reverse lookups (checker -> rules)."""
+"""Checker mappings and reverse lookups (checker -> rules).
+
+SEI CERT: data/checker_map.json. MISRA/AUTOSAR: the `checkers` of each record in
+data/guidelines.json (cppcheck MISRA addon, cppcheck's own guideline mapping, and
+curated clang-tidy / Clang Static Analyzer mappings).
+"""
 from __future__ import annotations
 
 import functools
 import json
+from typing import Iterable
 
 from .paths import data_dir
 from .rules import norm_id
+
+TIERS = ("deterministic", "partial", "llm-only")
 
 
 @functools.lru_cache(maxsize=1)
@@ -18,8 +26,26 @@ def info() -> dict:
     return {k: d[k] for k in ("sources", "tier_definitions", "summary")}
 
 
+def _tier(checkers: list[dict]) -> str:
+    if any(c["specific"] for c in checkers):
+        return "deterministic"
+    return "partial" if checkers else "llm-only"
+
+
+@functools.lru_cache(maxsize=1)
+def _guideline_entries() -> dict[str, dict]:
+    from . import rules as R
+    out = {}
+    for rid, r in R.guidelines().items():
+        cs = [{**c, "available": c.get("available", True)} for c in r.get("checkers", [])]
+        out[rid] = {"tier": _tier(cs), "tier_runnable": _tier([c for c in cs if c["available"]]),
+                    "checkers": cs, "cert_detectable": None}
+    return out
+
+
 def rule_entry(rule_id: str) -> dict | None:
-    return _load()["rules"].get(norm_id(rule_id))
+    rid = norm_id(rule_id)
+    return _load()["rules"].get(rid) or _guideline_entries().get(rid)
 
 
 def tier(rule_id: str, runnable: bool = True) -> str:
@@ -42,7 +68,7 @@ def tier_for_tools(rule_id: str, tools) -> str:
 
 @functools.lru_cache(maxsize=1)
 def reverse_index() -> dict[tuple[str, str], list[dict]]:
-    """(tool, checker) -> [{rule_id, specific, confidence}]"""
+    """(tool, checker) -> [{rule_id, specific, confidence?}] for SEI CERT."""
     idx: dict[tuple[str, str], list[dict]] = {}
     for rid, e in _load()["rules"].items():
         for c in e["checkers"]:
@@ -53,25 +79,47 @@ def reverse_index() -> dict[tuple[str, str], list[dict]]:
     return idx
 
 
-def checkers_for_tool(tool: str, lang: str | None = None, available_only: bool = True) -> set[str]:
+@functools.lru_cache(maxsize=1)
+def guideline_reverse_index() -> dict[tuple[str, str], list[dict]]:
+    """(tool, checker) -> [{rule_id, specific, standard}] for MISRA/AUTOSAR."""
+    from . import rules as R
+    idx: dict[tuple[str, str], list[dict]] = {}
+    for rid, e in _guideline_entries().items():
+        std = R.guidelines()[rid]["standard"]
+        for c in e["checkers"]:
+            idx.setdefault((c["tool"], c["checker"]), []).append(
+                {"rule_id": rid, "specific": c["specific"], "standard": std,
+                 "line_regex": c.get("line_regex")})
+    return idx
+
+
+def checkers_for_tool(tool: str, lang: str | None = None, available_only: bool = True,
+                      standards: Iterable[str] | None = None) -> set[str]:
+    """Checker names of `tool` that map to the selected standards (default SEI CERT)."""
+    from . import rules as R
+    stds = set(R.expand_standards(standards))
     out = set()
-    for rid, e in _load()["rules"].items():
-        if lang and not (rid.endswith("-CPP") == (lang == "cpp")) and lang in ("c", "cpp"):
-            # CodeChecker maps C checkers to both standards; keep rule-language filter
-            # on the finding side instead of here.
-            pass
+    if stds & set(R.CERT_STANDARDS):
+        for e in _load()["rules"].values():
+            for c in e["checkers"]:
+                if c["tool"] == tool and (c["available"] or not available_only):
+                    out.add(c["checker"])
+    for rid, e in _guideline_entries().items():
+        if R.guidelines()[rid]["standard"] not in stds:
+            continue
         for c in e["checkers"]:
             if c["tool"] == tool and (c["available"] or not available_only):
                 out.add(c["checker"])
     return out
 
 
-def coverage(lang: str | None = None, kind: str | None = None) -> dict:
+def coverage(lang: str | None = None, kind: str | None = None,
+             standard: str | Iterable[str] | None = None) -> dict:
     from . import rules as R
-    res = {"deterministic": [], "partial": [], "llm-only": []}
-    res_run = {"deterministic": [], "partial": [], "llm-only": []}
-    res_ext = {"deterministic": [], "partial": [], "llm-only": []}
-    for r in R.list_rules(lang=lang, kind=kind):
+    res: dict[str, list[str]] = {t: [] for t in TIERS}
+    res_run: dict[str, list[str]] = {t: [] for t in TIERS}
+    res_ext: dict[str, list[str]] = {t: [] for t in TIERS}
+    for r in R.list_rules(lang=lang, kind=kind, standard=standard):
         e = rule_entry(r["id"])
         res[e["tier"]].append(r["id"])
         res_run[e["tier_runnable"]].append(r["id"])

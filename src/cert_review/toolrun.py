@@ -5,6 +5,7 @@ import json
 import re
 import shutil
 import subprocess
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -15,7 +16,7 @@ from .profiles import Profile
 CT_LINE = re.compile(r"^(?P<file>.+?):(?P<line>\d+):(?P<col>\d+): (?P<sev>warning|error): "
                      r"(?P<msg>.*?) \[(?P<chk>[^\]]+)\]\s*$")
 CSA_LINE = CT_LINE
-CPPCHECK_LINE = re.compile(r"^(?P<file>.+?):(?P<line>\d+):(?P<col>\d+):(?P<sev>[a-z]+):(?P<id>[A-Za-z0-9_]+):(?P<msg>.*)$")
+CPPCHECK_LINE = re.compile(r"^(?P<file>.+?):(?P<line>\d+):(?P<col>\d+):(?P<sev>[a-z]+):(?P<id>[A-Za-z0-9_.-]+):(?P<msg>.*)$")
 
 C_EXT = {".c"}
 CPP_EXT = {".cc", ".cpp", ".cxx", ".c++", ".h", ".hh", ".hpp", ".hxx", ".inl"}
@@ -105,22 +106,22 @@ def fallback_flags(path: str, lang: str, profile: Profile, root: Path | None) ->
     return flags
 
 
-def _checks_for_clang_tidy(profile: Profile) -> tuple[list[str], list[str]]:
-    """(clang-tidy checks, clang-analyzer checks) that map to CERT rules and exist."""
-    ct = CM.checkers_for_tool("clang-tidy")
-    sa = {f"clang-analyzer-{c}" for c in CM.checkers_for_tool("clangsa")}
+def _checks_for_clang_tidy(profile: Profile, standards=None) -> tuple[list[str], list[str]]:
+    """(clang-tidy checks, clang-analyzer checks) that map to the selected standards' rules."""
+    ct = CM.checkers_for_tool("clang-tidy", standards=standards)
+    sa = {f"clang-analyzer-{c}" for c in CM.checkers_for_tool("clangsa", standards=standards)}
     return sorted(ct), sorted(sa)
 
 
 def run_clang_tidy(files: list[str], profile: Profile, compdb: Path | None,
                    root: Path | None, jobs: int = 4, timeout: int = 300,
-                   with_csa: bool = True) -> tuple[list[RawFinding], ToolStatus]:
+                   with_csa: bool = True, standards=None) -> tuple[list[RawFinding], ToolStatus]:
     exe = which("clang-tidy")
     st = ToolStatus("clang-tidy", bool(exe), version("clang-tidy") if exe else "")
     if not exe:
         st.notes.append("clang-tidy not installed")
         return [], st
-    ct, sa = _checks_for_clang_tidy(profile)
+    ct, sa = _checks_for_clang_tidy(profile, standards)
     checks = ["-*"] + ct + (sa if with_csa else []) + profile.extra_checks
     checks_arg = ",".join(checks)
     raw: list[RawFinding] = []
@@ -169,14 +170,15 @@ def run_clang_tidy(files: list[str], profile: Profile, compdb: Path | None,
 
 
 def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: Path | None,
-                 jobs: int = 4, timeout: int = 300) -> tuple[list[RawFinding], ToolStatus]:
+                 jobs: int = 4, timeout: int = 300,
+                 standards=None) -> tuple[list[RawFinding], ToolStatus]:
     """Standalone `clang --analyze` for mapped checkers (incl. alpha/optin)."""
     exe = which("clang")
     st = ToolStatus("clangsa", bool(exe), version("clang") if exe else "")
     if not exe:
         st.notes.append("clang not installed")
         return [], st
-    checkers = sorted(CM.checkers_for_tool("clangsa"))
+    checkers = sorted(CM.checkers_for_tool("clangsa", standards=standards))
     checker_set = set(checkers)
     raw: list[RawFinding] = []
 
@@ -210,15 +212,37 @@ def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: 
     return raw, st
 
 
+MISRA_ADDON_PREFIX = "misra-c2012-"
+
+
+def _misra_addon_arg(tmpdir: str) -> str:
+    """--addon value for the cppcheck MISRA addon; adds --rule-texts when the user configured
+    a licensed MISRA C rule-texts file (the file is only read by cppcheck, never copied)."""
+    from . import ruletexts
+    texts = ruletexts.path_for("misra-c-2012")
+    if not texts or not Path(texts).expanduser().is_file():
+        return "misra"
+    cfg = Path(tmpdir) / "misra.json"
+    cfg.write_text(json.dumps({"script": "misra.py",
+                               "args": [f"--rule-texts={Path(texts).expanduser()}"]}))
+    return str(cfg)
+
+
 def run_cppcheck(files: list[str], profile: Profile, root: Path | None, jobs: int = 4,
-                 timeout: int = 300) -> tuple[list[RawFinding], ToolStatus]:
+                 timeout: int = 300, standards=None) -> tuple[list[RawFinding], ToolStatus]:
     exe = which("cppcheck")
     st = ToolStatus("cppcheck", bool(exe), version("cppcheck") if exe else "")
     if not exe:
         st.notes.append("cppcheck not installed")
         return [], st
-    wanted = CM.checkers_for_tool("cppcheck")
+    wanted = CM.checkers_for_tool("cppcheck", standards=standards)
+    misra_c = "misra-c-2012" in (standards or ())
     raw: list[RawFinding] = []
+    tmp = tempfile.TemporaryDirectory(prefix="cert-review-") if misra_c else None
+    addon = _misra_addon_arg(tmp.name) if tmp else None
+    if misra_c:
+        st.notes.append("MISRA C:2012 addon enabled for .c files"
+                        + (" with your rule-texts file" if addon != "misra" else ""))
 
     def one(path: str):
         lang = lang_of(path)
@@ -227,6 +251,11 @@ def run_cppcheck(files: list[str], profile: Profile, root: Path | None, jobs: in
                "--template={file}:{line}:{column}:{severity}:{id}:{message}",
                f"--std={'c' + str(std.get('c_standard', 11)) if lang == 'c' else 'c++' + str(min(std.get('cpp_standard', 20), 20))}",
                "--language=" + ("c" if lang == "c" else "c++")]
+        if addon and lang == "c":
+            cmd.append(f"--addon={addon}")
+            if tmp:
+                # keep the addon's .dump files out of the source tree (it may be read-only)
+                cmd.append(f"--cppcheck-build-dir={tempfile.mkdtemp(dir=tmp.name)}")
         if root:
             for sub in ("src", "src/include"):
                 if (root / sub).is_dir():
@@ -238,18 +267,22 @@ def run_cppcheck(files: list[str], profile: Profile, root: Path | None, jobs: in
         except subprocess.TimeoutExpired:
             return path, "TIMEOUT"
 
-    with ThreadPoolExecutor(max_workers=jobs) as ex:
-        for path, out in ex.map(one, files):
-            st.files += 1
-            if out == "TIMEOUT":
-                st.notes.append(f"timeout: {path}")
-                st.timed_out.append(path)
-                continue
-            for line in out.splitlines():
-                m = CPPCHECK_LINE.match(line)
-                if m and m["id"] in wanted:
-                    raw.append(RawFinding("cppcheck", m["id"], m["file"], int(m["line"]),
-                                          int(m["col"]), m["msg"]))
+    try:
+        with ThreadPoolExecutor(max_workers=jobs) as ex:
+            for path, out in ex.map(one, files):
+                st.files += 1
+                if out == "TIMEOUT":
+                    st.notes.append(f"timeout: {path}")
+                    st.timed_out.append(path)
+                    continue
+                for line in out.splitlines():
+                    m = CPPCHECK_LINE.match(line)
+                    if m and m["id"] in wanted:
+                        raw.append(RawFinding("cppcheck", m["id"], m["file"], int(m["line"]),
+                                              int(m["col"]), m["msg"]))
+    finally:
+        if tmp:
+            tmp.cleanup()
     st.raw_findings = len(raw)
     return raw, st
 

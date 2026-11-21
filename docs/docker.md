@@ -74,7 +74,7 @@ printf '%s\n' \
   | docker run -i --rm cert-review-mcp | tail -1 | jq '.result.tools[].name'
 ```
 
-It should list 9 tools.
+It should list 10 tools.
 
 ## Glama
 

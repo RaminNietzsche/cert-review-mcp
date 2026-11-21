@@ -97,6 +97,11 @@ def summary_md(res: dict, findings: list[dict], root: str, mode: str, profile: s
     out = [f"## SEI CERT review ({mode} mode, profile `{profile}`)", "",
            f"**{n} finding(s)**: {counts['error']} error, {counts['warning']} warning, {counts['note']} note"
            f" in {len(res.get('files', []))} file(s). Tools: {tools}.", ""]
+    bl = res.get("baseline")
+    if bl:
+        fixed = "" if bl.get("fixed") is None else f", {bl['fixed']} fixed since the baseline"
+        out += [f"Baseline `{os.path.relpath(bl['path'], root)}`: {bl['new']} new, "
+                f"{bl['baselined']} already baselined (hidden){fixed}.", ""]
     if failing:
         out += [f"> Failing: at least one finding is at or above `{threshold}`.", ""]
     if n:
@@ -155,6 +160,12 @@ def main() -> int:
     min_conf = float(inp("min-confidence", "0.5"))
     threshold = inp("fail-on", "never").lower()
     sarif_path = str(Path(root, inp("sarif-file", "cert-review.sarif")))
+    baseline = inp("baseline") or None
+    if baseline:
+        baseline = str(Path(root, baseline).resolve())
+        if not Path(baseline).exists():
+            log("error", f"baseline file not found: {baseline}")
+            return 2
 
     try:
         if mode == "diff":
@@ -164,10 +175,12 @@ def main() -> int:
                 head = head if head and git(root, "cat-file", "-t", head) == "commit" else None
             except RuntimeError:
                 head = None
-            res = api.check_diff(root, base, head or "HEAD", None, profile, compdb, tools, min_conf)
+            res = api.check_diff(root, base, head or "HEAD", None, profile, compdb, tools, min_conf,
+                                 baseline=baseline)
         elif mode == "full":
             paths = [str(Path(root, p)) for p in split_globs(inp("paths", "."))]
-            res = api.check_file(paths, profile, None, compdb, root, tools, min_conf)
+            res = api.check_file(paths, profile, None, compdb, root, tools, min_conf,
+                                 baseline=baseline)
         else:
             log("error", f"mode must be diff or full, got {mode!r}")
             return 2
@@ -199,6 +212,7 @@ def main() -> int:
     set_output("sarif-file", sarif_path)
     set_output("findings", str(len(findings)))
     set_output("errors", str(sum(1 for f in findings if f["severity"] == "error")))
+    set_output("baselined", str((res.get("baseline") or {}).get("baselined", 0)))
 
     if truthy(inp("review-comments", "false")):
         token = inp("github-token")

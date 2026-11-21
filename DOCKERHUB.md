@@ -23,8 +23,9 @@ All tools are read-only and never write to the project.
 | `list_rules` | List CERT rules, filtered by language, category, kind, level or coverage |
 | `get_rule` | Full details for one rule, such as `EXP33-C` |
 | `search_rules` | Search rule titles and text |
-| `check_files` | Run the analyzers on files and return CERT-mapped findings |
+| `check_files` | Run the analyzers on files and return CERT-mapped findings (optionally only those not in a baseline) |
 | `check_diff` | Same, limited to lines changed in a git diff |
+| `explain_finding` | Explain one finding and suggest a fix from the rule's compliant example |
 | `build_review_packet` | Diff plus the rules worth checking by hand, for a reviewer |
 | `validate_findings` | Check findings against the rule catalog |
 | `get_rule_coverage` | Count rules by how they can be checked |

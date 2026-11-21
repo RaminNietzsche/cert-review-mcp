@@ -17,6 +17,7 @@ post back afterwards. Drafting and formatting are free; posting is not.
 |---|---|
 | `check_diff` | Static findings on the changed lines of `base..head`, the working tree, or a pasted diff |
 | `check_files` | Static findings for a file or directory |
+| `explain_finding` | One finding: why it matches, the closest CERT example pair and a fix to put in `fix` |
 | `build_review_packet` | Code hunks plus the rule texts worth reading, for rules no checker covers |
 | `validate_findings` | Rejects findings without a real rule ID or a verbatim rule quote |
 | `format_findings` | Markdown, GitHub review, GitLab discussions, SARIF or GitLab reports (formatting only) |
@@ -32,6 +33,9 @@ post back afterwards. Drafting and formatting are free; posting is not.
    from a rule-specific checker (`cert-*`) are the most reliable; findings from
    general analyzers mapped to a rule need a sanity check. See
    [references/false-positives.md](references/false-positives.md).
+   If the repository has a `.cert-review-baseline.json`, pass it as `baseline_path`
+   so only new findings are reviewed. Use `explain_finding` to draft the fix for a
+   confirmed finding.
 3. **Manual layer.** Call `build_review_packet` (`run_static: false` if step 2 already ran). For each hunk read the candidate rules'
    texts and decide whether the code really violates one. Follow
    [references/judging-llm-only-rules.md](references/judging-llm-only-rules.md).
