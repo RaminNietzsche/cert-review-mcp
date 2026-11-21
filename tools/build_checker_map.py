@@ -125,6 +125,10 @@ def main():
     for o in overlay:
         for rid in o["rules"]:
             add(rid, o["tool"], o["checker"], "curated-overlay", False)
+    excl = yaml.safe_load((ROOT / "data/checker_exclusions.yaml").read_text())
+    for x in excl:
+        for rid in x["rules"]:
+            mapping.get(rid, {}).pop((x["tool"], x["checker"]), None)
     out_rules = {}
     tiers = {"all": {}, "runnable": {}}
     for rid, r in sorted(rules.items()):
@@ -160,6 +164,7 @@ def main():
                      "commit": git_head(a.llvm),
                      "files": "clang-tools-extra/docs/clang-tidy/checks/cert/*.md"},
             "overlay": {"file": "data/checker_overlay.yaml", "entries": len(overlay)},
+            "exclusions": {"file": "data/checker_exclusions.yaml", "entries": len(excl)},
             "toolchain_versions": versions,
         },
         "tier_definitions": {

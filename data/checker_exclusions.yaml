@@ -1,0 +1,7 @@
+# Mappings removed from the CodeChecker-derived map because they do not match
+# the rule's meaning. Each entry must say why; the evidence is the Ceph trial
+# (docs/ceph-trial.md), where these produced hundreds of unrelated findings.
+- tool: clang-tidy
+  checker: bugprone-narrowing-conversions
+  rules: [EXP45-C, FIO34-C, FLP36-C]
+  reason: "Integer narrowing has nothing to do with assignments in conditions (EXP45-C), the EOF/char distinction (FIO34-C) or int-to-float precision (FLP36-C: only the float variants are relevant, and those are kept under FLP34-C)."

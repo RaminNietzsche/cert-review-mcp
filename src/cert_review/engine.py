@@ -106,6 +106,8 @@ def normalize(raw: list[T.RawFinding], profile: P.Profile, src: _Source | None =
         rel = relpath(r.file, root)
         lang = T.lang_of(r.file)
         for rid, specific, conf in _rules_for(r.tool, r.checker, lang):
+            if r.tool == "cppcheck" and r.message.startswith("Either the condition"):
+                conf *= 0.6      # cppcheck: a path-sensitive guess, not a proven defect
             f = F.make(rid, r.file, r.line, r.col, r.tool, r.checker, r.message, conf, profile)
             if f is None:
                 continue
@@ -113,7 +115,7 @@ def normalize(raw: list[T.RawFinding], profile: P.Profile, src: _Source | None =
             if reason:
                 f.suppressed = f"disabled rule: {reason}"
             else:
-                s = profile.suppression(rid, r.checker, rel, src.line(r.file, r.line))
+                s = profile.suppression(rid, r.checker, rel, src.line(r.file, r.line), r.message)
                 if s:
                     f.suppressed = s["reason"]
                 elif _inline_ignored(src, r.file, r.line, rid):

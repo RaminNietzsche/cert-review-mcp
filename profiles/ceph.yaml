@@ -159,6 +159,17 @@ suppress:
     code_regex: '\bwhile\s*\(\s*\(?\s*\w+\s*=\s*[^=]'
     reason: "Intentional assignment-in-condition loops such as `while ((r = read(...)) > 0)` are idiomatic C in Ceph's C utilities."
     paths: ["src/*.c", "src/common/*.c", "src/tools/*", "src/tools/**/*.c"]
+  # Found by the trial on src/common, src/msg, src/auth, src/osdc, src/crush (docs/ceph-trial.md).
+  - id: "INT31-C"
+    checker: "bugprone-narrowing-conversions"
+    message_regex: 'to signed type .* is implementation-defined'
+    reason: "Same-width unsigned-to-signed conversions (version_t/uint64_t into int64_t for Formatter::dump_int, ids, epochs) are pervasive in Ceph's interfaces. Real narrowing (uint64_t to uint32_t, size to int) is still reported."
+  - id: "DCL58-CPP"
+    code_not_regex: 'namespace\s+(std|posix)\b'
+    reason: "clang-tidy 19's cert-dcl58-cpp reports declarations that merely derive from or mention std types (399 hits in 5 directories, none inside a namespace std block). Only a line opening `namespace std` is a real candidate."
+  - id: "ERR58-CPP"
+    code_regex: '^\s*(static\s+)?(const(expr)?\s+)?(std::)?(string|string_view)\s+\w+\s*(=|\{|\()\s*"'
+    reason: "Constructing a global std::string from a literal can only throw bad_alloc during startup, which is fatal in any case; not worth a finding. Maps, vectors and objects with real constructors are still reported."
   # Tests, benchmarks and tools are not shipped daemons; keep only memory and UB rules.
   - id_prefixes: ["ERR", "MSC", "STR", "DCL", "OOP", "CON", "FIO", "INT"]
     paths: ["src/test/*", "src/tools/*bench*", "src/common/obj_bencher.cc", "src/*/test_*", "src/test_*", "src/*fuzz*"]

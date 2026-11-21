@@ -38,3 +38,8 @@
   checker: uninitStructMember
   rules: [EXP33-C, EXP53-CPP]
   reason: "Read of an uninitialized struct member."
+
+- tool: clang-tidy
+  checker: bugprone-narrowing-conversions
+  rules: [INT31-C, FLP34-C]
+  reason: "Narrowing integer or float conversions are INT31-C / FLP34-C; upstream omits INT31-C."

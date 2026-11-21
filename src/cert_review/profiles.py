@@ -55,7 +55,7 @@ class Profile:
                    for g in self.raw.get("exclude_paths", []))
 
     def suppression(self, rule_id: str, checker: str | None, path: str,
-                    code_line: str | None) -> dict | None:
+                    code_line: str | None, message: str | None = None) -> dict | None:
         """First matching suppression rule, or None."""
         p = path.lstrip("./")
         for s in self.raw.get("suppress", []):
@@ -76,6 +76,13 @@ class Profile:
                 continue
             if "code_regex" in s:
                 if code_line is None or not re.search(s["code_regex"], code_line):
+                    continue
+            if "code_not_regex" in s:
+                # suppress unless the line matches: for checks known to misfire
+                if code_line is not None and re.search(s["code_not_regex"], code_line):
+                    continue
+            if "message_regex" in s:
+                if message is None or not re.search(s["message_regex"], message):
                     continue
             return s
         return None

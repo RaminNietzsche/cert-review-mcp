@@ -27,6 +27,7 @@ def _common(p: argparse.ArgumentParser) -> None:
     p.add_argument("--format", default="markdown",
                    choices=["markdown", "json", "sarif", "github", "gitlab"])
     p.add_argument("--output", "-o")
+    p.add_argument("--report", help="also write the full result (tool status, suppressed findings) as JSON")
     p.add_argument("--min-confidence", type=float, default=0.0)
     p.add_argument("--fail-on", choices=["error", "warning", "note", "never"], default="never",
                    help="exit 1 if a finding at or above this severity exists")
@@ -101,6 +102,7 @@ def main(argv: list[str] | None = None) -> int:
                              a.tools.split(","), a.min_confidence, a.include_suppressed, a.jobs,
                              a.max_rules_per_location)
         _emit(res["findings"], a.format, a.root, a.output)
+        _write_report(res, a.report)
         _status(res)
         return _exit_code(res["findings"], a.fail_on)
     if a.cmd == "diff":
@@ -111,6 +113,7 @@ def main(argv: list[str] | None = None) -> int:
                              a.min_confidence, a.include_suppressed, a.jobs,
                              a.max_rules_per_location)
         _emit(res["findings"], a.format, res["root"], a.output)
+        _write_report(res, a.report)
         _status(res)
         return _exit_code(res["findings"], a.fail_on)
     if a.cmd == "explain":
@@ -153,6 +156,12 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(res, indent=2))
         return 1 if res["rejected"] else 0
     return 2
+
+
+def _write_report(res: dict, path: str | None) -> None:
+    if path:
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(res, fh)
 
 
 def _status(res: dict) -> None:

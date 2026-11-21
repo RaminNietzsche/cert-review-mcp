@@ -115,3 +115,14 @@ def test_missing_tools_are_reported_not_fatal(tmp_path, monkeypatch):
     f.write_text("int x;\n")
     res = engine.check([str(f)], "default", root=tmp_path)
     assert res.findings == [] and all(not t.available for t in res.tools)
+
+
+def test_cppcheck_conditional_messages_lose_confidence(tmp_path):
+    f = tmp_path / "a.cc"
+    f.write_text("int x;\n")
+    plain, _ = engine.normalize([raw("cppcheck", "negativeIndex", str(f), 1, "Array 'a[4]' accessed at index -1")],
+                                P.load("default"))
+    cond, _ = engine.normalize([raw("cppcheck", "negativeIndex", str(f), 1,
+                                    "Either the condition 'n<0' is redundant or the array is accessed at index -1")],
+                               P.load("default"))
+    assert cond[0].confidence < plain[0].confidence

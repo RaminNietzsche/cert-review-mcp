@@ -63,3 +63,24 @@ def test_override_priority_and_severity():
     base = F.make("EXP61-CPP", "a.cc", 1, 1, "t", "c", "m", 0.5, P.load("default"))
     ceph = F.make("EXP61-CPP", "a.cc", 1, 1, "t", "c", "m", 0.5, P.load("ceph"))
     assert ceph.priority == base.priority + 5 and ceph.severity == "error"
+
+
+def test_message_regex_suppression():
+    p = P.load("ceph")
+    sign = "narrowing conversion from 'unsigned long' to signed type 'int64_t' is implementation-defined"
+    width = "narrowing conversion from 'unsigned long' to 'unsigned int'"
+    assert p.suppression("INT31-C", "bugprone-narrowing-conversions", "src/common/a.cc", "x", sign)
+    assert not p.suppression("INT31-C", "bugprone-narrowing-conversions", "src/common/a.cc", "x", width)
+
+
+def test_code_not_regex_suppresses_unless_line_matches():
+    p = P.load("ceph")
+    assert p.suppression("DCL58-CPP", "cert-dcl58-cpp", "src/include/a.h", "struct foo : std::set<int> {", "m")
+    assert not p.suppression("DCL58-CPP", "cert-dcl58-cpp", "src/include/a.h", "namespace std {", "m")
+
+
+def test_static_string_literal_err58_suppressed():
+    p = P.load("ceph")
+    line = 'static const std::string CLOG_CHANNEL_NONE = "none";'
+    assert p.suppression("ERR58-CPP", "cert-err58-cpp", "src/common/LogEntry.h", line, "m")
+    assert not p.suppression("ERR58-CPP", "cert-err58-cpp", "src/common/x.cc", "static std::map<int,int> m = f();", "m")

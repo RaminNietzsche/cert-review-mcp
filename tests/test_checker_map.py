@@ -48,3 +48,8 @@ def test_overlay_entries_applied():
 def test_reverse_index_lookup():
     rules = CM.reverse_index()[("clang-tidy", "cert-err34-c")]
     assert {"rule_id": "ERR34-C", "specific": True} in rules
+
+
+def test_exclusions_removed_and_replacement_added():
+    ids = {r["rule_id"] for r in CM.reverse_index()[("clang-tidy", "bugprone-narrowing-conversions")]}
+    assert "INT31-C" in ids and not ids & {"EXP45-C", "FIO34-C", "FLP36-C"}

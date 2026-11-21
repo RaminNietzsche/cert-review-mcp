@@ -14,7 +14,11 @@
   },
   "overlay": {
    "file": "data/checker_overlay.yaml",
-   "entries": 9
+   "entries": 10
+  },
+  "exclusions": {
+   "file": "data/checker_exclusions.yaml",
+   "entries": 1
   },
   "toolchain_versions": {
    "clang-tidy": "19.1.7",
@@ -30,14 +34,14 @@
  "summary": {
   "c_rule_tier": {
    "deterministic": 18,
-   "partial": 55,
-   "llm-only": 49,
+   "partial": 53,
+   "llm-only": 51,
    "total": 122
   },
   "c_rule_tier_runnable": {
    "deterministic": 16,
-   "partial": 37,
-   "llm-only": 69,
+   "partial": 34,
+   "llm-only": 72,
    "total": 122
   },
   "c_recommendation_tier": {
@@ -2601,7 +2605,7 @@
   },
   "EXP45-C": {
    "tier": "deterministic",
-   "tier_runnable": "partial",
+   "tier_runnable": "llm-only",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2611,16 +2615,6 @@
      ],
      "specific": false,
      "available": false,
-     "severity_hint": "MEDIUM"
-    },
-    {
-     "tool": "clang-tidy",
-     "checker": "bugprone-narrowing-conversions",
-     "origins": [
-      "codechecker"
-     ],
-     "specific": false,
-     "available": true,
      "severity_hint": "MEDIUM"
     },
     {
@@ -3303,20 +3297,9 @@
    "cert_detectable": false
   },
   "FIO34-C": {
-   "tier": "partial",
-   "tier_runnable": "partial",
-   "checkers": [
-    {
-     "tool": "clang-tidy",
-     "checker": "bugprone-narrowing-conversions",
-     "origins": [
-      "codechecker"
-     ],
-     "specific": false,
-     "available": true,
-     "severity_hint": "MEDIUM"
-    }
-   ],
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
    "cert_detectable": true
   },
   "FIO37-C": {
@@ -3618,7 +3601,8 @@
      "tool": "clang-tidy",
      "checker": "bugprone-narrowing-conversions",
      "origins": [
-      "codechecker"
+      "codechecker",
+      "curated-overlay"
      ],
      "specific": false,
      "available": true,
@@ -3648,20 +3632,9 @@
    "cert_detectable": true
   },
   "FLP36-C": {
-   "tier": "partial",
-   "tier_runnable": "partial",
-   "checkers": [
-    {
-     "tool": "clang-tidy",
-     "checker": "bugprone-narrowing-conversions",
-     "origins": [
-      "codechecker"
-     ],
-     "specific": false,
-     "available": true,
-     "severity_hint": "MEDIUM"
-    }
-   ],
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
    "cert_detectable": true
   },
   "FLP37-C": {
@@ -3835,6 +3808,15 @@
    "tier": "partial",
    "tier_runnable": "partial",
    "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-narrowing-conversions",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
     {
      "tool": "clang-tidy",
      "checker": "bugprone-suspicious-memset-usage",
