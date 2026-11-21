@@ -59,6 +59,7 @@ def comment_body(f: dict, with_example: bool = True) -> str:
 
 
 def _rel(path: str, root: str | None) -> str:
+    root = root or (os.getcwd() if os.path.isabs(path) else None)
     if root:
         try:
             return os.path.relpath(path, root)
