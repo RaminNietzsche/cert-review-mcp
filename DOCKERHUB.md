@@ -12,7 +12,7 @@ Source, documentation and changelog: [github.com/RaminNietzsche/cert-review-mcp]
 - the `cert-review` CLI
 - clang 19, clang-tidy 19 and cppcheck
 
-Platforms: `linux/amd64`, `linux/arm64`. Tags: `latest` and one per release, such as `1.1.0`.
+Platforms: `linux/amd64`, `linux/arm64`. Tags: `latest` and one per release, such as `1.1.1`.
 
 ## Tools
 

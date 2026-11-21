@@ -39,6 +39,12 @@ jobs:
       - name: "Smoke test (amd64): the server must answer tools/list"
         run: |
           docker buildx build -f Dockerfile.mcp --platform linux/amd64 --load -t cert-review-mcp:test .
+          docker run --rm --entrypoint /opt/venv/bin/python cert-review-mcp:test -c "
+          import cert_review
+          from cert_review import diffutil
+          assert cert_review.__version__ == '${{ steps.v.outputs.version }}', cert_review.__version__
+          assert hasattr(diffutil, 'prepare_diff_workspace')
+          "
           out=$( (printf '%s\n' \
             '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"ci","version":"0"}}}' \
             '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
@@ -62,6 +68,8 @@ jobs:
           file: Dockerfile.mcp
           platforms: linux/amd64,linux/arm64
           push: true
+          provenance: false
+          sbom: false
           tags: |
             ${{ env.IMAGE }}:${{ steps.v.outputs.version }}
             ${{ env.IMAGE }}:latest
