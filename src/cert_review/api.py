@@ -44,6 +44,7 @@ def explain_rule(rule_id: str, profile: str = "default") -> dict:
         "automated_detection": r["automated_detection"],
         "related_guidelines": r["related_guidelines"],
         "coverage": {"tier": e["tier"], "tier_runnable": e["tier_runnable"],
+                     "tier_extended": e.get("tier_extended", e["tier_runnable"]),
                      "checkers": [{k: c[k] for k in ("tool", "checker", "specific", "available")}
                                   for c in e["checkers"]]},
         "profile": {"name": prof.name, "override": prof.override(r["id"]),
@@ -68,7 +69,7 @@ def check_file(path: str | list[str], profile: str = "default", lang: str | None
                max_rules_per_location: int = 2) -> dict:
     paths = [path] if isinstance(path, str) else list(path)
     res = engine.check(_collect(paths), profile, lang, compdb, root,
-                       tuple(tools) if tools else engine.DEFAULT_TOOLS,
+                       tuple(tools) if tools else None,
                        None, jobs, max_rules_per_location, min_confidence, include_suppressed)
     d = res.to_dict(include_suppressed)
     d["summary"] = summarize(res.findings)
@@ -95,7 +96,7 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
     prof = P.load(profile)
     files = engine.select_files(list(abs_changed), prof, None, root_p)
     res = engine.check(files, prof, None, compdb, root,
-                       tuple(tools) if tools else engine.DEFAULT_TOOLS,
+                       tuple(tools) if tools else None,
                        abs_changed, jobs, max_rules_per_location, min_confidence, include_suppressed)
     d = res.to_dict(include_suppressed)
     d["summary"] = summarize(res.findings)
@@ -149,6 +150,7 @@ def rule_coverage(lang: str | None = None, kind: str | None = None, include_ids:
     if not include_ids:
         c.pop("rules_all_mappings")
         c.pop("rules_runnable")
+        c.pop("rules_extended")
     c["definitions"] = CM.info()["tier_definitions"]
     c["sources"] = CM.info()["sources"]
     return c

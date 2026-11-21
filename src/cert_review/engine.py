@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from . import analyzers_extra as EX
 from . import checkers_map as CM
 from . import findings as F
 from . import profiles as P
@@ -15,6 +16,24 @@ from . import toolrun as T
 INLINE_IGNORE = re.compile(r"cert-review:\s*ignore\s+([A-Z]{3}\d{2}-(?:C|CPP)(?:\s*,\s*[A-Z]{3}\d{2}-(?:C|CPP))*)",
                            re.I)
 DEFAULT_TOOLS = ("clang-tidy", "clangsa", "cppcheck")
+ALL_TOOLS = DEFAULT_TOOLS + EX.OPTIONAL_TOOLS
+# Optional analyzers that run automatically when installed. CodeQL is opt-in
+# because building a database takes tens of seconds even for one file.
+AUTO_OPTIONAL = ("semgrep", "infer")
+
+
+def resolve_tools(tools) -> tuple[tuple[str, ...], bool]:
+    """-> (tools to run, explicit). None, empty or ["auto"] means the core tools
+    plus the optional analyzers in AUTO_OPTIONAL that are on PATH."""
+    req = [t for t in (tools or []) if t]
+    if not req or req == ["auto"]:
+        return DEFAULT_TOOLS + tuple(t for t in AUTO_OPTIONAL if EX.available(t)), False
+    unknown = [t for t in req if t not in ALL_TOOLS and t != "auto"]
+    if unknown:
+        raise ValueError(f"unknown analyzer(s): {', '.join(unknown)}; choose from {', '.join(ALL_TOOLS)}")
+    out = list(DEFAULT_TOOLS + tuple(t for t in AUTO_OPTIONAL if EX.available(t))) if "auto" in req else []
+    out += [t for t in req if t != "auto" and t not in out]
+    return tuple(out), True
 
 
 @dataclass
@@ -30,11 +49,17 @@ class Result:
         d = {"profile": self.profile, "files": self.files,
              "findings": [f.to_dict() for f in self.findings],
              "tools": [{**vars(t), "status": t.status} for t in self.tools], "notes": self.notes,
-             "warnings": T.parse_warnings(self.tools),
+             "warnings": T.parse_warnings(self.tools) + missing_warnings(self.tools),
              "suppressed_count": len(self.suppressed)}
         if include_suppressed:
             d["suppressed"] = [f.to_dict() for f in self.suppressed]
         return d
+
+
+def missing_warnings(tools) -> list[str]:
+    """A warning for each requested optional analyzer that could not run."""
+    return [f"{t.tool}: requested but not run: {'; '.join(t.notes) or 'not installed'}"
+            for t in tools if t.tool in EX.OPTIONAL_TOOLS and not t.available]
 
 
 class _Source:
@@ -70,7 +95,9 @@ def _rules_for(tool: str, checker: str, lang: str) -> list[tuple[str, bool, floa
     out = []
     n = max(1, len(sel))
     for e in sel:
-        if e["specific"]:
+        if e.get("confidence") is not None:     # per-checker value, e.g. bundled Semgrep rules
+            conf = e["confidence"] if n == 1 else max(0.3, e["confidence"] - 0.06 * (n - 1))
+        elif e["specific"]:
             conf = 0.9
         else:
             conf = 0.65 if n == 1 else max(0.3, 0.65 - 0.06 * (n - 1))
@@ -166,11 +193,12 @@ def select_files(paths: list[str], profile: P.Profile, lang: str | None = None,
 
 def check(paths: list[str], profile: P.Profile | str = "default", lang: str | None = None,
           compdb: str | Path | None = None, root: str | Path | None = None,
-          tools: tuple[str, ...] = DEFAULT_TOOLS, changed_lines: dict[str, set[int]] | None = None,
+          tools: tuple[str, ...] | None = DEFAULT_TOOLS, changed_lines: dict[str, set[int]] | None = None,
           jobs: int = 4, max_rules_per_location: int = 2, min_confidence: float = 0.0,
           include_suppressed: bool = True) -> Result:
     prof = P.load(profile) if isinstance(profile, str) else profile
     rootp = Path(root).resolve() if root else None
+    tools, _explicit = resolve_tools(tools)
     files = select_files(paths, prof, lang, rootp)
     # Headers are analysed through the sources that include them; analysing a
     # bare header works for clang-tidy, so keep them when passed explicitly.
@@ -192,6 +220,22 @@ def check(paths: list[str], profile: P.Profile | str = "default", lang: str | No
         r, st = T.run_cppcheck(files, prof, rootp, jobs=jobs)
         raw += r
         res.tools.append(st)
+    if "semgrep" in tools:
+        r, st = EX.run_semgrep(files, prof, rootp, jobs=jobs)
+        raw += r
+        res.tools.append(st)
+    if "infer" in tools:
+        r, st = EX.run_infer(files, prof, cdb, rootp, jobs=jobs)
+        raw += r
+        res.tools.append(st)
+    if "codeql" in tools:
+        r, st = EX.run_codeql(files, prof, cdb, rootp, jobs=jobs)
+        raw += r
+        res.tools.append(st)
+    if not _explicit:
+        absent = [t for t in EX.OPTIONAL_TOOLS if t not in tools and not EX.available(t)]
+        if absent:
+            res.notes.append("optional analyzers not installed: " + ", ".join(absent))
     # restrict to the files requested (clang-tidy may report headers)
     raw = [x for x in raw if not prof.excluded_path(relpath(x.file, rootp))]
     kept, dropped = normalize(raw, prof, root=rootp)

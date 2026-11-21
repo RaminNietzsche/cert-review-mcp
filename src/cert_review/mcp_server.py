@@ -30,8 +30,8 @@ WEBSITE = "https://github.com/RaminNietzsche/cert-review-mcp"
 
 INSTRUCTIONS = """\
 SEI CERT C/C++ secure-coding review for local source trees. Every tool only reads local
-files and bundled data and runs local analyzers (clang-tidy, clang, cppcheck); nothing is
-written, uploaded or posted.
+files and bundled data and runs local analyzers (clang-tidy, clang, cppcheck, and Semgrep,
+Infer or CodeQL when installed); nothing is written to the project, uploaded or posted.
 Rule lookup: list_rules (structured filters), search_rules (keywords), get_rule (one rule's
 full text), get_rule_coverage (what checkers can detect).
 Review flow:
@@ -53,13 +53,19 @@ RuleId = Annotated[str, Field(
     description="SEI CERT rule ID: three-letter category, two digits, then -C or -CPP; "
                 "case-insensitive.",
     pattern=r"^[A-Za-z]{3}\d{2}-(?:[Cc]|[Cc][Pp][Pp])$", examples=["EXP34-C", "MEM50-CPP"])]
-Tool = Literal["clang-tidy", "clangsa", "cppcheck"]
-ALL_TOOLS: list[str] = ["clang-tidy", "clangsa", "cppcheck"]
-Tools = Annotated[list[Tool], Field(
-    description="Analyzers to run. clang-tidy = clang-tidy cert-*/bugprone checks plus Clang "
-                "Static Analyzer checks; clangsa = standalone `clang --analyze` (adds alpha "
-                "checkers); cppcheck = cppcheck. Missing binaries are skipped and reported.",
-    min_length=1, json_schema_extra={"uniqueItems": True})]
+Tool = Literal["clang-tidy", "clangsa", "cppcheck", "semgrep", "infer", "codeql"]
+ALL_TOOLS: list[str] = ["clang-tidy", "clangsa", "cppcheck", "semgrep", "infer", "codeql"]
+Tools = Annotated[list[Tool] | None, Field(
+    description="Analyzers to run; omit for the default set: clang-tidy, clangsa and cppcheck "
+                "plus semgrep and infer when installed. clang-tidy = cert-*/bugprone checks plus "
+                "Clang Static Analyzer checks; clangsa = standalone `clang --analyze` (adds alpha "
+                "checkers); cppcheck = cppcheck; semgrep = the bundled CERT pattern rules; infer "
+                "= Infer (null, leak, use-after-free, overflow, race); codeql = the CodeQL CERT "
+                "query packs, opt-in because each run builds a database (tens of seconds or "
+                "more). A requested analyzer that is not installed is skipped and listed in "
+                "`warnings`.",
+    min_length=1, json_schema_extra={"uniqueItems": True},
+    examples=[["clang-tidy", "cppcheck", "semgrep"], ["codeql"]])]
 MinConfidence = Annotated[float, Field(
     ge=0.0, le=1.0,
     description="Drop findings below this confidence. Rule-specific checkers score 0.9, "
@@ -115,7 +121,7 @@ class RuleRecord(_Out):
     text: str = Field(description="Rule text as markdown; examples included unless include_examples=false. "
                                   "Copy `quote` values for validate_findings from here.")
     examples: list[dict[str, Any]] = Field(description="Noncompliant/compliant example pairs; [] when include_examples=false.")
-    coverage: dict[str, Any] = Field(description="tier, tier_runnable and checkers[] {tool, checker, specific, available}.")
+    coverage: dict[str, Any] = Field(description="tier, tier_runnable, tier_extended and checkers[] {tool, checker, specific, available}.")
     profile: dict[str, Any] = Field(description="name, override (severity/priority/note), disabled reason or null, idioms[].")
 
 
@@ -170,7 +176,8 @@ class Validation(_Out):
 class Coverage(_Out):
     total: int = Field(description="Rules counted after the lang/kind filters.")
     all_mappings: dict[str, int] = Field(description="Counts per tier using every upstream checker mapping.")
-    runnable_toolchain: dict[str, int] = Field(description="Counts per tier using only checkers available in the pinned toolchain.")
+    runnable_toolchain: dict[str, int] = Field(description="Counts per tier using only the reference toolchain shipped in the Docker image: clang-tidy, Clang Static Analyzer, cppcheck and the bundled Semgrep rules.")
+    extended_toolchain: dict[str, int] = Field(description="Counts per tier when the optional Infer and CodeQL (CERT query packs) analyzers are installed as well.")
     toolchain: dict[str, str] = Field(description="Pinned analyzer versions the tiers were computed for.")
     definitions: dict[str, str] = Field(description="Meaning of deterministic, partial and llm-only.")
     sources: dict[str, Any] = Field(description="Upstream mapping sources and commits.")
@@ -332,8 +339,9 @@ def build_server() -> Any:
         description=(
             "Count SEI CERT rules per detection tier: deterministic (a rule-specific checker "
             "exists), partial (only general checkers map) and llm-only (no checker; manual review "
-            "needed), both for all upstream checker mappings and for the pinned reference "
-            "toolchain (clang-tidy and Clang Static Analyzer 19.1.7, cppcheck 2.17.1). Use to "
+            "needed), for all checker mappings, for the reference toolchain (clang-tidy and Clang "
+            "Static Analyzer 19.1.7, cppcheck 2.17.1, Semgrep with the bundled rules) and for the "
+            "extended toolchain (plus Infer and the CodeQL CERT packs). Use to "
             "judge how much of a review static analysis can carry. Computed from bundled data; it "
             "does not probe the analyzers installed here (check_files reports those in tools[]). "
             "For one rule use get_rule; to list a tier's rules with titles use list_rules with "
@@ -342,7 +350,7 @@ def build_server() -> Any:
     def get_rule_coverage(
         lang: Annotated[LANGS, Field(description="Count only SEI CERT C (c) or C++ (cpp) rules.")] = "any",
         kind: Annotated[Literal["any", "rule", "recommendation"], Field(description="Count only rules or only recommendations.")] = "any",
-        include_ids: Annotated[bool, Field(description="Add rules_all_mappings and rules_runnable: rule ID lists per tier (~10 KB).")] = False,
+        include_ids: Annotated[bool, Field(description="Add rules_all_mappings, rules_runnable and rules_extended: rule ID lists per tier (~15 KB).")] = False,
     ) -> Coverage:
         return api.rule_coverage(_opt(lang), _opt(kind), include_ids)
 
@@ -352,7 +360,8 @@ def build_server() -> Any:
         annotations=ToolAnnotations(title="Check C/C++ files for SEI CERT violations", **RO),
         structured_output=True,
         description=(
-            "Run clang-tidy, the Clang Static Analyzer and cppcheck on a C/C++ file or a "
+            "Run clang-tidy, the Clang Static Analyzer and cppcheck (plus Semgrep and Infer when "
+            "installed, CodeQL on request; see `tools`) on a C/C++ file or a "
             "directory (recursive) and return every finding mapped to SEI CERT rule IDs. Use for "
             "whole-file or whole-tree audits; for a change set use check_diff, which keeps only "
             "changed lines. Runs the analyzers as local subprocesses (4 in parallel, 300 s "
@@ -368,11 +377,11 @@ def build_server() -> Any:
         compdb: Compdb = None,
         root: Annotated[str | None, Field(description="Absolute project root: adds root/src, root/include and similar as include paths, enables compdb auto-detection, and is the base for the profile's path globs.")] = None,
         lang: Annotated[LANGS, Field(description="Analyse only .c files (c) or only C++ files (cpp).")] = "any",
-        tools: Tools = ALL_TOOLS,
+        tools: Tools = None,
         min_confidence: MinConfidence = 0.0,
         include_suppressed: IncludeSuppressed = False,
     ) -> CheckResult:
-        return api.check_file(_exists(path), profile, _opt(lang), compdb, root, list(tools),
+        return api.check_file(_exists(path), profile, _opt(lang), compdb, root, list(tools) if tools else None,
                               min_confidence, include_suppressed)
 
     @mcp.tool(
@@ -397,14 +406,14 @@ def build_server() -> Any:
         diff_text: Annotated[str | None, Field(description="Unified diff text (git diff format, a/ b/ prefixes allowed). Overrides base and head.")] = None,
         profile: Profile = "default",
         compdb: Compdb = None,
-        tools: Tools = ALL_TOOLS,
+        tools: Tools = None,
         min_confidence: MinConfidence = 0.0,
         include_suppressed: IncludeSuppressed = False,
     ) -> DiffCheckResult:
         if not (diff_text or base):
             raise ToolError("provide base (git ref) or diff_text")
         return api.check_diff(_repo_for_diff(repo, diff_text), base, head, diff_text, profile, compdb,
-                              list(tools), min_confidence, include_suppressed)
+                              list(tools) if tools else None, min_confidence, include_suppressed)
 
     # ------------------------------------------------------------ manual review layer
     @mcp.tool(

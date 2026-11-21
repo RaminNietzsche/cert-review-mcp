@@ -27,7 +27,7 @@ inputs:
     description: Path to compile_commands.json or its directory. Strongly recommended; without it many files do not parse.
     required: false
   tools:
-    description: 'Comma separated: clang-tidy, clangsa, cppcheck.'
+    description: 'Comma separated: clang-tidy, clangsa, cppcheck, semgrep (bundled CERT rules; in the action image), infer, codeql (not in the action image), or auto (core tools plus semgrep and infer when installed).'
     default: clang-tidy,cppcheck
   min-confidence:
     description: Hide findings below this confidence (0..1).

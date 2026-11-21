@@ -14,8 +14,10 @@ It does three things:
    automated-detection tables. It is built reproducibly from a pinned upstream commit and
    checked against the standards' own index pages.
 2. **Runs real analyzers and maps them to rule IDs.** clang-tidy (`cert-*` and mapped checks),
-   the Clang Static Analyzer and cppcheck, normalised to one finding schema, de-duplicated,
-   filtered by a profile, and optionally limited to changed lines.
+   the Clang Static Analyzer, cppcheck and 40 bundled Semgrep rules for INT, EXP, MEM, CON and
+   other CERT rules; optionally Infer and the CodeQL CERT query packs
+   ([docs/analyzers.md](docs/analyzers.md)). Findings are normalised to one schema,
+   de-duplicated, filtered by a profile, and optionally limited to changed lines.
 3. **Prepares the rest for a manual review layer without letting it make things up.** For rules
    no checker covers, `build_review_packet` selects code hunks and the few rule texts worth reading;
    `validate_findings` rejects any finding that does not cite an existing rule ID and quote
@@ -35,15 +37,21 @@ The diagram source is in [docs/architecture.md](docs/architecture.md).
 
 ## Coverage
 
-Each rule is `deterministic` (a rule-specific checker exists, i.e. a clang-tidy `cert-*`
-check), `partial` (only general checkers are mapped) or `llm-only` (no checker). "Runnable"
-counts only checkers present in the supported toolchain (clang-tidy/clang 19.1.7, cppcheck 2.17.1).
+Each rule is `deterministic` (a rule-specific checker exists: a clang-tidy `cert-*` check or a
+CodeQL CERT query), `partial` (only general checkers or the bundled Semgrep pattern rules map)
+or `llm-only` (no checker). The *reference toolchain* is what the Docker images run:
+clang-tidy/clang 19.1.7, cppcheck 2.17.1 and Semgrep 1.186.0 with the bundled rules. The
+*extended toolchain* adds Infer 1.3.0 and CodeQL 2.27 with the CERT packs 2.63.0, which are
+optional and not in the images.
 
-| Set | Total | Deterministic | Partial | LLM-only | Runnable: det / partial / llm-only |
-|---|---|---|---|---|---|
-| C rules | 122 | 18 | 53 | 51 | 16 / 34 / 72 |
-| C recommendations | 183 | 4 | 3 | 176 | 4 / 2 / 177 |
-| C++ rules | 83 | 18 | 37 | 28 | 18 / 29 / 36 |
+| Set | Total | All mappings: det / partial / llm-only | Reference toolchain | Extended toolchain |
+|---|---|---|---|---|
+| C rules | 122 | 100 / 12 / 10 | 16 / 51 / 55 | 100 / 8 / 14 |
+| C recommendations | 183 | 4 / 4 / 175 | 4 / 2 / 177 | 4 / 3 / 176 |
+| C++ rules | 83 | 82 / 0 / 1 | 18 / 31 / 34 | 82 / 0 / 1 |
+
+Before the Semgrep rules, the reference toolchain covered C rules 16 / 34 / 72 and C++ rules
+18 / 29 / 36. A mapped checker is not a detection guarantee; the measured numbers follow.
 
 Measured precision and recall on the CERT examples: [docs/accuracy.md](docs/accuracy.md).
 Rule counts versus the official index pages: [docs/rule-counts.md](docs/rule-counts.md).
@@ -56,7 +64,8 @@ git clone <this repository> cert-review-mcp && cd cert-review-mcp
 python3 -m venv .venv && . .venv/bin/activate
 pip install -e '.[dev]'
 sudo apt-get install clang clang-tidy cppcheck       # static layer (optional but recommended)
-pytest                                              # 105 tests
+pip install semgrep==1.186.0                        # optional: the bundled CERT pattern rules
+pytest                                              # 129 tests
 ```
 
 The package reads `data/` and `profiles/` from the checkout (set `CERT_REVIEW_HOME` to point

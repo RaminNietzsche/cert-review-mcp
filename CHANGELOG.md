@@ -1,5 +1,34 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Optional analyzers, normalised into the same finding schema and checker map:
+  - **Semgrep** with 40 CERT rules shipped in `data/semgrep/` for INT30/33/34/36-C,
+    EXP34/44/45/46-C, EXP52-CPP, MEM30/34/35-C, MEM50/51-CPP, CON31/34/36/39/40/41-C,
+    CON50/54-CPP, POS34/48/50/53-C, ENV30-C, FIO30/34/37-C and STR30-C. Included in both
+    Docker images (amd64 and arm64).
+  - **Infer** (Pulse, InferBO, liveness, RacerD, starvation, SIOF); 28 issue types mapped in
+    `data/checker_overlay.yaml`. Not in the images (about 1.2 GB, no Linux arm64 release).
+  - **CodeQL** with the `codeql/cert-c-coding-standards` and `codeql/cert-cpp-coding-standards`
+    packs (232 queries mapped). Opt-in; not in the images and not run in CI.
+- `tools` (CLI `--tools`, MCP `tools`, Action `tools`) accepts `semgrep`, `infer`, `codeql` and
+  `auto`. The default is now `auto`: the core tools plus Semgrep and Infer when they are on
+  `PATH`. A requested analyzer that is not installed adds a `warnings` entry.
+- `tier_extended` per rule and `extended_toolchain` in `get_rule_coverage`: coverage with Infer
+  and CodeQL installed. `tier_runnable` now counts the reference toolchain of the images,
+  which includes Semgrep.
+- `docs/analyzers.md`: install notes, tiers, what each analyzer covers, a Ceph sanity check of
+  the Semgrep rules.
+- `tools/eval_accuracy.py` measures each toolset (baseline, + Semgrep, + Infer, + CodeQL) and
+  reports corpus-wide recall; CodeQL is evaluated with one database per example.
+
+### Changed
+
+- Docker images grow by about 330 MB (MCP image 787 MB to 1.12 GB, Action image 957 MB to
+  1.29 GB, uncompressed, amd64) for Semgrep.
+
 ## 1.1.2 (2026-11-21)
 
 ### Added

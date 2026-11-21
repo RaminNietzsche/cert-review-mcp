@@ -43,8 +43,9 @@ def test_explain_and_list_in_process():
         return a, b, c
     a, b, c = asyncio.run(go())
     assert a["risk"]["priority"] == "P18" and a["coverage"]["checkers"]
-    assert b["count"] == 18 and all(r["lang"] == "cpp" for r in b["rules"])
-    assert c["total"] == 83
+    want = c["all_mappings"]["deterministic"]   # the filter matches either tier
+    assert b["count"] == want and all(r["lang"] == "cpp" for r in b["rules"])
+    assert c["total"] == 83 and c["runnable_toolchain"]["deterministic"] == 18
 
 
 def test_annotations_and_titles():

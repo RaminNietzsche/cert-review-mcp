@@ -1,7 +1,7 @@
 # cert-review-mcp
 
 An MCP server that reviews C and C++ code against the SEI CERT C and C++ coding standards.
-It runs clang-tidy and cppcheck, maps their findings to CERT rules, and gives MCP clients
+It runs clang-tidy, cppcheck and Semgrep (bundled CERT rules), maps their findings to CERT rules, and gives MCP clients
 tools to look up rules, check files or a diff, and build a review packet.
 
 Source, documentation and changelog: [github.com/RaminNietzsche/cert-review-mcp](https://github.com/RaminNietzsche/cert-review-mcp)
@@ -10,7 +10,7 @@ Source, documentation and changelog: [github.com/RaminNietzsche/cert-review-mcp]
 
 - `cert-review-mcp`, the MCP server over stdio (the entrypoint)
 - the `cert-review` CLI
-- clang 19, clang-tidy 19 and cppcheck
+- clang 19, clang-tidy 19, cppcheck and Semgrep 1.186.0
 
 Platforms: `linux/amd64`, `linux/arm64`. Tags: `latest` and one per release, such as `1.1.1`.
 
