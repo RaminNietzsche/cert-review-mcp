@@ -1,0 +1,3778 @@
+{
+ "corpus_files": 1548,
+ "seconds": 169.4,
+ "tools": [
+  {
+   "tool": "clang-tidy",
+   "available": true,
+   "version": "19.1.7",
+   "files": 1548,
+   "raw_findings": 789,
+   "parse_errors": 1567,
+   "notes": []
+  },
+  {
+   "tool": "clangsa",
+   "available": true,
+   "version": "19.1.7",
+   "files": 1548,
+   "raw_findings": 432,
+   "parse_errors": 0,
+   "notes": []
+  },
+  {
+   "tool": "cppcheck",
+   "available": true,
+   "version": "2.17.1",
+   "files": 1548,
+   "raw_findings": 82,
+   "parse_errors": 0,
+   "notes": []
+  }
+ ],
+ "summary": {
+  "all_scored": {
+   "rules": 106,
+   "tp": 111,
+   "fn": 148,
+   "fp": 7,
+   "tn": 312,
+   "precision": 0.940677966101695,
+   "recall": 0.42857142857142855
+  },
+  "deterministic": {
+   "rules": 37,
+   "tp": 37,
+   "fn": 24,
+   "fp": 0,
+   "tn": 73,
+   "precision": 1.0,
+   "recall": 0.6065573770491803
+  },
+  "partial": {
+   "rules": 69,
+   "tp": 74,
+   "fn": 124,
+   "fp": 7,
+   "tn": 239,
+   "precision": 0.9135802469135802,
+   "recall": 0.37373737373737376
+  },
+  "llm-only(not scored)": {
+   "rules": 265
+  }
+ },
+ "rules": [
+  {
+   "rule": "API00-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "API01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "API02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "API03-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "API04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "API05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "API07-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "API09-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "API10-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ARR01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ARR02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ARR30-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 0,
+   "fp": 0,
+   "tn": 7,
+   "precision": null,
+   "recall": null
+  },
+  {
+   "rule": "ARR32-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ARR36-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ARR37-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ARR38-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 6,
+   "fp": 0,
+   "tn": 7,
+   "precision": 1.0,
+   "recall": 0.14285714285714285
+  },
+  {
+   "rule": "ARR39-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON07-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON08-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON09-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON30-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON31-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON32-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON33-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "CON34-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 4,
+   "fp": 0,
+   "tn": 5,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON35-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON36-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "CON37-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON38-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON39-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON40-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON41-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON43-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON50-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON51-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 0,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": null
+  },
+  {
+   "rule": "CON52-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON53-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON54-CPP",
+   "tier": "deterministic",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON55-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CON56-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CTR50-CPP",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 5,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CTR51-CPP",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CTR52-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 5,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CTR53-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CTR54-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 4,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CTR55-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CTR56-CPP",
+   "tier": "deterministic",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CTR57-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "CTR58-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL00-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL03-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 2,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "DCL04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 4,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL06-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL07-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 4,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL08-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL09-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL10-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL11-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL12-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL13-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL15-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL16-C",
+   "tier": "deterministic",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL17-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL18-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL19-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL20-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL21-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL22-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL23-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL30-C",
+   "tier": "partial",
+   "tp": 3,
+   "fn": 0,
+   "fp": 0,
+   "tn": 4,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "DCL31-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL36-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL37-C",
+   "tier": "deterministic",
+   "tp": 2,
+   "fn": 3,
+   "fp": 0,
+   "tn": 5,
+   "precision": 1.0,
+   "recall": 0.4
+  },
+  {
+   "rule": "DCL38-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL39-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 5,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL40-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 5,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL41-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "DCL42-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL50-CPP",
+   "tier": "deterministic",
+   "tp": 0,
+   "fn": 0,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": null
+  },
+  {
+   "rule": "DCL51-CPP",
+   "tier": "deterministic",
+   "tp": 2,
+   "fn": 2,
+   "fp": 0,
+   "tn": 4,
+   "precision": 1.0,
+   "recall": 0.5
+  },
+  {
+   "rule": "DCL52-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL53-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL54-CPP",
+   "tier": "deterministic",
+   "tp": 2,
+   "fn": 0,
+   "fp": 0,
+   "tn": 2,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "DCL55-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL56-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL57-CPP",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 5,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL58-CPP",
+   "tier": "deterministic",
+   "tp": 2,
+   "fn": 0,
+   "fp": 0,
+   "tn": 3,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "DCL59-CPP",
+   "tier": "deterministic",
+   "tp": 0,
+   "fn": 4,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "DCL60-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 5,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ENV01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ENV02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ENV03-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ENV30-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ENV31-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ENV32-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ENV33-C",
+   "tier": "deterministic",
+   "tp": 2,
+   "fn": 0,
+   "fp": 0,
+   "tn": 4,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "ENV34-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR06-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR07-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR30-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 2,
+   "fp": 0,
+   "tn": 4,
+   "precision": 1.0,
+   "recall": 0.3333333333333333
+  },
+  {
+   "rule": "ERR32-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR33-C",
+   "tier": "partial",
+   "tp": 4,
+   "fn": 1,
+   "fp": 0,
+   "tn": 6,
+   "precision": 1.0,
+   "recall": 0.8
+  },
+  {
+   "rule": "ERR34-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "ERR50-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": null
+  },
+  {
+   "rule": "ERR51-CPP",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR52-CPP",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "ERR53-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR54-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR55-CPP",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR56-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR57-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR58-CPP",
+   "tier": "deterministic",
+   "tp": 3,
+   "fn": 0,
+   "fp": 0,
+   "tn": 4,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "ERR59-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR60-CPP",
+   "tier": "deterministic",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "ERR61-CPP",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "ERR62-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP00-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP03-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP07-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP08-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP09-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP10-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP11-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP12-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP13-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP14-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP15-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP16-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP19-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 5,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP20-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 5,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP30-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 2,
+   "fp": 0,
+   "tn": 5,
+   "precision": 1.0,
+   "recall": 0.3333333333333333
+  },
+  {
+   "rule": "EXP32-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP33-C",
+   "tier": "partial",
+   "tp": 3,
+   "fn": 3,
+   "fp": 0,
+   "tn": 6,
+   "precision": 1.0,
+   "recall": 0.5
+  },
+  {
+   "rule": "EXP34-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 2,
+   "fp": 1,
+   "tn": 2,
+   "precision": 0.5,
+   "recall": 0.3333333333333333
+  },
+  {
+   "rule": "EXP35-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP36-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP37-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 4,
+   "fp": 0,
+   "tn": 5,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP39-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 3,
+   "fp": 0,
+   "tn": 4,
+   "precision": 1.0,
+   "recall": 0.25
+  },
+  {
+   "rule": "EXP40-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP42-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "EXP43-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 6,
+   "fp": 0,
+   "tn": 6,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP44-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 4,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP45-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 7,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP46-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP47-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP50-CPP",
+   "tier": "partial",
+   "tp": 2,
+   "fn": 2,
+   "fp": 0,
+   "tn": 6,
+   "precision": 1.0,
+   "recall": 0.5
+  },
+  {
+   "rule": "EXP51-CPP",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "EXP52-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP53-CPP",
+   "tier": "partial",
+   "tp": 2,
+   "fn": 2,
+   "fp": 0,
+   "tn": 4,
+   "precision": 1.0,
+   "recall": 0.5
+  },
+  {
+   "rule": "EXP54-CPP",
+   "tier": "partial",
+   "tp": 3,
+   "fn": 4,
+   "fp": 0,
+   "tn": 8,
+   "precision": 1.0,
+   "recall": 0.42857142857142855
+  },
+  {
+   "rule": "EXP55-CPP",
+   "tier": "partial",
+   "tp": 3,
+   "fn": 0,
+   "fp": 0,
+   "tn": 2,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "EXP56-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP57-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP58-CPP",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": 1.0,
+   "recall": 0.5
+  },
+  {
+   "rule": "EXP59-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP60-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "EXP61-CPP",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 2,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "EXP62-CPP",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": 1.0,
+   "recall": 0.5
+  },
+  {
+   "rule": "EXP63-CPP",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": 1.0,
+   "recall": 0.5
+  },
+  {
+   "rule": "FIO01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO03-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO06-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO08-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO09-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO10-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 7,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO13-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO15-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO17-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO18-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO19-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO20-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO21-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 5,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO22-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO23-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO24-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO30-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO32-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO34-C",
+   "tier": "partial",
+   "tp": 2,
+   "fn": 1,
+   "fp": 1,
+   "tn": 2,
+   "precision": 0.6666666666666666,
+   "recall": 0.6666666666666666
+  },
+  {
+   "rule": "FIO37-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO38-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "FIO39-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO40-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO41-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO42-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 3,
+   "fp": 0,
+   "tn": 4,
+   "precision": 1.0,
+   "recall": 0.25
+  },
+  {
+   "rule": "FIO44-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO45-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO46-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO47-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO50-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FIO51-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FLP02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FLP03-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FLP04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FLP05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FLP06-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FLP07-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FLP30-C",
+   "tier": "deterministic",
+   "tp": 2,
+   "fn": 0,
+   "fp": 0,
+   "tn": 2,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "FLP32-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 4,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "FLP34-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 1,
+   "fp": 1,
+   "tn": 1,
+   "precision": 0.5,
+   "recall": 0.5
+  },
+  {
+   "rule": "FLP36-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 0,
+   "fp": 1,
+   "tn": 0,
+   "precision": 0.5,
+   "recall": 1.0
+  },
+  {
+   "rule": "FLP37-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "FLP38-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT00-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT07-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT08-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT09-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 3,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "INT10-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT12-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT13-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT14-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT15-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT16-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT17-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT18-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT30-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 8,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT31-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 5,
+   "fp": 0,
+   "tn": 6,
+   "precision": 1.0,
+   "recall": 0.16666666666666666
+  },
+  {
+   "rule": "INT32-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 7,
+   "fp": 0,
+   "tn": 11,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT33-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT34-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT35-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 5,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT36-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "INT50-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM00-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 7,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM03-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM06-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM07-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM10-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM11-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 0,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM12-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM30-C",
+   "tier": "partial",
+   "tp": 3,
+   "fn": 1,
+   "fp": 1,
+   "tn": 3,
+   "precision": 0.75,
+   "recall": 0.75
+  },
+  {
+   "rule": "MEM31-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "MEM33-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM34-C",
+   "tier": "partial",
+   "tp": 2,
+   "fn": 0,
+   "fp": 1,
+   "tn": 1,
+   "precision": 0.6666666666666666,
+   "recall": 1.0
+  },
+  {
+   "rule": "MEM35-C",
+   "tier": "partial",
+   "tp": 2,
+   "fn": 0,
+   "fp": 0,
+   "tn": 3,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "MEM36-C",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 2,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "MEM50-CPP",
+   "tier": "partial",
+   "tp": 4,
+   "fn": 0,
+   "fp": 0,
+   "tn": 7,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "MEM51-CPP",
+   "tier": "partial",
+   "tp": 8,
+   "fn": 0,
+   "fp": 0,
+   "tn": 8,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "MEM52-CPP",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 1,
+   "fp": 0,
+   "tn": 5,
+   "precision": 1.0,
+   "recall": 0.5
+  },
+  {
+   "rule": "MEM53-CPP",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM54-CPP",
+   "tier": "partial",
+   "tp": 3,
+   "fn": 0,
+   "fp": 0,
+   "tn": 3,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "MEM55-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MEM56-CPP",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": 1.0,
+   "recall": 0.3333333333333333
+  },
+  {
+   "rule": "MEM57-CPP",
+   "tier": "deterministic",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC00-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC06-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 4,
+   "fp": 0,
+   "tn": 5,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC07-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC09-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC11-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC12-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 7,
+   "fp": 0,
+   "tn": 10,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC13-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC14-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC15-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC17-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC19-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC20-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC21-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC22-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC24-C",
+   "tier": "deterministic",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC30-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 2,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "MSC32-C",
+   "tier": "deterministic",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC33-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "MSC37-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC38-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC39-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC40-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 4,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC41-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC50-CPP",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "MSC51-CPP",
+   "tier": "deterministic",
+   "tp": 2,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "MSC52-CPP",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": 1.0,
+   "recall": 0.5
+  },
+  {
+   "rule": "MSC53-CPP",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "MSC54-CPP",
+   "tier": "deterministic",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "OOP50-CPP",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "OOP51-CPP",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 1,
+   "fp": 0,
+   "tn": 4,
+   "precision": 1.0,
+   "recall": 0.5
+  },
+  {
+   "rule": "OOP52-CPP",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "OOP53-CPP",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "OOP54-CPP",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 3,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "OOP55-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "OOP56-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "OOP57-CPP",
+   "tier": "deterministic",
+   "tp": 2,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": 1.0,
+   "recall": 0.6666666666666666
+  },
+  {
+   "rule": "OOP58-CPP",
+   "tier": "deterministic",
+   "tp": 0,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": null
+  },
+  {
+   "rule": "POS01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS30-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS34-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS35-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS36-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS37-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS38-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS39-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS44-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "POS47-C",
+   "tier": "deterministic",
+   "tp": 2,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "POS48-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS49-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS50-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS51-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS52-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS53-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "POS54-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE00-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE02-C",
+   "tier": "partial",
+   "tp": 2,
+   "fn": 3,
+   "fp": 0,
+   "tn": 2,
+   "precision": 1.0,
+   "recall": 0.4
+  },
+  {
+   "rule": "PRE04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE06-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": null
+  },
+  {
+   "rule": "PRE07-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE08-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE09-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE10-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 6,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE11-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE12-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE13-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE30-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "PRE31-C",
+   "tier": "partial",
+   "tp": 2,
+   "fn": 1,
+   "fp": 0,
+   "tn": 5,
+   "precision": 1.0,
+   "recall": 0.6666666666666666
+  },
+  {
+   "rule": "PRE32-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "SIG00-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "SIG01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "SIG02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 4,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "SIG30-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 2,
+   "fp": 0,
+   "tn": 3,
+   "precision": 1.0,
+   "recall": 0.3333333333333333
+  },
+  {
+   "rule": "SIG31-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "SIG34-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "SIG35-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR03-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR05-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 2,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR06-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR09-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR10-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR11-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR30-C",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR31-C",
+   "tier": "partial",
+   "tp": 2,
+   "fn": 6,
+   "fp": 1,
+   "tn": 11,
+   "precision": 0.6666666666666666,
+   "recall": 0.25
+  },
+  {
+   "rule": "STR32-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 4,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR34-C",
+   "tier": "deterministic",
+   "tp": 1,
+   "fn": 2,
+   "fp": 0,
+   "tn": 2,
+   "precision": 1.0,
+   "recall": 0.3333333333333333
+  },
+  {
+   "rule": "STR37-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR38-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR50-CPP",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 2,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR51-CPP",
+   "tier": "partial",
+   "tp": 1,
+   "fn": 0,
+   "fp": 0,
+   "tn": 1,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  {
+   "rule": "STR52-CPP",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "STR53-CPP",
+   "tier": "partial",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 0,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "WIN00-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "WIN01-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "WIN02-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 0,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "WIN03-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 3,
+   "fp": 0,
+   "tn": 3,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "WIN04-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  },
+  {
+   "rule": "WIN30-C",
+   "tier": "llm-only",
+   "tp": 0,
+   "fn": 1,
+   "fp": 0,
+   "tn": 1,
+   "precision": null,
+   "recall": 0.0
+  }
+ ],
+ "source_commit": "73ee7a0dbe778512ba57a5f5ee0017af0ea09239"
+}
