@@ -17,9 +17,11 @@ from . import validator as V
 
 def list_rules(lang: str | None = None, category: str | None = None, kind: str | None = None,
                level: str | None = None, detectable: bool | None = None,
-               coverage: str | None = None, limit: int = 500) -> dict:
+               coverage: str | None = None, limit: int = 500, standard: Any = None,
+               classification: str | None = None) -> dict:
     out = []
-    for r in R.list_rules(lang=lang, category=category, kind=kind, level=level, detectable=detectable):
+    for r in R.list_rules(lang=lang, category=category, kind=kind, level=level, detectable=detectable,
+                          standard=standard, classification=classification):
         e = CM.rule_entry(r["id"])
         if coverage and e["tier_runnable"] != coverage and e["tier"] != coverage:
             continue
@@ -30,12 +32,54 @@ def list_rules(lang: str | None = None, category: str | None = None, kind: str |
     return {"count": len(out), "rules": out[:limit], "truncated": len(out) > limit}
 
 
+def _guideline_record(r: dict, prof: P.Profile) -> dict:
+    from . import ruletexts
+    e = CM.rule_entry(r["id"])
+    std = R.standard_of(r)
+    lic = ruletexts.text_for(r["id"])
+    return {
+        "id": r["id"], "title": R.title(r), "lang": r["lang"], "kind": r["kind"],
+        "category": r["category"], "url": R.url(r), "cwe": [], "risk": None,
+        "text": R.rule_text(r), "exceptions": None, "examples": [],
+        "automated_detection": None, "related_guidelines": None,
+        "standard": std, "display_name": R.display_name(r), "local_id": r["local_id"],
+        "classification": r["classification"], "category_name": r.get("category_name"),
+        "summary": r.get("summary"), "decidability": r.get("decidability"),
+        "enforcement": r.get("enforcement"), "target": r.get("target"),
+        "cert": r.get("cert", []),
+        "text_source": "licensed-file" if lic else "summary-only",
+        "quote_required": bool(lic),
+        "coverage": {"tier": e["tier"], "tier_runnable": e["tier_runnable"],
+                     "checkers": [{k: c[k] for k in ("tool", "checker", "specific", "available")}
+                                  | {"source": c.get("source")} for c in e["checkers"]]},
+        "profile": {"name": prof.name, "override": prof.override(r["id"]),
+                    "disabled": prof.disabled(r["id"]), "idioms": []},
+        "source": {**R.guideline_info()["standards"].get(std, {}),
+                   "data_sources": R.guideline_info()["sources"],
+                   "notice": R.guideline_info()["notice"]},
+    }
+
+
+def related_guidelines_for_cert(cert_id: str) -> list[dict]:
+    """MISRA/AUTOSAR guidelines that cite (or are cited by) a SEI CERT rule."""
+    out = []
+    for g in R.guidelines().values():
+        for c in g.get("cert", []):
+            if c["id"] == cert_id:
+                out.append({"id": g["id"], "standard": g["standard"],
+                            "name": R.display_name(g), "relation": c["relation"],
+                            "source": c["source"]})
+    return out
+
+
 def explain_rule(rule_id: str, profile: str = "default") -> dict:
     r = R.get(rule_id)
     if r is None:
-        near = [x["id"] for x in R.search(rule_id, 5)]
+        near = [x["id"] for x in R.search(rule_id, 5, standard="all")]
         return {"error": f"unknown rule {rule_id}", "did_you_mean": near}
     prof = P.load(profile)
+    if not R.is_cert(r):
+        return _guideline_record(r, prof)
     e = CM.rule_entry(r["id"])
     return {
         "id": r["id"], "title": r["title"], "lang": r["lang"], "kind": r["kind"],
@@ -51,6 +95,8 @@ def explain_rule(rule_id: str, profile: str = "default") -> dict:
                     "disabled": prof.disabled(r["id"]),
                     "idioms": [i["id"] for i in prof.raw.get("idioms", []) if r["id"] in i["rules"]]},
         "source": R.source_info(),
+        "standard": R.standard_of(r),
+        "cross_references": related_guidelines_for_cert(r["id"]),
     }
 
 
@@ -69,8 +115,8 @@ def write_baseline(result: dict, path: str, update: bool = False) -> dict:
     return stats
 
 
-def search_rules(query: str, limit: int = 10, lang: str | None = None) -> dict:
-    return {"query": query, "results": R.search(query, limit, lang)}
+def search_rules(query: str, limit: int = 10, lang: str | None = None, standard: Any = None) -> dict:
+    return {"query": query, "results": R.search(query, limit, lang, standard)}
 
 
 def _collect(paths: list[str]) -> list[str]:
@@ -81,11 +127,13 @@ def check_file(path: str | list[str], profile: str = "default", lang: str | None
                compdb: str | None = None, root: str | None = None,
                tools: list[str] | None = None, min_confidence: float = 0.0,
                include_suppressed: bool = False, jobs: int = 4,
-               max_rules_per_location: int = 2, baseline: str | None = None) -> dict:
+               max_rules_per_location: int = 2, standards: Any = None,
+               baseline: str | None = None) -> dict:
     paths = [path] if isinstance(path, str) else list(path)
     res = engine.check(_collect(paths), profile, lang, compdb, root,
                        tuple(tools) if tools else engine.DEFAULT_TOOLS,
-                       None, jobs, max_rules_per_location, min_confidence, include_suppressed)
+                       None, jobs, max_rules_per_location, min_confidence, include_suppressed,
+                       standards)
     d = res.to_dict(include_suppressed)
     if baseline:
         BL.apply(d, baseline, scope="files")
@@ -105,7 +153,8 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
                diff_text: str | None = None, profile: str = "default",
                compdb: str | None = None, tools: list[str] | None = None,
                min_confidence: float = 0.0, include_suppressed: bool = False, jobs: int = 4,
-               max_rules_per_location: int = 2, baseline: str | None = None) -> dict:
+               max_rules_per_location: int = 2, standards: Any = None,
+               baseline: str | None = None) -> dict:
     text = _diff_text(repo, base, head, diff_text)
     changed = diffutil.parse_unified_diff(text)
     root_p, abs_changed = diffutil.prepare_diff_workspace(repo, text)
@@ -114,7 +163,8 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
     files = engine.select_files(list(abs_changed), prof, None, root_p)
     res = engine.check(files, prof, None, compdb, root,
                        tuple(tools) if tools else engine.DEFAULT_TOOLS,
-                       abs_changed, jobs, max_rules_per_location, min_confidence, include_suppressed)
+                       abs_changed, jobs, max_rules_per_location, min_confidence, include_suppressed,
+                       standards)
     d = res.to_dict(include_suppressed)
     if baseline:
         BL.apply(d, baseline, scope="diff")
@@ -164,13 +214,36 @@ def validate_findings(findings: list[dict] | str, packet: dict | None = None,
     return V.validate(findings, packet, profile)
 
 
-def rule_coverage(lang: str | None = None, kind: str | None = None, include_ids: bool = False) -> dict:
-    c = CM.coverage(lang, kind)
+def rule_coverage(lang: str | None = None, kind: str | None = None, include_ids: bool = False,
+                  standard: Any = None) -> dict:
+    stds = R.expand_standards(standard)
+    c = CM.coverage(lang, kind, stds)
     if not include_ids:
         c.pop("rules_all_mappings")
         c.pop("rules_runnable")
+    c["standards"] = list(stds)
     c["definitions"] = CM.info()["tier_definitions"]
     c["sources"] = CM.info()["sources"]
+    if set(stds) - set(R.CERT_STANDARDS):
+        from . import ruletexts
+        g = R.guideline_info()
+        c["definitions"] = {**c["definitions"],
+                            "deterministic": c["definitions"]["deterministic"]
+                            + "; for MISRA/AUTOSAR: a checker that reports exactly this guideline "
+                              "(e.g. the cppcheck MISRA addon)"}
+        c["sources"] = {**c["sources"], "guidelines": g["sources"]}
+        c["toolchain"] = {**c["toolchain"], **{k: v for k, v in
+                                               R._load_guidelines().get("toolchain_versions", {}).items() if v}}
+        by_std = {}
+        for s in stds:
+            if s in R.CERT_STANDARDS:
+                continue
+            sc = CM.coverage(lang, kind, (s,))
+            by_std[s] = {"total": sc["total"], "all_mappings": sc["all_mappings"],
+                         "runnable_toolchain": sc["runnable_toolchain"],
+                         "summaries": (g["standards"].get(s) or {}).get("summaries")}
+        c["by_standard"] = by_std
+        c["licensed_texts"] = {k: v for k, v in ruletexts.status().items() if k in stds}
     return c
 
 
