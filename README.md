@@ -190,7 +190,16 @@ python3 tools/ceph_compdb.py --ceph ~/ceph --out /tmp/ceph-compdb src/common   #
 - Static coverage is thin by nature: most CERT rules are not decidable by tools; the
   `llm-only` and `partial` rules depend on the review layer and on a human.
 - Tools need compilable code. Without `compile_commands.json` many files do not parse and
-  checks are skipped; the engine reports parse errors instead of "no findings".
+  checks are skipped. The engine reports this instead of "no findings": the tool status
+  becomes `partial`, the markdown, SARIF (`executionSuccessful: false` plus a
+  `toolExecutionNotifications` warning), GitHub review, Action summary and CLI output carry a
+  warning, and `--fail-on-parse-error` (Action input `fail-on-parse-error`) turns it into a
+  failing exit code.
+- **Ceph needs Linux.** Its sources include Linux-only headers (`linux/version.h`, ...) and
+  Linux-only Boost.Asio features, so e.g. `src/rgw/radosgw-admin/radosgw-admin.cc` cannot be
+  parsed on macOS even with the SDK sysroot and Homebrew Boost. Analyse Ceph on Linux, with the
+  Docker image, or with the GitHub Action. `tools/ceph_compdb.py` adds `-isysroot` on macOS, which
+  is enough for some directories (`src/common`) but not for all of them.
 - Mappings come from CodeChecker labels and clang-tidy aliases plus a small curated overlay;
   general analyzers can map to several rules, so the engine keeps the best few per line.
 - Ceph's profile is based on reading the code and on a limited trial, not on a full build.

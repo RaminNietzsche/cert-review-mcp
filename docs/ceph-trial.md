@@ -79,6 +79,10 @@ profile ranks by CERT priority and the packet/skill tell the reviewer to confirm
 
 ## Limits
 
+- **Run Ceph analysis on Linux.** Ceph's sources need Linux headers and Linux-only Boost.Asio
+  features; on macOS files such as `radosgw-admin.cc` stop at the first missing include. Use Linux, the
+  Docker image or the GitHub Action, and a real `compile_commands.json` where you can.
+
 - **Not a real build.** 36% of files had compile errors (missing generated or third-party
   headers, an older Boost), so those files were only partly analysed. Absence of findings in
   them is not evidence of absence. Use a real `compile_commands.json` for any claim that matters.

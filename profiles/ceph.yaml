@@ -1,5 +1,8 @@
 # Ceph profile.
 #
+# Run this profile on Linux (Docker image or the GitHub Action): Ceph's sources need Linux
+# headers, so parts of src/rgw and others do not parse on macOS.
+#
 # Facts below were checked against a Ceph `main` checkout (src/CMakeLists.txt,
 # src/include/ceph_assert.h, src/common/ceph_mutex.h, src/common/RefCountedObj.h,
 # src/common/dout.h, src/include/buffer.h, src/crimson/, CodingStyle,
