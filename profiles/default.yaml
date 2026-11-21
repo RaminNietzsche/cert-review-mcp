@@ -4,6 +4,9 @@ description: Plain SEI CERT C/C++ review; severities come straight from the CERT
 languages:
   c_standard: 11
   cpp_standard: 17
+# Rule sets findings are mapped to: cert (SEI CERT C and C++), misra (MISRA C:2012 and
+# MISRA C++:2023), autosar (AUTOSAR C++14), or individual standard names.
+standards: [cert]
 file_extensions:
   c: [".c"]
   cpp: [".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"]

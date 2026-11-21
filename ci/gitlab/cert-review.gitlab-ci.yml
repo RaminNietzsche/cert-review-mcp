@@ -15,6 +15,7 @@ variables:
   CERT_REVIEW_TOOLS: "clang-tidy,cppcheck"
   CERT_REVIEW_MIN_CONFIDENCE: "0.5"
   CERT_REVIEW_FAIL_ON: "never"          # error | warning | note | never
+  CERT_REVIEW_BASELINE: ""              # baseline JSON from `cert-review baseline create`
 
 cert-review:
   stage: test
@@ -41,6 +42,7 @@ cert-review:
     - export PATH=/opt/venv/bin:$PATH
     - COMMON="--profile $CERT_REVIEW_PROFILE --tools $CERT_REVIEW_TOOLS --min-confidence $CERT_REVIEW_MIN_CONFIDENCE"
     - if [ -n "$CERT_REVIEW_COMPILE_COMMANDS" ]; then COMMON="$COMMON --compdb $CERT_REVIEW_COMPILE_COMMANDS"; fi
+    - if [ -n "$CERT_REVIEW_BASELINE" ]; then COMMON="$COMMON --baseline $CERT_REVIEW_BASELINE"; fi
     - |
       run() {  # run <format> <output>
         if [ "$CERT_REVIEW_MODE" = "diff" ]; then

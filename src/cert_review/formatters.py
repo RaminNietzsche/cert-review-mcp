@@ -21,7 +21,7 @@ def compliant_snippet(rule_id: str, max_lines: int = 14) -> str | None:
     r = R.get(rule_id)
     if not r:
         return None
-    for ex in r["examples"]:
+    for ex in r.get("examples") or []:
         for c in ex["compliant"]:
             for b in c["code"]:
                 lines = b["code"].strip("\n").splitlines()
@@ -35,7 +35,8 @@ def compliant_snippet(rule_id: str, max_lines: int = 14) -> str | None:
 
 def comment_body(f: dict, with_example: bool = True) -> str:
     r = R.get(f["rule_id"]) or {}
-    head = (f"**CERT {f['rule_id']}** \u2014 {f.get('title') or r.get('title', '')}  \n"
+    label = R.display_name(r) if r else f"CERT {f['rule_id']}"
+    head = (f"**{label}** \u2014 {f.get('title') or (R.title(r) if r else '')}  \n"
             f"severity: {f['severity']} \u00b7 priority P{f['priority']} \u00b7 level {f['level']}")
     parts = [head, "", f["message"].strip()]
     why = _first_paragraph(r.get("risk_text", "")) or _first_paragraph(r.get("intro", ""))
@@ -51,7 +52,7 @@ def comment_body(f: dict, with_example: bool = True) -> str:
         parts += ["", f"> {f['quote']}"]
     if f.get("note"):
         parts += ["", f"**Project note:** {f['note']}"]
-    url = f.get("url") or r.get("url")
+    url = f.get("url") or (R.url(r) if r else None)
     src = f"{f['tool']}:{f['checker']}" if f.get("tool") else ""
     foot = f"Rule: {url}" + (f" \u00b7 found by `{src}` (confidence {f.get('confidence')})" if src else "")
     parts += ["", foot]
@@ -74,12 +75,21 @@ def _warning_block(warnings: list[str] | None) -> str:
     return "> **Warning: partial analysis.**\n" + "".join(f"> - {w}\n" for w in warnings) + "\n"
 
 
+def _review_name(findings: list[dict]) -> str:
+    """'SEI CERT' unless findings cite MISRA or AUTOSAR guidelines too."""
+    stds = {R.standard_of(r) for f in findings if (r := R.get(f["rule_id"]))}
+    if stds <= set(R.CERT_STANDARDS):
+        return "SEI CERT"
+    return " / ".join(sorted({"SEI CERT" if s in R.CERT_STANDARDS else R.STANDARD_NAMES[s]
+                              for s in stds}))
+
+
 def to_markdown(findings: list[dict], root: str | None = None, warnings: list[str] | None = None) -> str:
     wb = _warning_block(warnings)
     if not findings:
         return wb + ("No SEI CERT findings in the files that could be analysed.\n" if warnings
                      else "No SEI CERT findings.\n")
-    out = [wb + f"# SEI CERT review: {len(findings)} finding(s)\n"]
+    out = [wb + f"# {_review_name(findings)} review: {len(findings)} finding(s)\n"]
     by_file: dict[str, list[dict]] = {}
     for f in findings:
         by_file.setdefault(_rel(f["file"], root), []).append(f)
@@ -96,7 +106,7 @@ def to_github_review(findings: list[dict], root: str | None = None, summary: str
     """Body for `POST /repos/{o}/{r}/pulls/{n}/reviews` (event COMMENT). Not sent."""
     comments = [{"path": _rel(f["file"], root), "line": f["line"], "side": "RIGHT",
                  "body": comment_body(f)} for f in findings]
-    body = summary or (f"SEI CERT review: {len(findings)} finding(s). "
+    body = summary or (f"{_review_name(findings)} review: {len(findings)} finding(s). "
                        "Drafted for human review; nothing is posted automatically.")
     if warnings:
         body += "\n\n" + _warning_block(warnings).rstrip()
@@ -126,18 +136,20 @@ def to_sarif(findings: list[dict], root: str | None = None, tool_name: str = "ce
     for rid in rule_ids:
         r = R.get(rid) or {}
         risk = r.get("risk") or {}
+        title = R.title(r) if r else rid
+        family = "cert" if not r or R.is_cert(r) else R.standard_of(r)
         rules_out.append({
             "id": rid,
-            "name": rid.replace("-", ""),
-            "shortDescription": {"text": r.get("title", rid)},
-            "fullDescription": {"text": _first_paragraph(r.get("intro", ""), 900) or r.get("title", rid)},
-            "helpUri": r.get("url"),
+            "name": rid.replace("-", "").replace(".", "_"),
+            "shortDescription": {"text": title},
+            "fullDescription": {"text": _first_paragraph(r.get("intro") or "", 900) or title},
+            "helpUri": R.url(r) if r else None,
             "help": {"text": comment_body({"rule_id": rid, "severity": risk.get("severity", ""),
                                            "priority": 0, "level": risk.get("level", ""),
-                                           "message": r.get("title", ""), "tool": "", "checker": ""},
+                                           "message": title, "tool": "", "checker": ""},
                                           with_example=True),
                      "markdown": ""},
-            "properties": {"tags": ["security", "external/cert/" + rid.lower()] +
+            "properties": {"tags": ["security", f"external/{family}/" + rid.lower()] +
                                    [c.lower() for c in r.get("cwe", [])],
                            "certSeverity": risk.get("severity"), "certLikelihood": risk.get("likelihood"),
                            "certPriority": risk.get("priority"), "certLevel": risk.get("level"),
@@ -185,7 +197,7 @@ def to_codequality(findings: list[dict], root: str | None = None) -> list[dict]:
     """GitLab Code Quality (Code Climate) report: gl-code-quality-report.json."""
     sev = {"error": "critical", "warning": "major", "note": "minor"}
     return [{
-        "description": f"CERT {f['rule_id']}: {f['message'].strip()}",
+        "description": f"{R.display_name(f['rule_id'])}: {f['message'].strip()}",
         "check_name": f["rule_id"],
         "fingerprint": _fingerprint(f, root),
         "severity": sev.get(f["severity"], "major"),
@@ -200,14 +212,16 @@ def to_gitlab_sast(findings: list[dict], root: str | None = None) -> dict:
     vulns = []
     for f in findings:
         r = R.get(f["rule_id"]) or {}
-        ids = [{"type": "cert", "name": f["rule_id"], "value": f["rule_id"], "url": r.get("url")}]
+        family = "cert" if not r or R.is_cert(r) else R.standard_of(r)
+        ids = [{"type": family, "name": f["rule_id"], "value": f["rule_id"],
+                "url": R.url(r) if r else None}]
         ids += [{"type": "cwe", "name": c, "value": c.split("-")[-1],
                  "url": f"https://cwe.mitre.org/data/definitions/{c.split('-')[-1]}.html"}
                 for c in r.get("cwe", [])]
         vulns.append({
             "id": _fingerprint(f, root),
             "category": "sast",
-            "name": f"{f['rule_id']}: {f.get('title') or r.get('title', '')}",
+            "name": f"{f['rule_id']}: {f.get('title') or (R.title(r) if r else '')}",
             "message": f["message"].strip(),
             "description": _first_paragraph(r.get("risk_text", "") or r.get("intro", ""), 600),
             "severity": sev.get(f["severity"], "Medium"),

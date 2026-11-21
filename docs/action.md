@@ -34,6 +34,7 @@ on the runner (it is on `ubuntu-latest`).
 | `min-confidence` | `0.5` | Hide findings below this confidence |
 | `fail-on` | `never` | Fail the job at `error`, `warning` or `note` |
 | `fail-on-parse-error` | `false` | Fail the job when the analysis was partial: a file had compile errors or an analyzer timed out on it (300 s per file and tool) |
+| `baseline` | none | Baseline JSON from `cert-review baseline create`, relative to `working-directory`; recorded findings are not reported, annotated or counted for `fail-on` ([baseline.md](baseline.md)) |
 | `sarif-file` | `cert-review.sarif` | SARIF 2.1.0 output path |
 | `upload-sarif` | `false` | Upload to code scanning (`github/codeql-action/upload-sarif@v3`); needs `security-events: write` |
 | `sarif-category` | `cert-review` | Code scanning category |
@@ -43,7 +44,8 @@ on the runner (it is on `ubuntu-latest`).
 | `working-directory` | `.` | Project directory inside the workspace |
 | `image` | none | Prebuilt image instead of building the Dockerfile |
 
-Outputs: `sarif-file`, `findings`, `errors`, `partial` (`true` when some files did not parse or timed out).
+Outputs: `sarif-file`, `findings`, `errors`, `partial` (`true` when some files did not parse or timed out),
+`baselined` (findings hidden by `baseline`).
 
 ### What it writes
 
@@ -81,7 +83,8 @@ The `cert-review` job runs on merge requests, installs the same pinned toolchain
 from `CERT_REVIEW_SOURCE` (default: this repository at `v1`), and publishes
 `gl-code-quality-report.json` (MR Code Quality widget) and `gl-sast-report.json` (Security
 dashboard) plus a Markdown summary. Variables: `CERT_REVIEW_PROFILE`, `_MODE`, `_PATHS`,
-`_COMPILE_COMMANDS`, `_TOOLS`, `_MIN_CONFIDENCE`, `_FAIL_ON`. It does not post MR comments; to
+`_COMPILE_COMMANDS`, `_TOOLS`, `_MIN_CONFIDENCE`, `_FAIL_ON`, `_BASELINE` (path of a baseline file
+in the repository). It does not post MR comments; to
 draft discussion payloads use `cert-review diff --format gitlab` and send them yourself.
 Needs `GIT_DEPTH: 0` (set by the job) for diff mode.
 
