@@ -64,11 +64,12 @@ def _collect(paths: list[str]) -> list[str]:
 def check_file(path: str | list[str], profile: str = "default", lang: str | None = None,
                compdb: str | None = None, root: str | None = None,
                tools: list[str] | None = None, min_confidence: float = 0.0,
-               include_suppressed: bool = False, jobs: int = 4) -> dict:
+               include_suppressed: bool = False, jobs: int = 4,
+               max_rules_per_location: int = 2) -> dict:
     paths = [path] if isinstance(path, str) else list(path)
     res = engine.check(_collect(paths), profile, lang, compdb, root,
                        tuple(tools) if tools else engine.DEFAULT_TOOLS,
-                       None, jobs, 2, min_confidence, include_suppressed)
+                       None, jobs, max_rules_per_location, min_confidence, include_suppressed)
     d = res.to_dict(include_suppressed)
     d["summary"] = summarize(res.findings)
     return d
@@ -85,7 +86,8 @@ def _diff_text(repo: str | None, base: str | None, head: str | None, diff_text: 
 def check_diff(repo: str | None = None, base: str | None = None, head: str | None = None,
                diff_text: str | None = None, profile: str = "default",
                compdb: str | None = None, tools: list[str] | None = None,
-               min_confidence: float = 0.0, include_suppressed: bool = False, jobs: int = 4) -> dict:
+               min_confidence: float = 0.0, include_suppressed: bool = False, jobs: int = 4,
+               max_rules_per_location: int = 2) -> dict:
     text = _diff_text(repo, base, head, diff_text)
     changed = diffutil.parse_unified_diff(text)
     root = str(Path(repo).resolve()) if repo else str(Path.cwd())
@@ -94,7 +96,7 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
     files = engine.select_files([p for p in abs_changed if Path(p).exists()], prof, None, Path(root))
     res = engine.check(files, prof, None, compdb, root,
                        tuple(tools) if tools else engine.DEFAULT_TOOLS,
-                       abs_changed, jobs, 2, min_confidence, include_suppressed)
+                       abs_changed, jobs, max_rules_per_location, min_confidence, include_suppressed)
     d = res.to_dict(include_suppressed)
     d["summary"] = summarize(res.findings)
     d["changed_files"] = sorted(changed)

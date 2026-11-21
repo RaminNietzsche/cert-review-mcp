@@ -31,6 +31,8 @@ def _common(p: argparse.ArgumentParser) -> None:
     p.add_argument("--fail-on", choices=["error", "warning", "note", "never"], default="never",
                    help="exit 1 if a finding at or above this severity exists")
     p.add_argument("--include-suppressed", action="store_true")
+    p.add_argument("--max-rules-per-location", type=int, default=2,
+                   help="many CERT rules map to one checker; keep the best N per line")
 
 
 def _exit_code(findings: list[dict], fail_on: str) -> int:
@@ -96,7 +98,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if a.cmd == "check":
         res = api.check_file(a.paths, a.profile, a.lang, a.compdb, a.root,
-                             a.tools.split(","), a.min_confidence, a.include_suppressed, a.jobs)
+                             a.tools.split(","), a.min_confidence, a.include_suppressed, a.jobs,
+                             a.max_rules_per_location)
         _emit(res["findings"], a.format, a.root, a.output)
         _status(res)
         return _exit_code(res["findings"], a.fail_on)
@@ -105,7 +108,8 @@ def main(argv: list[str] | None = None) -> int:
         if a.diff_file:
             text = sys.stdin.read() if a.diff_file == "-" else open(a.diff_file, encoding="utf-8").read()
         res = api.check_diff(a.repo, a.base, a.head, text, a.profile, a.compdb, a.tools.split(","),
-                             a.min_confidence, a.include_suppressed, a.jobs)
+                             a.min_confidence, a.include_suppressed, a.jobs,
+                             a.max_rules_per_location)
         _emit(res["findings"], a.format, res["root"], a.output)
         _status(res)
         return _exit_code(res["findings"], a.fail_on)

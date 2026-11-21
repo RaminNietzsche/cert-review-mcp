@@ -39,6 +39,7 @@ class ToolStatus:
     files: int = 0
     raw_findings: int = 0
     parse_errors: int = 0
+    files_with_errors: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
 
@@ -124,8 +125,11 @@ def run_clang_tidy(files: list[str], profile: Profile, compdb: Path | None,
                 if not m:
                     continue
                 chks = [c.strip() for c in m["chk"].split(",")]
-                if any(c in ("clang-diagnostic-error",) or c.startswith("clang-diagnostic") for c in chks):
-                    st.parse_errors += 1
+                if any(c.startswith("clang-diagnostic") for c in chks):
+                    if m["sev"] == "error":
+                        st.parse_errors += 1
+                        if path not in st.files_with_errors:
+                            st.files_with_errors.append(path)
                     continue
                 for c in chks:
                     raw.append(RawFinding("clang-tidy", c, m["file"], int(m["line"]),
