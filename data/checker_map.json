@@ -1,0 +1,6194 @@
+{
+ "schema": 1,
+ "sources": {
+  "codechecker": {
+   "repository": "https://github.com/Ericsson/codechecker",
+   "commit": "53222cd5d7566c553d8d7edbb5134a35a56ef15e",
+   "license": "Apache-2.0",
+   "files": "config/labels/analyzers/*.json"
+  },
+  "llvm": {
+   "repository": "https://github.com/llvm/llvm-project",
+   "commit": "5689d1bcbc57030e576c74b1ee5dd0bd936247d6",
+   "files": "clang-tools-extra/docs/clang-tidy/checks/cert/*.md"
+  },
+  "toolchain_versions": {
+   "clang-tidy": "19.1.7",
+   "clangsa": "19.1.7",
+   "cppcheck": "2.17.1"
+  }
+ },
+ "tier_definitions": {
+  "deterministic": "a rule-specific checker exists (clang-tidy cert-* alias)",
+  "partial": "only general checkers are mapped; some violation patterns are caught",
+  "llm-only": "no checker is mapped; needs review"
+ },
+ "summary": {
+  "c_rule_tier": {
+   "deterministic": 17,
+   "partial": 56,
+   "llm-only": 49,
+   "total": 122
+  },
+  "c_rule_tier_runnable": {
+   "deterministic": 15,
+   "partial": 38,
+   "llm-only": 69,
+   "total": 122
+  },
+  "c_recommendation_tier": {
+   "deterministic": 4,
+   "partial": 3,
+   "llm-only": 176,
+   "total": 183
+  },
+  "c_recommendation_tier_runnable": {
+   "deterministic": 4,
+   "partial": 2,
+   "llm-only": 177,
+   "total": 183
+  },
+  "cpp_rule_tier": {
+   "deterministic": 18,
+   "partial": 36,
+   "llm-only": 29,
+   "total": 83
+  },
+  "cpp_rule_tier_runnable": {
+   "deterministic": 18,
+   "partial": 28,
+   "llm-only": 37,
+   "total": 83
+  }
+ },
+ "rules": {
+  "API00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "API01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "API02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "API03-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "API04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "API05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "API07-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "API09-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "API10-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ARR00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ARR01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ARR02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "ARR30-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "core.NullPointerArithm",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "arrayIndexOutOfBounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "bufferAccessOutOfBounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-out-of-bounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "ARR32-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "core.VLASize",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "ARR36-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "security.PointerSub",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "subtractPointers",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-undefined-behavior-ptrdiff",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "ARR37-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "ARR38-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "unix.StdCLibraryFunctions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-out-of-bounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-use-of-uninitialized-value",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "ARR39-C": {
+   "tier": "deterministic",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-arr39-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": false,
+     "alias_of": "bugprone-sizeof-expression"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-array-bounds-pointer-arithmetic",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "misc-sizeof-expression",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-out-of-bounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "CON01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "CON02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON03-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "CON05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON06-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON07-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "CON08-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON09-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON30-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON31-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON32-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON33-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "concurrency-mt-unsafe",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "CON34-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON35-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON36-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-spuriously-wake-up-functions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-con36-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-spuriously-wake-up-functions"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "CON37-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "CON38-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON39-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON40-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "CON41-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "CON43-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON50-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON51-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "CON52-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON53-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON54-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-spuriously-wake-up-functions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-con54-cpp",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-spuriously-wake-up-functions"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "CON55-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CON56-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CTR50-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "cppcheck",
+     "checker": "algorithmOutOfBounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "containerOutOfBounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "negativeContainerIndex",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "CTR51-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CTR52-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CTR53-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CTR54-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CTR55-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CTR56-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-pointer-arithmetic-on-polymorphic-object",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-ctr56-cpp",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-pointer-arithmetic-on-polymorphic-object"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "CTR57-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "CTR58-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL03-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-dcl03-c",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "MEDIUM",
+     "alias_of": "misc-static-assert"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL06-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL07-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL08-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL09-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL10-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL11-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL12-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL13-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL15-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL16-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-dcl16-c",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "STYLE",
+     "alias_of": "readability-uppercase-literal-suffix"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL17-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL18-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL19-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL20-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL21-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL22-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL23-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL30-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-return-stack-address",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.StackAddrEscapeBase",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.StackAddressEscape",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "autoVariables",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "danglingLifetime",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "returnDanglingLifetime",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-use-of-pointer-in-stale-stack-frame",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "DCL31-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-implicit",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-implicit-function-declaration",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-implicit-int",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL36-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL37-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-reserved-identifier",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "LOW"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-dcl37-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-reserved-identifier"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-reserved-identifier",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-reserved-macro-identifier",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL38-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL39-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL40-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL41-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-sometimes-uninitialized",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.CallAndMessage",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-use-of-uninitialized-value",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL42-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL50-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-dcl50-cpp",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "LOW",
+     "alias_of": "modernize-avoid-variadic-functions"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-va-list-exhausted",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL51-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-reserved-identifier",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "LOW"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-dcl51-cpp",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-reserved-identifier"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-reserved-identifier",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-reserved-macro-identifier",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-reserved-module-identifier",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-user-defined-literals",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL52-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "DCL53-CPP": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-vexing-parse",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL54-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-dcl54-cpp",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "misc-new-delete-overloads"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "misc-new-delete-overloads",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL55-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "DCL56-CPP": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-infinite-recursion",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL57-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-exception-escape",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-unsafe-to-allow-exceptions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL58-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-std-namespace-modification",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-dcl58-cpp",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "HIGH",
+     "alias_of": "bugprone-std-namespace-modification"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL59-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-dcl59-cpp",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "misc-anonymous-namespace-in-header"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "google-build-namespaces",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "DCL60-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "ENV01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ENV02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "ENV03-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ENV04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": null
+  },
+  "ENV30-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ENV31-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "security.cert.env.InvalidPtr",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ENV32-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "ENV33-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-command-processor",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-env33-c",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "MEDIUM",
+     "alias_of": "bugprone-command-processor"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ENV34-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "security.cert.env.InvalidPtr",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ERR00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ERR01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "ERR02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ERR04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ERR05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "ERR06-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ERR07-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "ERR30-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "unix.Errno",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ERR32-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "ERR33-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-suspicious-realloc-usage",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-unused-return-value",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-err33-c",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "unix.StdCLibraryFunctions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "memleakOnRealloc",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "nullPointerArithmeticOutOfMemory",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "nullPointerDefaultArg",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "nullPointerOutOfMemory",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "nullPointerOutOfResources",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-null-argument",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-possible-null-argument",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-possible-null-dereference",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ERR34-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-unchecked-string-to-number-conversion",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-err34-c",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "LOW",
+     "alias_of": "bugprone-unchecked-string-to-number-conversion"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ERR50-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ERR51-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-multiple-new-in-one-expression",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-unhandled-exception-at-new",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ERR52-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-err52-cpp",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "LOW",
+     "alias_of": "modernize-avoid-setjmp-longjmp"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ERR53-CPP": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-exceptions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ERR54-CPP": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-exceptions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ERR55-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-exception-escape",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-unsafe-to-allow-exceptions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-throw-of-unexpected-type",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "ERR56-CPP": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-use-of-uninitialized-value",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "ERR57-CPP": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-malloc-leak",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "ERR58-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-err58-cpp",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "LOW",
+     "alias_of": "bugprone-throwing-static-initialization"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "ERR59-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "ERR60-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-exception-copy-constructor-throws",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-err60-cpp",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "MEDIUM",
+     "alias_of": "bugprone-exception-copy-constructor-throws"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ERR61-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-err61-cpp",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "misc-throw-by-value-catch-by-reference"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "misc-throw-by-value-catch-by-reference",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "ERR62-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "EXP03-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "EXP05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "EXP07-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "EXP08-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "EXP09-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "EXP10-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "EXP11-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "EXP12-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP13-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP14-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "EXP15-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP16-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP19-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP20-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP30-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-unsequenced",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.CallAndMessage",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "unknownEvaluationOrder",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP32-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-incompatible-pointer-types",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-incompatible-pointer-types-discards-qualifiers",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP33-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-conditional-uninitialized",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-sometimes-uninitialized",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-uninitialized",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-uninitialized-const-reference",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-uninitialized-explicit-init",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.CallAndMessage",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.UndefinedBinaryOperatorResult",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.uninitialized.ArraySubscript",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.uninitialized.Assign",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.uninitialized.Branch",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.uninitialized.CapturedBlockVariable",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.uninitialized.NewArraySize",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "unix.cstring.UninitializedRead",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "legacyUninitvar",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "uninitvar",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-use-of-uninitialized-value",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP34-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "core.CallAndMessage",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.NonNullParamChecker",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.NullDereference",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.NullPointerArithm",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "nullability.NullPassedToNonnull",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "nullability.NullReturnedFromNonnull",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "nullability.NullabilityBase",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false
+    },
+    {
+     "tool": "clangsa",
+     "checker": "nullability.NullableDereferenced",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "nullability.NullablePassedToNonnull",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "nullability.NullableReturnedFromNonnull",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "unix.cstring.NullArg",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "ctunullpointer",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "nullPointer",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "nullPointerOutOfMemory",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "nullPointerOutOfResources",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "nullPointerRedundantCheck",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-deref-before-check",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-null-argument",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-null-dereference",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-possible-null-dereference",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP35-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP36-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-allocation-size",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-out-of-bounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP37-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-incompatible-function-pointer-types-strict",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "unix.API",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP39-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "core.CallAndMessage",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP40-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP42-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-suspicious-memory-comparison",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-exp42-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-suspicious-memory-comparison"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "EXP43-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-overlapping-buffers",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP44-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-unevaluated-expression",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "EXP45-C": {
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-assignment-in-selection-statement",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-narrowing-conversions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-exp45-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": false,
+     "alias_of": "bugprone-assignment-in-selection-statement"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-parentheses",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-infinite-loop",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "EXP46-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP47-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-varargs",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "optin.core.UnconditionalVAArg",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-va-list-exhausted",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP50-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-multiple-new-in-one-expression",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.CallAndMessage",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.UndefinedBinaryOperatorResult",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "unknownEvaluationOrder",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP51-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.ArrayDelete",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-mismatching-deallocation",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP52-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP53-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "core.CallAndMessage",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "legacyUninitvar",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "uninitdata",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-use-of-uninitialized-value",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP54-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-return-stack-address",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.CallAndMessage",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.StackAddrEscapeBase",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.StackAddressEscape",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.NewDelete",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "danglingTemporaryLifetime",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "returnDanglingLifetime",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP55-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cppcoreguidelines-pro-type-const-cast",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "LOW"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP56-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "EXP57-CPP": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-delete-incomplete",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "EXP58-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-varargs",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "va_start_referencePassed",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-va-list-leak",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "EXP59-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "EXP60-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "EXP61-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-return-stack-address",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.StackAddrEscapeBase",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.StackAddressEscape",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "returnDanglingLifetime",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-use-of-pointer-in-stale-stack-frame",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "EXP62-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-raw-memory-call-on-non-trivial-type",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-undefined-memory-manipulation",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-dynamic-class-memaccess",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "memsetClass",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "EXP63-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-use-after-move",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "misc-use-after-move",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.Move",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "FIO01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "FIO02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO03-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO06-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO08-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO09-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO10-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO11-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO13-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO14-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO15-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO17-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO18-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO19-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "FIO20-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO21-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO22-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO23-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO24-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO30-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-format-nonliteral",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-format-security",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "FIO32-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO34-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-narrowing-conversions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "FIO37-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "FIO38-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-fio38-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "misc-non-copyable-objects"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "misc-non-copyable-objects",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "FIO39-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "cppcheck",
+     "checker": "IOWithoutPositioning",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "FIO40-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "FIO41-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "FIO42-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "unix.Stream",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "resourceLeak",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-double-fclose",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-file-leak",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-malloc-leak",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "FIO44-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO45-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FIO46-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "cppcheck",
+     "checker": "fcloseInLoopCondition",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "FIO47-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-format",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "FIO50-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "FIO51-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FLP00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FLP01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FLP02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FLP03-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FLP04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FLP05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FLP06-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FLP07-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "FLP30-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-float-loop-counter",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-flp30-c",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "HIGH",
+     "alias_of": "bugprone-float-loop-counter"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "security.FloatLoopCounter",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "FLP32-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-float-conversion",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "invalidFunctionArg",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "FLP34-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-narrowing-conversions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-double-promotion",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-float-conversion",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "FLP36-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-narrowing-conversions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "FLP37-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-suspicious-memory-comparison",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-flp37-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-suspicious-memory-comparison"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "FLP38-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "INT00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "INT01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "INT02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "INT04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "INT05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "INT07-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "INT08-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "INT09-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-int09-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "readability-enum-initial-value"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "readability-enum-initial-value",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "LOW"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "INT10-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-out-of-bounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "INT12-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "INT13-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "INT14-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "INT15-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "INT16-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "INT17-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "INT18-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "INT30-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "INT31-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-suspicious-memset-usage",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "INT32-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "core.BitwiseShift",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "integerOverflow",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "INT33-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "core.DivideZero",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "zerodiv",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "INT34-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "core.BitwiseShift",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "shiftNegative",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "shiftTooManyBits",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-shift-count-negative",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-shift-count-overflow",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "INT35-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "INT36-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-implicit-int-conversion",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-int-conversion",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-pointer-to-int-cast",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "INT50-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MEM00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MEM01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MEM02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MEM03-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MEM04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MEM05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MEM06-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MEM07-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MEM10-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MEM11-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MEM12-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MEM30-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "optin.portability.UnixAPI",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "unix.Malloc",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "deallocuse",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-double-free",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-use-after-free",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MEM31-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "unix.Malloc",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "memleak",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-malloc-leak",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MEM33-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-out-of-bounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "MEM34-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "unix.Malloc",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "autovarInvalidDeallocation",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-free-of-non-heap",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MEM35-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-sizeof-expression",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-format-overflow",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-format-overflow-non-kprintf",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "unix.Malloc",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "unix.MallocSizeof",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-allocation-size",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-out-of-bounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MEM36-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "unix.Malloc",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "doubleFree",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MEM50-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-dangling",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.InnerPointer",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.NewDelete",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "danglingTemporaryLifetime",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "deallocuse",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "invalidLifetime",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MEM51-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-multiple-new-in-one-expression",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-shared-ptr-array-mismatch",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-unique-ptr-array-mismatch",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-mismatched-new-delete",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.NewDelete",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.NewDeleteLeaks",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "unix.MismatchedDeallocator",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "mismatchAllocDealloc",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-free-of-non-heap",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-mismatching-deallocation",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MEM52-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-multiple-new-in-one-expression",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-unhandled-exception-at-new",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "nullPointerOutOfMemory",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "MEM53-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "cppcheck",
+     "checker": "uninitdata",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MEM54-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.PlacementNew",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "optin.core.EnumCastOutOfRange",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-allocation-size",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-out-of-bounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MEM55-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MEM56-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "cppcheck",
+     "checker": "doubleFree",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MEM57-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-default-operator-new-on-overaligned-type",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-mem57-cpp",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "MEDIUM",
+     "alias_of": "bugprone-default-operator-new-on-overaligned-type"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-over-aligned",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-mismatching-deallocation",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MSC00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MSC05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MSC06-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MSC07-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC09-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MSC10-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC11-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC12-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "deadcode.DeadStores",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "LOW"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MSC13-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MSC14-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC15-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC17-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MSC18-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC19-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MSC20-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MSC21-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC22-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC23-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC24-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-unsafe-functions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "LOW"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-msc24-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-unsafe-functions"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "MSC25-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC30-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-msc30-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "misc-predictable-rand"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-msc50-cpp",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "LOW"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "misc-predictable-rand",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "MSC32-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-random-generator-seed",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-msc32-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-random-generator-seed"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-msc51-cpp",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "MSC33-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-unsafe-functions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "LOW"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-msc33-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-unsafe-functions"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MSC37-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-return-type",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "missingReturn",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "MSC38-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "MSC39-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-va-arg-type-mismatch",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "MSC40-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-static-in-inline",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "MSC41-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "MSC50-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-msc50-cpp",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "LOW",
+     "alias_of": "misc-predictable-rand"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "misc-predictable-rand",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "MSC51-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-random-generator-seed",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-msc51-cpp",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "MEDIUM",
+     "alias_of": "bugprone-random-generator-seed"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "MSC52-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-return-type",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "missingReturn",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "MSC53-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-exception-escape",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-invalid-noreturn",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "MSC54-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-signal-handler",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-msc54-cpp",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-signal-handler"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "OOP50-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "optin.cplusplus.VirtualCall",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "OOP51-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cppcoreguidelines-slicing",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "LOW"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "OOP52-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-delete-abstract-non-virtual-dtor",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-delete-non-abstract-non-virtual-dtor",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-delete-non-virtual-dtor",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-non-virtual-dtor",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "virtualDestructor",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "OOP53-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-reorder-ctor",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "core.uninitialized.UndefReturn",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-use-of-uninitialized-value",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "OOP54-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-unhandled-self-assignment",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-oop54-cpp",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-unhandled-self-assignment"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-self-assign-overloaded",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.NewDelete",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.SelfAssignment",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-use-of-uninitialized-value",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "OOP55-CPP": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-jump-through-null",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-out-of-bounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "OOP56-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "OOP57-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-raw-memory-call-on-non-trivial-type",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-undefined-memory-manipulation",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-oop57-cpp",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "HIGH",
+     "alias_of": "bugprone-raw-memory-call-on-non-trivial-type"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-dynamic-class-memaccess",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "OOP58-CPP": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-copy-constructor-mutates-argument",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-oop58-cpp",
+     "origins": [
+      "codechecker",
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "severity_hint": "MEDIUM",
+     "alias_of": "bugprone-copy-constructor-mutates-argument"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "POS01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "POS02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "POS04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "POS05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "POS30-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "POS34-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "security.PutenvStackArray",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-putenv-of-auto-var",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "POS35-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-fd-leak",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-fd-use-after-close",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-fd-use-without-check",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "POS36-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "security.SetgidSetuidOrder",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "POS37-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "POS38-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-fd-leak",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-fd-use-without-check",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "POS39-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "POS44-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-bad-signal-to-kill-thread",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-pos44-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-bad-signal-to-kill-thread"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "POS47-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-pos47-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "concurrency-thread-canceltype-asynchronous"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "concurrency-thread-canceltype-asynchronous",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "POS48-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "POS49-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "POS50-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "POS51-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "POS52-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "unix.StdCLibraryFunctions",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "POS53-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "POS54-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-possible-null-argument",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "PRE00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "PRE01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "PRE02-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-macro-parentheses",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "PRE04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "PRE05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "PRE06-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "PRE07-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "PRE08-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "PRE09-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "PRE10-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "PRE11-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "PRE12-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "PRE13-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "PRE30-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "PRE31-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-assert-side-effect",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-macro-repeated-side-effects",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "misc-assert-side-effect",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "PRE32-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "clang-diagnostic-embedded-directive",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "syntaxError",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "CRITICAL"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "SIG00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "SIG01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "SIG02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "SIG30-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-signal-handler",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-sig30-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-signal-handler"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-unsafe-call-within-signal-handler",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "SIG31-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "SIG34-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "SIG35-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "STR00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "STR01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "STR02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "STR03-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "STR04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "STR05-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "STR06-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "STR09-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "STR10-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "STR11-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "STR30-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "cppcheck",
+     "checker": "stringLiteralWrite",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-write-to-const",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "gcc",
+     "checker": "gcc-analyzer-write-to-string-literal",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "STR31-C": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "security.insecureAPI.gets",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "security.insecureAPI.strcpy",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "unix.cstring.BadSizeArg",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "unix.cstring.NotNullTerminated",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "STR32-C": {
+   "tier": "partial",
+   "tier_runnable": "llm-only",
+   "checkers": [
+    {
+     "tool": "cppcheck",
+     "checker": "terminateStrncpy",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": false,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "STR34-C": {
+   "tier": "deterministic",
+   "tier_runnable": "deterministic",
+   "checkers": [
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-signed-char-misuse",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "cert-str34-c",
+     "origins": [
+      "clang-tidy-alias"
+     ],
+     "specific": true,
+     "available": true,
+     "alias_of": "bugprone-signed-char-misuse"
+    }
+   ],
+   "cert_detectable": true
+  },
+  "STR37-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "STR38-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "STR50-CPP": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "STR51-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.StringChecker",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "STR52-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "cplusplus.InnerPointer",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "invalidContainer",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "STR53-CPP": {
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "cppcheck",
+     "checker": "containerOutOfBounds",
+     "origins": [
+      "codechecker"
+     ],
+     "specific": false,
+     "available": true,
+     "severity_hint": "HIGH"
+    }
+   ],
+   "cert_detectable": false
+  },
+  "WIN00-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "WIN01-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "WIN02-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": true
+  },
+  "WIN03-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "WIN04-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  },
+  "WIN30-C": {
+   "tier": "llm-only",
+   "tier_runnable": "llm-only",
+   "checkers": [],
+   "cert_detectable": false
+  }
+ }
+}
