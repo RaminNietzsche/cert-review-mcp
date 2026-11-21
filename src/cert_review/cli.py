@@ -24,7 +24,10 @@ def _emit(findings: list[dict], fmt: str, root: str | None, out: str | None,
 def _common(p: argparse.ArgumentParser) -> None:
     p.add_argument("--profile", default="default", help="profile name or YAML path (default, ceph)")
     p.add_argument("--compdb", help="directory containing compile_commands.json")
-    p.add_argument("--tools", default="clang-tidy,clangsa,cppcheck")
+    p.add_argument("--tools", default="auto",
+                   help="comma-separated analyzers: clang-tidy, clangsa, cppcheck, semgrep, infer, "
+                        "codeql, or auto (default: the first three plus semgrep and infer when "
+                        "installed; codeql runs only when named)")
     p.add_argument("--format", default="markdown",
                    choices=["markdown", "json", "sarif", "github", "gitlab", "codequality", "gitlab-sast"])
     p.add_argument("--output", "-o")

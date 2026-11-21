@@ -15,7 +15,7 @@
 A complete workflow is in [examples/github-workflow.yml](../examples/github-workflow.yml).
 
 How it runs: `action.yml` is a composite action. It builds the repository's `Dockerfile`
-(Debian 13, clang/clang-tidy 19.1.7-3+b1, cppcheck 2.17.1-2, the toolchain behind
+(Debian 13, clang/clang-tidy 19.1.7-3+b1, cppcheck 2.17.1-2, Semgrep 1.186.0, the toolchain behind
 [accuracy.md](accuracy.md)) and runs `python -m cert_review.action` in it on your workspace.
 Building takes a few minutes; set `image` to a prebuilt copy to skip it. Docker must be available
 on the runner (it is on `ubuntu-latest`).
@@ -30,7 +30,7 @@ on the runner (it is on `ubuntu-latest`).
 | `paths` | `.` | Full mode: files or directories, newline or comma separated |
 | `include` / `exclude` | none | Globs relative to the repository, applied to findings |
 | `compile-commands` | none | `compile_commands.json` or its directory. Strongly recommended |
-| `tools` | `clang-tidy,cppcheck` | Add `clangsa` for the standalone analyzer (needs flags that parse) |
+| `tools` | `clang-tidy,cppcheck` | Add `clangsa` for the standalone analyzer (needs flags that parse) and `semgrep` for the bundled CERT pattern rules (Semgrep 1.186.0 is in the image). `infer` and `codeql` are not in the image; see [analyzers.md](analyzers.md) |
 | `min-confidence` | `0.5` | Hide findings below this confidence |
 | `fail-on` | `never` | Fail the job at `error`, `warning` or `note` |
 | `fail-on-parse-error` | `false` | Fail the job when the analysis was partial: a file had compile errors or an analyzer timed out on it (300 s per file and tool) |

@@ -1,6 +1,8 @@
 # Running the MCP server in Docker
 
-`Dockerfile.mcp` builds an image with clang 19, clang-tidy 19, cppcheck and cert-review.
+`Dockerfile.mcp` builds an image with clang 19, clang-tidy 19, cppcheck, Semgrep 1.186.0 and
+cert-review. Infer and CodeQL are not included; [analyzers.md](analyzers.md) shows how to add
+Infer in a derived image (amd64 only).
 Its entrypoint is `cert-review-mcp`, the MCP server over stdio; the `cert-review` CLI is in
 the same image. `./Dockerfile` is a different image: the GitHub Action.
 

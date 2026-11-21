@@ -1,5 +1,6 @@
 # Reproducible toolchain: the same versions the accuracy figures in
-# docs/accuracy.md were measured with (clang/clang-tidy 19.1.7, cppcheck 2.17.1).
+# docs/accuracy.md were measured with (clang/clang-tidy 19.1.7, cppcheck 2.17.1,
+# semgrep 1.186.0). Infer and CodeQL are not included; see docs/analyzers.md.
 # Debian 13 (trixie) package versions are pinned; if the archive drops a pinned
 # version, rebuild with the current one and re-run tools/eval_accuracy.py.
 FROM debian:trixie-slim
@@ -18,8 +19,9 @@ COPY src /opt/cert-review/src
 COPY data /opt/cert-review/data
 COPY profiles /opt/cert-review/profiles
 RUN python3 -m venv /opt/venv \
- && /opt/venv/bin/pip install --no-cache-dir /opt/cert-review
+ && /opt/venv/bin/pip install --no-cache-dir /opt/cert-review semgrep==1.186.0
 
 ENV CERT_REVIEW_HOME=/opt/cert-review PATH=/opt/venv/bin:$PATH
-RUN clang-tidy --version | grep -q 'version 19.1.7' && cppcheck --version | grep -q '2.17.1'
+RUN clang-tidy --version | grep -q 'version 19.1.7' && cppcheck --version | grep -q '2.17.1' \
+ && semgrep --version --disable-version-check | grep -q '1.186.0'
 ENTRYPOINT ["python3", "-m", "cert_review.action"]

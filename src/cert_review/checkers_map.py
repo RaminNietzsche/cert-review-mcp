@@ -55,14 +55,27 @@ def tier(rule_id: str, runnable: bool = True) -> str:
     return e["tier_runnable" if runnable else "tier"]
 
 
+def tier_for_tools(rule_id: str, tools) -> str:
+    """Tier counting only available checkers of the given tools."""
+    e = rule_entry(rule_id)
+    if not e:
+        return "unknown"
+    cs = [c for c in e["checkers"] if c["available"] and c["tool"] in set(tools)]
+    if any(c["specific"] for c in cs):
+        return "deterministic"
+    return "partial" if cs else "llm-only"
+
+
 @functools.lru_cache(maxsize=1)
 def reverse_index() -> dict[tuple[str, str], list[dict]]:
-    """(tool, checker) -> [{rule_id, specific}] for SEI CERT (unchanged shape)."""
+    """(tool, checker) -> [{rule_id, specific, confidence?}] for SEI CERT."""
     idx: dict[tuple[str, str], list[dict]] = {}
     for rid, e in _load()["rules"].items():
         for c in e["checkers"]:
-            idx.setdefault((c["tool"], c["checker"]), []).append(
-                {"rule_id": rid, "specific": c["specific"]})
+            ent = {"rule_id": rid, "specific": c["specific"]}
+            if c.get("confidence") is not None:
+                ent["confidence"] = c["confidence"]
+            idx.setdefault((c["tool"], c["checker"]), []).append(ent)
     return idx
 
 
@@ -105,13 +118,16 @@ def coverage(lang: str | None = None, kind: str | None = None,
     from . import rules as R
     res: dict[str, list[str]] = {t: [] for t in TIERS}
     res_run: dict[str, list[str]] = {t: [] for t in TIERS}
+    res_ext: dict[str, list[str]] = {t: [] for t in TIERS}
     for r in R.list_rules(lang=lang, kind=kind, standard=standard):
         e = rule_entry(r["id"])
         res[e["tier"]].append(r["id"])
         res_run[e["tier_runnable"]].append(r["id"])
+        res_ext[e.get("tier_extended", e["tier_runnable"])].append(r["id"])
     n = sum(len(v) for v in res.values())
     return {"total": n,
             "all_mappings": {k: len(v) for k, v in res.items()},
             "runnable_toolchain": {k: len(v) for k, v in res_run.items()},
-            "rules_all_mappings": res, "rules_runnable": res_run,
+            "extended_toolchain": {k: len(v) for k, v in res_ext.items()},
+            "rules_all_mappings": res, "rules_runnable": res_run, "rules_extended": res_ext,
             "toolchain": _load()["sources"]["toolchain_versions"]}

@@ -147,7 +147,7 @@ def test_explain_guideline():
 
 def test_coverage_by_standard():
     c = api.rule_coverage()
-    assert c["total"] == 388 and c["all_mappings"]["deterministic"] == 40
+    assert c["total"] == 388 and c["all_mappings"]["deterministic"] == 186   # incl. CodeQL CERT queries
     m = api.rule_coverage(standard="misra-c-2012")
     assert m["total"] == 221 and sum(m["all_mappings"].values()) == 221
     assert m["all_mappings"]["deterministic"] >= 131          # cppcheck MISRA addon rules

@@ -7,6 +7,9 @@ exact. Use the tier and confidence to decide how much to trust a finding.
 |---|---|---|
 | `clang-tidy:cert-*` (rule-specific alias) | high | The checker was written for that rule. Still confirm the context. |
 | `cppcheck:*`, `clangsa:*` mapped to a rule | medium | General bug finders. A leak checker may be mapped to several MEM rules; pick the best fit and report once. |
+| `codeql:*/cert/*` (CERT query pack) | high | Written for that rule. Whole-program queries (DCL40-C, DCL60-CPP) also report collisions between unrelated files analysed together. |
+| `semgrep:*` (bundled pattern rule) | medium | Matches the rule's typical form inside one function. INT33-C/INT34-C fire on any unchecked parameter divisor or shift count; check whether callers can pass the bad value. |
+| `infer:*` mapped to a rule | medium | Interprocedural, but only as good as the compile flags; a file listed under `files_with_errors` was not fully analysed. |
 | LLM review (validated) | depends on the quote and the path you can show | Never report without a concrete path. |
 
 ## Quick triage
