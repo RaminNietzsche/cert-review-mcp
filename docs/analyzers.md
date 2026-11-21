@@ -103,9 +103,11 @@ split by message into `<checker>@<variant>`, and each variant maps to its own ru
 | `alpha.unix.cstring.OutOfBounds` | `mem*` functions | ARR38-C |
 | | string functions | STR31-C |
 
-Mapped checkers the installed clang does not list are skipped with a note; with clang 18,
-`GenericTaint` runs under its older name `alpha.security.taint.TaintPropagation` and
-`optin.taint.TaintedAlloc` is skipped.
+Mapped checkers the installed clang does not list are skipped with a note. Renamed checkers
+run under the installed clang's name: `GenericTaint` is `alpha.security.taint.TaintPropagation`
+in clang 18 and `optin.taint.GenericTaint` from clang 20, `ArrayBoundV2` is
+`security.ArrayBound` in clang 21 (tested with 18.1, 19.1 and 21.1; clang 18 has no
+`optin.taint.TaintedAlloc`).
 
 `data/csa-taint.yaml` adds the byte-order helpers (`ntohs`, `be32toh`, ...) and `strtoul` as
 taint propagators. Limits measured with clang 19.1.7: the taint sources are standard input,

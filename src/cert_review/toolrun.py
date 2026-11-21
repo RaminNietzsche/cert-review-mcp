@@ -217,8 +217,14 @@ def checker_variant(checker: str, message: str) -> str:
 csa_variant = checker_variant
 
 
-# Checkers renamed between clang releases: current name -> name in older clangs.
-CSA_OLD_NAMES = {"alpha.security.taint.GenericTaint": "alpha.security.taint.TaintPropagation"}
+# Checkers renamed between clang releases: the name in the checker map (clang 19) -> names
+# used by other releases, tried in order when the installed clang lacks the mapped name.
+CSA_OTHER_NAMES = {
+    "alpha.security.taint.GenericTaint": ["optin.taint.GenericTaint",              # 20+
+                                          "alpha.security.taint.TaintPropagation"],  # <= 18
+    "alpha.security.ArrayBoundV2": ["security.ArrayBound"],                          # 21+
+}
+TAINT_PROPAGATION = ["alpha.security.taint.TaintPropagation", "optin.taint.TaintPropagation"]
 
 
 @functools.lru_cache(maxsize=4)
@@ -227,7 +233,8 @@ def csa_supported(exe: str) -> frozenset[str] | None:
     An unknown -analyzer-checker aborts the whole analysis, and the checker map is built
     against clang 19 while older clangs (e.g. 18) lack some checkers."""
     names: set[str] = set()
-    for flag in ("-analyzer-checker-help", "-analyzer-checker-help-alpha"):
+    for flag in ("-analyzer-checker-help", "-analyzer-checker-help-alpha",
+                 "-analyzer-checker-help-developer"):
         try:
             out = subprocess.run([exe, "-cc1", flag], capture_output=True, text=True, timeout=30).stdout
         except (OSError, subprocess.SubprocessError):
@@ -292,10 +299,12 @@ def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: 
     known = csa_supported(exe)
     renamed: dict[str, str] = {}
     if known is not None:
-        for new, old in CSA_OLD_NAMES.items():
-            if new in checkers and new not in known and old in known:
-                checkers = [old if c == new else c for c in checkers]
-                renamed[old] = new
+        for name, others in CSA_OTHER_NAMES.items():
+            if name in checkers and name not in known:
+                other = next((o for o in others if o in known), None)
+                if other:
+                    checkers = [other if c == name else c for c in checkers]
+                    renamed[other] = name
         missing = [c for c in checkers if c not in known]
         if missing:
             st.notes.append(f"not in this clang, skipped: {', '.join(missing)}")
@@ -303,6 +312,8 @@ def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: 
     raw: list[RawFinding] = []
     cfg = taint_config()
     taint = any("taint" in c for c in checkers) and cfg.exists()
+    propagation = next((p for p in TAINT_PROPAGATION if known is None or p in known), None)
+    taint = taint and propagation is not None
 
     def one(path: str):
         lang = lang_of(path)
@@ -311,7 +322,7 @@ def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: 
             cmd += ["-Xanalyzer", f"-analyzer-checker={c}"]
         if taint:
             cmd += ["-Xanalyzer", "-analyzer-config", "-Xanalyzer",
-                    f"alpha.security.taint.TaintPropagation:Config={cfg}"]
+                    f"{propagation}:Config={cfg}"]
         flags, cwd = csa_compile_args(path, profile, compdb, root)
         cmd += ["-x", "c" if lang == "c" else "c++", *flags, path, "-o", os.devnull]
         try:
