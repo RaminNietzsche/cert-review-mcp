@@ -42,7 +42,7 @@ count as `deterministic`. Infer issue types are general and count as `partial`.
 
 ## Semgrep rules
 
-`data/semgrep/*.yml` holds 40 rules; each names its CERT rule(s) in `metadata.cert`:
+`data/semgrep/*.yml` holds 41 rules; each names its CERT rule(s) in `metadata.cert`:
 
 | File | Rules covered |
 |---|---|
@@ -51,6 +51,7 @@ count as `deterministic`. Infer issue types are general and count as `partial`.
 | `mem.yml` | MEM30-C, MEM34-C, MEM35-C, MEM50-CPP, MEM51-CPP |
 | `con.yml` | CON31-C, CON34-C, CON36-C, CON39-C, CON40-C, CON41-C, CON50-CPP, CON54-CPP, POS48-C, POS50-C, POS53-C |
 | `misc.yml` | ENV30-C, FIO30-C, FIO34-C, FIO37-C, POS34-C, STR30-C |
+| `size.yml` | INT30-C (unchecked `+` or `*` in an allocation, copy or read size) |
 
 `tests/test_semgrep_rules.py` runs them on the CERT noncompliant and compliant examples in
 `corpus/`. The rules were written against those examples, so the corpus figures for Semgrep in
@@ -69,7 +70,61 @@ condition-variable waits whose callers loop (CON54-CPP 5, CON36-C 2), a
 `compare_exchange_weak` retried with `goto` (CON41-C) and three dereference-before-check
 reports (EXP34-C).
 
+`size.yml` was added after the rest and was not written against the corpus: INT30-C is a
+held-out rule (see [accuracy.md](accuracy.md)). It flags `malloc`, `realloc`, `memcpy`,
+`memmove`, `memset`, `strncpy`, `recv`, `read`, `fread`, `new T[...]` and similar calls whose
+size argument is (or is a variable just assigned from) a sum or product of two non-constant
+operands, unless an `if`, `assert` or `ceph_assert` mentions an operand first. Operands that are
+`sizeof`, literals, ALL-CAPS macros or `strlen(...)` are ignored, so `strlen(s) + 1` and
+`n * sizeof(T)` are not reported. On the same 698 Ceph files it reports one finding
+(`malloc(key.size() + value.size() + 2)` in `src/libcephfs.cc`). Its design follows the
+integer-overflow misses in [benchmark-real.md](benchmark-real.md), so gains there are not fully
+independent of that benchmark.
+
 Rebuild the checker map after editing the rules: `python3 tools/build_checker_map.py ...`.
+
+## Clang Static Analyzer: taint and bounds checkers
+
+`clangsa` runs `clang --analyze` with the mapped checkers, including alpha and opt-in ones that
+clang-tidy cannot enable, and with the file's flags from the compilation database when one is
+given (up to 1.2.0 it always used guessed flags). Checkers that report several weaknesses are
+split by message into `<checker>@<variant>`, and each variant maps to its own rules
+(`data/checker_overlay.yaml`):
+
+| Checker (clang 19) | Variant | CERT rules |
+|---|---|---|
+| `alpha.security.taint.GenericTaint` | untrusted format string | FIO30-C |
+| | untrusted data passed to `system`/`exec*` | ENV33-C, STR02-C |
+| | untrusted value as a size argument | ARR38-C, INT04-C |
+| | other configured sinks | INT04-C |
+| `optin.taint.TaintedAlloc` | | INT04-C, MEM35-C |
+| `alpha.security.ArrayBoundV2` | tainted index | ARR30-C, INT04-C |
+| | untainted index | not mapped (noisy on fragments) |
+| `alpha.unix.cstring.OutOfBounds` | `mem*` functions | ARR38-C |
+| | string functions | STR31-C |
+
+Mapped checkers the installed clang does not list are skipped with a note. Renamed checkers
+run under the installed clang's name: `GenericTaint` is `alpha.security.taint.TaintPropagation`
+in clang 18 and `optin.taint.GenericTaint` from clang 20, `ArrayBoundV2` is
+`security.ArrayBound` in clang 21 (tested with 18.1, 19.1 and 21.1; clang 18 has no
+`optin.taint.TaintedAlloc`).
+
+`data/csa-taint.yaml` adds the byte-order helpers (`ntohs`, `be32toh`, ...) and `strtoul` as
+taint propagators. Limits measured with clang 19.1.7: the taint sources are standard input,
+`getenv` and similar; `read` and `recv` only pass on the taint of their descriptor, which is not
+tainted by default, and entries in the configuration file do not override the built-in rules for
+those names; the buffer filled by `fgets` loses its taint on the path where the result is
+tested. In practice the taint checkers find untrusted format strings and command strings in
+small programs, and rarely fire on library code such as Ceph, where input arrives through
+network buffers and wrapper classes. `alpha.security.MallocOverflow` was tried and left out: on
+the dev rules 3 of its 5 reports were on compliant examples.
+
+`bugprone-narrowing-conversions` (clang-tidy) is split the same way: integer-to-integer
+conversions map to INT31-C with confidence 0.45, floating-to-integer and floating-to-floating
+conversions to FLP34-C, integer-to-floating conversions to nothing. Before, every narrowing was
+reported as both INT31-C and FLP34-C; on real code these reports sit next to many bugs without
+being the bug, and the lower confidence ranks them below more specific findings at the same
+location and hides them at `--min-confidence 0.5`.
 
 ## Infer
 

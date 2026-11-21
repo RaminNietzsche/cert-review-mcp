@@ -51,5 +51,10 @@ def test_reverse_index_lookup():
 
 
 def test_exclusions_removed_and_replacement_added():
-    ids = {r["rule_id"] for r in CM.reverse_index()[("clang-tidy", "bugprone-narrowing-conversions")]}
-    assert "INT31-C" in ids and not ids & {"EXP45-C", "FIO34-C", "FLP36-C"}
+    idx = CM.reverse_index()
+    # the bare checker is no longer mapped; each message variant maps to its own rule
+    assert ("clang-tidy", "bugprone-narrowing-conversions") not in idx
+    ids = {v: {r["rule_id"] for r in idx.get(("clang-tidy", f"bugprone-narrowing-conversions@{v}"), [])}
+           for v in ("int-to-int", "float-to-int", "float-to-float", "int-to-float")}
+    assert ids == {"int-to-int": {"INT31-C"}, "float-to-int": {"FLP34-C"},
+                   "float-to-float": {"FLP34-C"}, "int-to-float": set()}

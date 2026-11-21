@@ -14,7 +14,7 @@
   },
   "overlay": {
    "file": "data/checker_overlay.yaml",
-   "entries": 38
+   "entries": 49
   },
   "exclusions": {
    "file": "data/checker_exclusions.yaml",
@@ -22,7 +22,7 @@
   },
   "semgrep": {
    "files": "data/semgrep/*.yml",
-   "rules": 40
+   "rules": 41
   },
   "codeql": {
    "repository": "https://github.com/github/codeql-coding-standards",
@@ -82,20 +82,20 @@
   },
   "c_recommendation_tier": {
    "deterministic": 4,
-   "partial": 4,
-   "llm-only": 175,
+   "partial": 6,
+   "llm-only": 173,
    "total": 183
   },
   "c_recommendation_tier_runnable": {
    "deterministic": 4,
-   "partial": 2,
-   "llm-only": 177,
+   "partial": 4,
+   "llm-only": 175,
    "total": 183
   },
   "c_recommendation_tier_extended": {
    "deterministic": 4,
-   "partial": 3,
-   "llm-only": 176,
+   "partial": 5,
+   "llm-only": 174,
    "total": 183
   },
   "cpp_rule_tier": {
@@ -207,6 +207,15 @@
    "tier_runnable": "partial",
    "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "alpha.security.ArrayBoundV2@tainted",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
     {
      "tool": "clangsa",
      "checker": "core.NullPointerArithm",
@@ -409,6 +418,24 @@
    "tier_runnable": "partial",
    "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "alpha.security.taint.GenericTaint@buffer-size",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "clangsa",
+     "checker": "alpha.unix.cstring.OutOfBounds@memory",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
     {
      "tool": "clangsa",
      "checker": "unix.StdCLibraryFunctions",
@@ -2454,6 +2481,15 @@
      "available": true,
      "severity_hint": "MEDIUM",
      "alias_of": "bugprone-command-processor"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "alpha.security.taint.GenericTaint@system-call",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     },
     {
      "tool": "codeql",
@@ -5158,6 +5194,15 @@
      "severity_hint": "MEDIUM"
     },
     {
+     "tool": "clangsa",
+     "checker": "alpha.security.taint.GenericTaint@format-string",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
      "tool": "codeql",
      "checker": "c/cert/exclude-user-input-from-format-strings",
      "origins": [
@@ -5731,14 +5776,21 @@
    "checkers": [
     {
      "tool": "clang-tidy",
-     "checker": "bugprone-narrowing-conversions",
+     "checker": "bugprone-narrowing-conversions@float-to-float",
      "origins": [
-      "codechecker",
       "curated-overlay"
      ],
      "specific": false,
-     "available": true,
-     "severity_hint": "MEDIUM"
+     "available": true
+    },
+    {
+     "tool": "clang-tidy",
+     "checker": "bugprone-narrowing-conversions@float-to-int",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     },
     {
      "tool": "clang-tidy",
@@ -5855,10 +5907,47 @@
    "cert_detectable": false
   },
   "INT04-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "tier_extended": "llm-only",
-   "checkers": [],
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "tier_extended": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "alpha.security.ArrayBoundV2@tainted",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "clangsa",
+     "checker": "alpha.security.taint.GenericTaint@buffer-size",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "clangsa",
+     "checker": "alpha.security.taint.GenericTaint@other",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "clangsa",
+     "checker": "optin.taint.TaintedAlloc",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "INT05-C": {
@@ -6018,6 +6107,16 @@
      "specific": false,
      "available": true,
      "confidence": 0.65
+    },
+    {
+     "tool": "semgrep",
+     "checker": "int30-c-unchecked-size-arithmetic",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
     }
    ],
    "cert_detectable": false
@@ -6029,12 +6128,13 @@
    "checkers": [
     {
      "tool": "clang-tidy",
-     "checker": "bugprone-narrowing-conversions",
+     "checker": "bugprone-narrowing-conversions@int-to-int",
      "origins": [
       "curated-overlay"
      ],
      "specific": false,
-     "available": true
+     "available": true,
+     "confidence": 0.45
     },
     {
      "tool": "clang-tidy",
@@ -6741,6 +6841,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "clangsa",
+     "checker": "optin.taint.TaintedAlloc",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     },
     {
      "tool": "clangsa",
@@ -9148,10 +9257,20 @@
    "cert_detectable": false
   },
   "STR02-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "tier_extended": "llm-only",
-   "checkers": [],
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "tier_extended": "partial",
+   "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "alpha.security.taint.GenericTaint@system-call",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "STR03-C": {
@@ -9285,6 +9404,15 @@
    "tier_runnable": "partial",
    "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "clangsa",
+     "checker": "alpha.unix.cstring.OutOfBounds@string",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
     {
      "tool": "clangsa",
      "checker": "security.insecureAPI.gets",

@@ -158,3 +158,56 @@
   checker: STATIC_INITIALIZATION_ORDER_FIASCO
   rules: [DCL56-CPP]
   reason: "A static initializer reads a static object from another translation unit that may not be initialized yet."
+# Clang Static Analyzer taint and bounds checkers. Findings of checkers that report several
+# weaknesses are split by message into "<checker>@<variant>" (src/cert_review/toolrun.py,
+# CSA_VARIANTS); an unlisted variant is not reported. Sources and propagation rules:
+# data/csa-taint.yaml.
+- tool: clangsa
+  checker: alpha.security.taint.GenericTaint@format-string
+  rules: [FIO30-C]
+  reason: "Untrusted data used as a format string."
+- tool: clangsa
+  checker: alpha.security.taint.GenericTaint@system-call
+  rules: [ENV33-C, STR02-C]
+  reason: "Untrusted data passed to system() or an exec function."
+- tool: clangsa
+  checker: alpha.security.taint.GenericTaint@buffer-size
+  rules: [ARR38-C, INT04-C]
+  reason: "Untrusted value used as the size argument of a library function."
+- tool: clangsa
+  checker: alpha.security.taint.GenericTaint@other
+  rules: [INT04-C]
+  reason: "Untrusted value reaches a configured sink without a bound check."
+- tool: clangsa
+  checker: optin.taint.TaintedAlloc
+  rules: [INT04-C, MEM35-C]
+  reason: "Allocation size taken from untrusted input without a bound check."
+- tool: clangsa
+  checker: alpha.security.ArrayBoundV2@tainted
+  rules: [ARR30-C, INT04-C]
+  reason: "Array index taken from untrusted input without a bound check. The untainted variant is noisy on fragments and is not mapped."
+- tool: clangsa
+  checker: alpha.unix.cstring.OutOfBounds@memory
+  rules: [ARR38-C]
+  reason: "memcpy/memset/memmove reads or writes past the end of a buffer."
+- tool: clangsa
+  checker: alpha.unix.cstring.OutOfBounds@string
+  rules: [STR31-C]
+  reason: "A string function writes past the end of the destination."
+# bugprone-narrowing-conversions, split by message (see checker_exclusions.yaml). Integer
+# narrowing is reported on most lines that mix int and size_t, including lines next to
+# real bugs where a more specific finding exists; the lower confidence ranks it below
+# those findings (engine cap_per_location) and hides it at --min-confidence 0.5.
+- tool: clang-tidy
+  checker: bugprone-narrowing-conversions@int-to-int
+  rules: [INT31-C]
+  confidence: 0.45
+  reason: "Integer conversion that may lose data or change sign."
+- tool: clang-tidy
+  checker: bugprone-narrowing-conversions@float-to-int
+  rules: [FLP34-C]
+  reason: "Floating-point value converted to an integer type that may not hold it."
+- tool: clang-tidy
+  checker: bugprone-narrowing-conversions@float-to-float
+  rules: [FLP34-C]
+  reason: "Floating-point value converted to a narrower floating type."

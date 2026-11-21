@@ -179,7 +179,8 @@ def main():
         key = (tool, checker)
         e = mapping.setdefault(rid, {}).setdefault(key, {
             "tool": tool, "checker": checker, "origins": [], "specific": False,
-            "available": checker in avail.get(tool, set()) or
+            # "<checker>@<variant>": one message class of a checker (toolrun.CSA_VARIANTS)
+            "available": checker.split("@", 1)[0] in avail.get(tool, set()) or
                          (tool == "cppcheck" and checker.removeprefix("cppcheck-") in avail["cppcheck"]),
         })
         if confidence is not None:
@@ -206,7 +207,7 @@ def main():
     overlay = yaml.safe_load((ROOT / "data/checker_overlay.yaml").read_text())
     for o in overlay:
         for rid in o["rules"]:
-            add(rid, o["tool"], o["checker"], "curated-overlay", False)
+            add(rid, o["tool"], o["checker"], "curated-overlay", False, confidence=o.get("confidence"))
     excl = yaml.safe_load((ROOT / "data/checker_exclusions.yaml").read_text())
     for x in excl:
         for rid in x["rules"]:

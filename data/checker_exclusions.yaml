@@ -3,8 +3,8 @@
 # (docs/ceph-trial.md), where these produced hundreds of unrelated findings.
 - tool: clang-tidy
   checker: bugprone-narrowing-conversions
-  rules: [EXP45-C, FIO34-C, FLP36-C]
-  reason: "Integer narrowing has nothing to do with assignments in conditions (EXP45-C), the EOF/char distinction (FIO34-C) or int-to-float precision (FLP36-C: only the float variants are relevant, and those are kept under FLP34-C)."
+  rules: [EXP45-C, FIO34-C, FLP36-C, INT31-C, FLP34-C]
+  reason: "Integer narrowing has nothing to do with assignments in conditions (EXP45-C), the EOF/char distinction (FIO34-C) or int-to-float precision (FLP36-C). INT31-C and FLP34-C are mapped per message instead (bugprone-narrowing-conversions@int-to-int / @float-to-int / @float-to-float in checker_overlay.yaml), so an integer narrowing is no longer also reported as FLP34-C and the reverse."
 - tool: clangsa
   checker: optin.core.EnumCastOutOfRange
   rules: [MEM54-CPP]

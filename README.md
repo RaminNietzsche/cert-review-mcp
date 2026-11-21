@@ -52,7 +52,7 @@ optional and not in the images.
 | Set | Total | All mappings: det / partial / llm-only | Reference toolchain | Extended toolchain |
 |---|---|---|---|---|
 | C rules | 122 | 100 / 12 / 10 | 16 / 51 / 55 | 100 / 8 / 14 |
-| C recommendations | 183 | 4 / 4 / 175 | 4 / 2 / 177 | 4 / 3 / 176 |
+| C recommendations | 183 | 4 / 6 / 173 | 4 / 4 / 175 | 4 / 5 / 174 |
 | C++ rules | 83 | 82 / 0 / 1 | 18 / 31 / 34 | 82 / 0 / 1 |
 
 Before the Semgrep rules, the reference toolchain covered C rules 16 / 34 / 72 and C++ rules

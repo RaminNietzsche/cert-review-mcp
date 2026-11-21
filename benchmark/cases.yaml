@@ -16,7 +16,7 @@ projects:
     sparse: ["/src/", "!/src/pybind/", "!/src/test/", "!/src/crimson/", "!/src/seastar/", "!/src/rocksdb/",
              "!/src/boost/", "!/src/spdk/", "!/src/dpdk/", "!/src/arrow/", "!/src/jaegertracing/"]
     compdb: ceph
-    includes: [src/spawn/include]
+    includes: [src/spawn/include, src/rgw, src/rgw/services, src/rgw/driver/rados]
     submodules: [src/fmt, src/s3select, src/xxHash, src/BLAKE3, src/rapidjson, src/spawn, src/dmclock]
   curl:
     repo: https://github.com/curl/curl

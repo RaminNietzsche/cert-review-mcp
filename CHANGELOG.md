@@ -1,5 +1,43 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Clang Static Analyzer taint and bounds checkers mapped to CERT rules:
+  `alpha.security.taint.GenericTaint` (FIO30-C, ENV33-C, STR02-C, ARR38-C, INT04-C),
+  `optin.taint.TaintedAlloc` (INT04-C, MEM35-C), `alpha.security.ArrayBoundV2` with a tainted
+  index (ARR30-C, INT04-C) and `alpha.unix.cstring.OutOfBounds` (ARR38-C, STR31-C). Findings of
+  checkers that report several weaknesses are split by message into `<checker>@<variant>`
+  entries of the checker map; `data/csa-taint.yaml` adds byte-order helpers as taint
+  propagators. See [docs/analyzers.md](docs/analyzers.md).
+- Semgrep rule `int30-c-unchecked-size-arithmetic` (`data/semgrep/size.yml`): unchecked `+` or
+  `*` of two non-constant operands in an allocation, copy or read size.
+- `tools/eval_accuracy.py`: fixed dev / held-out split of the corpus by rule (`--half`), a
+  dev / held-out table and `--compare` with an earlier run.
+- `tools/run_real_benchmark.py`: `--tools` (default: the analyzers of the Docker images, which
+  now include Semgrep), a second score that counts only findings with confidence >= 0.5, and
+  Ceph / other-project rows.
+
+### Changed
+
+- `clangsa` uses the file's flags from the compilation database (it used guessed flags only) and
+  skips mapped checkers the installed clang does not have, with a note; checkers renamed in
+  clang 18, 20 and 21 (`GenericTaint`, `ArrayBoundV2`) run under the installed clang's name.
+- `bugprone-narrowing-conversions` is mapped by message: integer narrowing to INT31-C at
+  confidence 0.45, floating conversions to FLP34-C. Before, every narrowing was reported as both
+  INT31-C and FLP34-C.
+- Real-code benchmark, Ceph cases: `-std` comes from the tree's `CMakeLists.txt` instead of the
+  fix date; `tools/ceph_compdb.py` defines `HAVE_LINUX_TYPES_H` and searches the bundled fmt
+  headers after the system headers, so that fmt's `format` file no longer hides `<format>`.
+- Accuracy on the CERT examples (reference toolchain, corpus-wide): dev rules recall 24% -> 25%
+  at 96% precision; held-out rules recall 17% -> 17% (64 -> 65 TP) with precision 97% -> 96%
+  (one INT04-C false positive). See [docs/accuracy.md](docs/accuracy.md).
+- Real-code benchmark (same analyzers as the images): 6 of 57 detected (was 5; the new one,
+  curl CVE-2017-8816, comes from the size-arithmetic rule), Ceph 2 of 33 (unchanged), partial
+  Ceph cases 27 -> 18 of 33 scored, wrong-rule-only cases 12 -> 5 at confidence >= 0.5. See
+  [docs/benchmark-real.md](docs/benchmark-real.md).
+
 ## 1.2.0 (2026-11-21)
 
 ### Added

@@ -4,7 +4,7 @@ Corpus: 1548 code examples taken from the CERT rule pages (commit `73ee7a0dbe77`
 
 Toolchain: clang-tidy 19.1.7, clangsa 19.1.7, cppcheck 2.17.1, semgrep 1.186.0, infer 1.3.0, codeql 2.27.5. CodeQL ran the `codeql/cert-c-coding-standards` and `codeql/cert-cpp-coding-standards` packs (codeql/cert-c-coding-standards 2.63.0, codeql/cert-cpp-coding-standards 2.63.0).
 
-Run time: core 286s, semgrep 12s, infer 126s, codeql 6680s.
+Run time: core 277s, semgrep 16s, infer 91s, codeql 6680s.
 
 A noncompliant example is *detected* when the engine reports that example's own rule in the file; a compliant example is a *false positive* when it does. Precision = TP/(TP+FP), recall = TP/(TP+FN). *Scored rules* are the rules with at least one checker in the toolset; *corpus-wide* counts every example, including rules no checker covers, so it is the number to compare across toolsets. The examples are short fragments and many do not compile standalone, so absolute numbers understate what the tools achieve on real code, and precision is optimistic because compliant fragments are tiny.
 
@@ -12,57 +12,72 @@ A noncompliant example is *detected* when the engine reports that example's own 
 
 | Toolset | Scored rules | TP | FN | FP | TN | Precision | Recall (scored) | Corpus-wide recall | Corpus-wide FP rate |
 |---|---|---|---|---|---|---|---|---|---|
-| baseline: clang-tidy, clangsa, cppcheck | 103 | 105 | 147 | 5 | 303 | 95% | 42% | 15% (105/708) | 1% (5/840) |
-| reference image: + semgrep | 122 | 141 | 150 | 5 | 357 | 97% | 48% | 20% (141/708) | 1% (5/840) |
-| + infer | 129 | 142 | 160 | 5 | 371 | 97% | 47% | 20% (142/708) | 1% (5/840) |
-| + codeql (all analyzers) | 197 | 201 | 216 | 28 | 492 | 88% | 48% | 28% (201/708) | 3% (28/840) |
+| baseline: clang-tidy, clangsa, cppcheck | 106 | 109 | 150 | 6 | 310 | 95% | 42% | 15% (109/708) | 1% (6/840) |
+| reference image: + semgrep | 124 | 145 | 151 | 6 | 361 | 96% | 49% | 20% (145/708) | 1% (6/840) |
+| + infer | 131 | 146 | 161 | 6 | 375 | 96% | 48% | 21% (146/708) | 1% (6/840) |
+| + codeql (all analyzers) | 199 | 204 | 218 | 29 | 496 | 88% | 48% | 29% (204/708) | 3% (29/840) |
 
-### The 103 rules the baseline scores
+## Dev and held-out rules
+
+Every rule, with all of its examples, is assigned to one half by a hash of its ID (`sha256("cert-review-split-v1:<rule>") % 2`). Checkers and mappings were tuned on dev rules only; held-out rules show whether that generalises. Precision and recall are corpus-wide (every example of the half counts). *Before* is release 1.2.0 (same corpus and analyzer versions).
+
+| Toolset | Half | Rules | TP | FN | FP | TN | Precision | Recall | Before: precision | Before: recall |
+|---|---|---|---|---|---|---|---|---|---|---|
+| baseline: clang-tidy, clangsa, cppcheck | dev | 177 | 55 | 269 | 3 | 378 | 95% | 17% | 95% | 16% (52) |
+| baseline: clang-tidy, clangsa, cppcheck | held-out | 194 | 54 | 330 | 3 | 456 | 95% | 14% | 96% | 14% (53) |
+| reference image: + semgrep | dev | 177 | 80 | 244 | 3 | 378 | 96% | 25% | 96% | 24% (77) |
+| reference image: + semgrep | held-out | 194 | 65 | 319 | 3 | 456 | 96% | 17% | 97% | 17% (64) |
+| + infer | dev | 177 | 81 | 243 | 3 | 378 | 96% | 25% | 96% | 24% (78) |
+| + infer | held-out | 194 | 65 | 319 | 3 | 456 | 96% | 17% | 97% | 17% (64) |
+| + codeql (all analyzers) | dev | 177 | 99 | 225 | 17 | 364 | 85% | 31% | 85% | 30% (97) |
+| + codeql (all analyzers) | held-out | 194 | 105 | 279 | 12 | 447 | 90% | 27% | 90% | 27% (104) |
+
+### The 106 rules the baseline scores
 
 Same rules for every toolset, so the rows differ only by what the added analyzers find.
 
 | Toolset | TP | FN | FP | TN | Precision | Recall |
 |---|---|---|---|---|---|---|
-| baseline: clang-tidy, clangsa, cppcheck | 105 | 147 | 5 | 303 | 95% | 42% |
-| reference image: + semgrep | 116 | 136 | 5 | 303 | 96% | 46% |
-| + infer | 116 | 136 | 5 | 303 | 96% | 46% |
-| + codeql (all analyzers) | 137 | 115 | 19 | 289 | 88% | 54% |
+| baseline: clang-tidy, clangsa, cppcheck | 109 | 150 | 6 | 310 | 95% | 42% |
+| reference image: + semgrep | 122 | 137 | 6 | 310 | 95% | 47% |
+| + infer | 122 | 137 | 6 | 310 | 95% | 47% |
+| + codeql (all analyzers) | 142 | 117 | 20 | 296 | 88% | 55% |
 
 ### By tier: baseline: clang-tidy, clangsa, cppcheck
 
 | Group | Rules | TP | FN | FP | TN | Precision | Recall |
 |---|---|---|---|---|---|---|---|
-| all_scored | 103 | 105 | 147 | 5 | 303 | 95% | 42% |
+| all_scored | 106 | 109 | 150 | 6 | 310 | 95% | 42% |
 | deterministic | 38 | 41 | 25 | 0 | 79 | 100% | 62% |
-| partial | 65 | 64 | 122 | 5 | 224 | 93% | 34% |
-| llm-only (not scored) | 268 | | | | | | |
+| partial | 68 | 68 | 125 | 6 | 231 | 92% | 35% |
+| llm-only (not scored) | 265 | | | | | | |
 
 ### By tier: reference image: + semgrep
 
 | Group | Rules | TP | FN | FP | TN | Precision | Recall |
 |---|---|---|---|---|---|---|---|
-| all_scored | 122 | 141 | 150 | 5 | 357 | 97% | 48% |
+| all_scored | 124 | 145 | 151 | 6 | 361 | 96% | 49% |
 | deterministic | 38 | 41 | 25 | 0 | 79 | 100% | 62% |
-| partial | 84 | 100 | 125 | 5 | 278 | 95% | 44% |
-| llm-only (not scored) | 249 | | | | | | |
+| partial | 86 | 104 | 126 | 6 | 282 | 95% | 45% |
+| llm-only (not scored) | 247 | | | | | | |
 
 ### By tier: + infer
 
 | Group | Rules | TP | FN | FP | TN | Precision | Recall |
 |---|---|---|---|---|---|---|---|
-| all_scored | 129 | 142 | 160 | 5 | 371 | 97% | 47% |
+| all_scored | 131 | 146 | 161 | 6 | 375 | 96% | 48% |
 | deterministic | 38 | 41 | 25 | 0 | 79 | 100% | 62% |
-| partial | 91 | 101 | 135 | 5 | 292 | 95% | 43% |
-| llm-only (not scored) | 242 | | | | | | |
+| partial | 93 | 105 | 136 | 6 | 296 | 95% | 44% |
+| llm-only (not scored) | 240 | | | | | | |
 
 ### By tier: + codeql (all analyzers)
 
 | Group | Rules | TP | FN | FP | TN | Precision | Recall |
 |---|---|---|---|---|---|---|---|
-| all_scored | 197 | 201 | 216 | 28 | 492 | 88% | 48% |
-| deterministic | 186 | 197 | 195 | 28 | 461 | 88% | 50% |
-| partial | 11 | 4 | 21 | 0 | 31 | 100% | 16% |
-| llm-only (not scored) | 174 | | | | | | |
+| all_scored | 199 | 204 | 218 | 29 | 496 | 88% | 48% |
+| deterministic | 186 | 199 | 193 | 28 | 461 | 88% | 51% |
+| partial | 13 | 5 | 25 | 1 | 35 | 83% | 17% |
+| llm-only (not scored) | 172 | | | | | | |
 
 ## Per rule: reference image: + semgrep
 
@@ -70,7 +85,7 @@ Same rules for every toolset, so the rows differ only by what the added analyzer
 |---|---|---|---|---|---|---|---|
 | ARR30-C | partial | 0 | 0 | 0 | 7 | n/a | n/a |
 | ARR32-C | partial | 0 | 2 | 0 | 2 | n/a | 0% |
-| ARR38-C | partial | 1 | 6 | 0 | 7 | 100% | 14% |
+| ARR38-C | partial | 4 | 3 | 0 | 7 | 100% | 57% |
 | CON31-C | partial | 0 | 1 | 0 | 1 | n/a | 0% |
 | CON33-C | partial | 1 | 0 | 0 | 1 | 100% | 100% |
 | CON34-C | partial | 1 | 3 | 0 | 5 | 100% | 25% |
@@ -136,6 +151,7 @@ Same rules for every toolset, so the rows differ only by what the added analyzer
 | FLP32-C | partial | 0 | 4 | 0 | 4 | n/a | 0% |
 | FLP34-C | partial | 1 | 1 | 1 | 1 | 50% | 50% |
 | FLP37-C | deterministic | 1 | 0 | 0 | 1 | 100% | 100% |
+| INT04-C | partial | 1 | 2 | 1 | 2 | 50% | 33% |
 | INT09-C | deterministic | 1 | 0 | 0 | 3 | 100% | 100% |
 | INT30-C | partial | 1 | 2 | 0 | 8 | 100% | 33% |
 | INT31-C | partial | 1 | 5 | 0 | 6 | 100% | 17% |
@@ -184,6 +200,7 @@ Same rules for every toolset, so the rows differ only by what the added analyzer
 | PRE02-C | partial | 2 | 3 | 0 | 2 | 100% | 40% |
 | PRE31-C | partial | 2 | 1 | 0 | 5 | 100% | 67% |
 | SIG30-C | deterministic | 1 | 2 | 0 | 3 | 100% | 33% |
+| STR02-C | partial | 0 | 2 | 0 | 2 | n/a | 0% |
 | STR30-C | partial | 3 | 0 | 0 | 3 | 100% | 100% |
 | STR31-C | partial | 2 | 6 | 1 | 11 | 67% | 25% |
 | STR34-C | deterministic | 1 | 2 | 0 | 2 | 100% | 33% |
@@ -199,7 +216,7 @@ Same rules for every toolset, so the rows differ only by what the added analyzer
 | ARR32-C | deterministic | 1 | 1 | 1 | 1 | 50% | 50% |
 | ARR36-C | deterministic | 0 | 1 | 0 | 1 | n/a | 0% |
 | ARR37-C | deterministic | 1 | 0 | 0 | 2 | 100% | 100% |
-| ARR38-C | deterministic | 2 | 5 | 1 | 6 | 67% | 29% |
+| ARR38-C | deterministic | 4 | 3 | 1 | 6 | 80% | 57% |
 | ARR39-C | deterministic | 0 | 3 | 0 | 3 | n/a | 0% |
 | CON30-C | deterministic | 1 | 0 | 0 | 2 | 100% | 100% |
 | CON31-C | deterministic | 0 | 1 | 0 | 1 | n/a | 0% |
@@ -319,6 +336,7 @@ Same rules for every toolset, so the rows differ only by what the added analyzer
 | FLP34-C | deterministic | 1 | 1 | 1 | 1 | 50% | 50% |
 | FLP36-C | deterministic | 1 | 0 | 0 | 1 | 100% | 100% |
 | FLP37-C | deterministic | 1 | 0 | 0 | 1 | 100% | 100% |
+| INT04-C | partial | 1 | 2 | 1 | 2 | 50% | 33% |
 | INT09-C | deterministic | 1 | 0 | 0 | 3 | 100% | 100% |
 | INT30-C | deterministic | 3 | 0 | 0 | 8 | 100% | 100% |
 | INT31-C | deterministic | 3 | 3 | 1 | 5 | 75% | 50% |
@@ -382,6 +400,7 @@ Same rules for every toolset, so the rows differ only by what the added analyzer
 | SIG31-C | deterministic | 1 | 0 | 0 | 2 | 100% | 100% |
 | SIG34-C | deterministic | 0 | 1 | 0 | 2 | n/a | 0% |
 | SIG35-C | deterministic | 1 | 0 | 0 | 1 | 100% | 100% |
+| STR02-C | partial | 0 | 2 | 0 | 2 | n/a | 0% |
 | STR30-C | deterministic | 3 | 0 | 0 | 3 | 100% | 100% |
 | STR31-C | deterministic | 2 | 6 | 2 | 10 | 50% | 25% |
 | STR32-C | deterministic | 0 | 3 | 0 | 4 | n/a | 0% |
@@ -397,7 +416,13 @@ Same rules for every toolset, so the rows differ only by what the added analyzer
 
 * **Semgrep figures are in-sample.** The bundled rules in `data/semgrep/` were written while
   looking at these CERT examples, so their recall here overstates what they find in other code.
-  An out-of-sample check on Ceph is in [analyzers.md](analyzers.md).
+  This holds for both halves of the split: those rules predate it. An out-of-sample check on Ceph
+  is in [analyzers.md](analyzers.md).
+* **Dev and held-out rules.** Changes made after the split (the Clang taint and bounds checkers,
+  the message-based split of `bugprone-narrowing-conversions`, the size-arithmetic Semgrep rule)
+  were tuned on dev rules only, and the held-out rows are the check on them. The split is by rule,
+  so a held-out rule (for example INT30-C, INT32-C, STR31-C, FLP34-C) was never looked at during
+  that work, not even through a sibling example.
 * **CodeQL** ran with one database per example and only the queries mapped to that example's
   rule. Whole-program queries (DCL40-C, DCL60-CPP) need two translation units, which a single
   example file does not have.

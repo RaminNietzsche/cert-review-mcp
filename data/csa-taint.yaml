@@ -1,0 +1,44 @@
+# Taint configuration for the Clang Static Analyzer's alpha.security.taint checkers (see
+# clang's "Taint Analysis Configuration"). clang 19's sources are standard input (fgets,
+# scanf, getchar, ...), getenv and command-line style inputs; read and recv only pass on
+# taint that their descriptor already carries, and entries here cannot override the
+# built-in rules for those names (tested with clang 19.1.7). This file only adds the
+# byte-order helpers used to decode lengths from input buffers, so a value that passes
+# through them stays tainted.
+Propagations:
+  - Name: ntohs
+    SrcArgs: [0]
+    DstArgs: [-1]
+  - Name: ntohl
+    SrcArgs: [0]
+    DstArgs: [-1]
+  - Name: htons
+    SrcArgs: [0]
+    DstArgs: [-1]
+  - Name: htonl
+    SrcArgs: [0]
+    DstArgs: [-1]
+  - Name: be16toh
+    SrcArgs: [0]
+    DstArgs: [-1]
+  - Name: be32toh
+    SrcArgs: [0]
+    DstArgs: [-1]
+  - Name: be64toh
+    SrcArgs: [0]
+    DstArgs: [-1]
+  - Name: le16toh
+    SrcArgs: [0]
+    DstArgs: [-1]
+  - Name: le32toh
+    SrcArgs: [0]
+    DstArgs: [-1]
+  - Name: le64toh
+    SrcArgs: [0]
+    DstArgs: [-1]
+  - Name: strtoul
+    SrcArgs: [0]
+    DstArgs: [-1]
+  - Name: strtoull
+    SrcArgs: [0]
+    DstArgs: [-1]
