@@ -35,7 +35,9 @@ written, uploaded or posted.
 Rule lookup: list_rules (structured filters), search_rules (keywords), get_rule (one rule's
 full text), get_rule_coverage (what checkers can detect).
 Review flow:
-1. check_diff for a change, or check_files for whole files or directories.
+1. check_diff for a change, or check_files for whole files or directories; pass baseline_path
+   to hide findings already recorded in a .cert-review-baseline.json.
+   explain_finding turns one finding into a rule summary, the closest CERT example and a fix.
 2. build_review_packet for rules no checker decides; judge each hunk and write findings
    that cite a candidate rule_id and quote that rule's text verbatim.
 3. validate_findings to drop ungrounded findings.
@@ -94,6 +96,12 @@ Compdb = Annotated[str | None, Field(
                 "recommended: without it files are compiled with guessed flags and often fail "
                 "to parse. Omitted: auto-detected in root, root/build or root/build-clang.",
     examples=["/home/me/ceph/build"])]
+BaselinePath = Annotated[str | None, Field(
+    description="Absolute path of a baseline JSON written by `cert-review baseline create`. Findings "
+                "recorded there are left out and counted in `baseline`; file paths in it are relative "
+                "to its directory. Matching uses rule, file and hashes of the code line and its "
+                "neighbours, so line shifts do not resurface old findings. Omit to report everything.",
+    examples=["/home/me/ceph/.cert-review-baseline.json"])]
 LANGS = Literal["any", "c", "cpp"]
 Standards = Annotated[list[StandardFilter] | None, Field(
     description="Standards to map findings to, overriding the profile's `standards` (default "
@@ -171,12 +179,27 @@ class CheckResult(_Out):
     warnings: list[str] = Field(description="One line per analyzer that could not fully analyse its input (compile errors or timeouts); non-empty means the result is incomplete.")
     notes: list[str] = Field(description="Engine notes, e.g. 'no C/C++ files selected'.")
     suppressed_count: int = Field(description="Findings hidden by the profile or inline ignores.")
-    summary: dict[str, Any] = Field(description="total, by_severity {error, warning, note}, top_rules [[rule_id, count], ...].")
+    summary: dict[str, Any] = Field(description="total, by_severity {error, warning, note}, top_rules [[rule_id, count], ...]. Counts only findings left after the baseline filter.")
+    baseline: dict[str, Any] | None = Field(None, description=(
+        "Present only with baseline_path: path, entries (in the file), new (findings returned), "
+        "baselined (findings hidden because they match an entry), fixed (entries in analysed files "
+        "with no matching finding; null for check_diff, which sees only changed lines), "
+        "fixed_entries[] (up to 50 {rule_id, file, line, message}) and note."))
 
 
 class DiffCheckResult(CheckResult):
     changed_files: list[str] = Field(description="Every file in the diff, relative to root, including non-C/C++ files that were skipped.")
     root: str = Field(description="Absolute repository root used to resolve diff paths.")
+
+
+class Explanation(_Out):
+    rule: dict[str, Any] = Field(description="id, title, lang, category, url, severity, priority, level, cwe[], summary (first sentence of the rule), coverage (checker tier).")
+    finding: dict[str, Any] = Field(description="Echo of the input: file, line, tool, checker, message, code (flagged line) and snippet (numbered lines around it, read from the file).")
+    why: list[str] = Field(description="Reasons the finding matches the rule: checker mapping (rule-specific or general), message, APIs the rule discusses, identifiers shared with the CERT example, profile notes.")
+    example: dict[str, Any] | None = Field(description="Closest CERT example pair: index, similarity (token Jaccard 0-1), shared_tokens[], noncompliant {heading, code}, compliant {heading, code, text}; null when the rule has no example pair.")
+    fix: dict[str, Any] = Field(description="summary (one-line advice), steps[] (ordered advice: follow the compliant example, API replacements, lines it adds), example_diff (unified diff noncompliant -> compliant), category_advice.")
+    alternatives: list[dict[str, Any]] = Field(description="Next best example pairs {index, heading, score}; pass a different code snippet to steer the choice.")
+    profile: str = Field(description="Profile used for notes and disabled rules.")
 
 
 class Packet(_Out):
@@ -236,6 +259,18 @@ class FindingOut(BaseModel):
     message: str
     tool: str
     checker: str
+
+
+class FindingRef(BaseModel):
+    """One finding to explain: a check_files/check_diff finding unchanged, or just a rule and a location."""
+    model_config = ConfigDict(extra="allow")
+    rule_id: str = Field(description="SEI CERT rule ID of the finding, e.g. ERR34-C.", examples=["ERR34-C"])
+    file: str | None = Field(None, description="Absolute path of the source file; the flagged line and its neighbours are read from it.")
+    line: int | None = Field(None, ge=1, description="1-based line of the finding in `file`.")
+    code: str | None = Field(None, description="The flagged source line or a short snippet. Use when the file is not readable by the server; overrides the line read from `file`.")
+    message: str | None = Field(None, description="Analyzer or reviewer message; its words also steer the example choice.")
+    tool: str | None = Field(None, description="Analyzer that reported it (clang-tidy, clangsa, cppcheck), as in check_files output.")
+    checker: str | None = Field(None, description="Checker name, e.g. cert-err34-c; used to say whether the mapping is rule-specific.")
 
 
 class PacketIn(BaseModel):
@@ -408,7 +443,9 @@ def build_server() -> Any:
             "but minutes for large trees. Pass `compdb` when the project has a compilation "
             "database; without it flags are guessed and project headers are often missing. A "
             "tools[].status of 'partial' or non-empty `warnings` means some files did not "
-            "compile or timed out, so an empty result is not proof."))
+            "compile or timed out, so an empty result is not proof. With `baseline_path`, "
+            "findings already in the baseline are hidden and `baseline` reports new, baselined "
+            "and fixed counts."))
     @_guard
     def check_files(
         path: Annotated[str, Field(description="Absolute path of a C/C++ file or a directory to scan recursively. Files are picked by the profile's extensions and exclude_paths.", examples=["/home/me/proj/src/buf.c", "/home/me/proj/src"])],
@@ -420,9 +457,11 @@ def build_server() -> Any:
         min_confidence: MinConfidence = 0.0,
         include_suppressed: IncludeSuppressed = False,
         standards: Standards = None,
+        baseline_path: BaselinePath = None,
     ) -> CheckResult:
         return api.check_file(_exists(path), profile, _opt(lang), compdb, root, list(tools),
-                              min_confidence, include_suppressed, standards=standards)
+                              min_confidence, include_suppressed, standards=standards,
+                              baseline=_exists(baseline_path) if baseline_path else None)
 
     @mcp.tool(
         title="Check changed C/C++ lines for coding-standard violations",
@@ -438,7 +477,8 @@ def build_server() -> Any:
             "nothing. For git refs, files must exist at `head` or line numbers will not match. "
             "With `diff_text`, missing files are reconstructed under `repo` (or a temp tree when "
             "`repo` is omitted) so remote MCP hosts can review without your checkout. Check "
-            "tools[].status and `warnings` before trusting an empty result."))
+            "tools[].status and `warnings` before trusting an empty result. `baseline_path` hides "
+            "findings recorded in a baseline file (fixed is not computed in diff scope)."))
     @_guard
     def check_diff(
         repo: Annotated[str, Field(description="Absolute path of the git checkout; diff paths are resolved against it.", examples=["/home/me/ceph"])],
@@ -451,11 +491,42 @@ def build_server() -> Any:
         min_confidence: MinConfidence = 0.0,
         include_suppressed: IncludeSuppressed = False,
         standards: Standards = None,
+        baseline_path: BaselinePath = None,
     ) -> DiffCheckResult:
         if not (diff_text or base):
             raise ToolError("provide base (git ref) or diff_text")
         return api.check_diff(_repo_for_diff(repo, diff_text), base, head, diff_text, profile, compdb,
-                              list(tools), min_confidence, include_suppressed, standards=standards)
+                              list(tools), min_confidence, include_suppressed, standards=standards,
+                              baseline=_exists(baseline_path) if baseline_path else None)
+
+    @mcp.tool(
+        title="Explain a SEI CERT finding and suggest a fix",
+        annotations=ToolAnnotations(title="Explain a SEI CERT finding and suggest a fix", **RO),
+        structured_output=True,
+        description=(
+            "Explain one finding: a short rule summary, why the finding matches the rule (checker "
+            "mapping, APIs, shared identifiers), the rule's noncompliant/compliant example pair "
+            "most similar to the flagged code (token overlap), a unified diff between them, and "
+            "concrete fix steps derived from that compliant example plus per-API and per-category "
+            "advice. Use after check_files or check_diff when you need to explain or fix a "
+            "finding; pass the finding object unchanged, or rule_id with file and line, or with a "
+            "code snippet. Use get_rule instead for the full rule text and all examples, and "
+            "validate_findings (not this tool) to check that a manually written finding is "
+            "grounded. Deterministic and offline: reads only the bundled rules and the named "
+            "file. An unknown rule_id returns an error listing close matches."))
+    @_guard
+    def explain_finding(
+        finding: Annotated[FindingRef, Field(description="The finding: an item of check_files/check_diff `findings` as is, or {rule_id, file, line} or {rule_id, code}.")],
+        profile: Profile = "default",
+        context_lines: Annotated[int, Field(ge=0, le=20, description="Lines shown around the flagged line in finding.snippet (and used as fallback tokens when the line is blank).")] = 3,
+    ) -> Explanation:
+        f = finding.model_dump(exclude_none=True)
+        if f.get("file") and not Path(f["file"]).expanduser().exists() and not f.get("code"):
+            raise ToolError(f"path not found: {f['file']} (pass an absolute path, or `code` with the flagged line)")
+        d = api.explain_finding(f, profile, context_lines)
+        if "error" in d:
+            raise ToolError(f"{d['error']}; did you mean: {', '.join(d['did_you_mean']) or 'none'}")
+        return d
 
     # ------------------------------------------------------------ manual review layer
     @mcp.tool(

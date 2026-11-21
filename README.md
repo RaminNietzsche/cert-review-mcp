@@ -64,7 +64,7 @@ git clone <this repository> cert-review-mcp && cd cert-review-mcp
 python3 -m venv .venv && . .venv/bin/activate
 pip install -e '.[dev]'
 sudo apt-get install clang clang-tidy cppcheck       # static layer (optional but recommended)
-pytest                                              # 145 tests
+pytest                                              # 167 tests
 ```
 
 The package reads `data/` and `profiles/` from the checkout (set `CERT_REVIEW_HOME` to point
@@ -164,9 +164,13 @@ directory.
 | `get_rule_coverage(standard, lang, kind, include_ids)` | Rule counts per tier: deterministic / partial / llm-only |
 | `check_files(path, profile, standards, compdb, root, lang, tools, ...)` | Analyzer findings for a file or a directory tree |
 | `check_diff(repo, base, head \| diff_text, profile, standards, compdb, ...)` | Analyzer findings on changed lines only |
+| `explain_finding(finding, profile, context_lines)` | One finding: rule summary, why it matches, closest noncompliant/compliant example pair, fix steps |
 | `build_review_packet(path \| repo + base \| diff_text, ...)` | Code hunks plus candidate rule texts for manual review |
 | `validate_findings(findings, packet, profile)` | Accept only grounded findings (rule ID + verbatim quote; MISRA/AUTOSAR quotes only when a licensed text is loaded) |
 | `format_findings(findings, style, root, warnings)` | `markdown`, `github`, `gitlab`, `sarif`, `codequality` or `gitlab-sast`; formatting only |
+
+`check_files` and `check_diff` take an optional `baseline_path`: findings recorded in a
+baseline file are hidden and counted (new, baselined, fixed). See [docs/baseline.md](docs/baseline.md).
 
 MCP tool and parameter names changed after the `v1` release; see [CHANGELOG.md](CHANGELOG.md).
 
@@ -182,6 +186,9 @@ cert-review check src/common/Throttle.cc --profile ceph --compdb build --format 
 cert-review diff --repo ~/ceph --base origin/main --profile ceph --format sarif -o out.sarif
 cert-review diff --diff-file change.patch --format github > review.json   # payload only
 cert-review explain EXP34-C
+cert-review explain-finding ERR34-C --file src/parse.c --line 42     # closest example + fix
+cert-review baseline create src --compdb build                      # record existing findings
+cert-review check src --compdb build --baseline .cert-review-baseline.json --fail-on warning
 cert-review coverage --lang cpp
 cert-review rules --lang cpp --coverage llm-only
 cert-review packet --repo ~/ceph --base origin/main --profile ceph -o packet.json
@@ -192,7 +199,7 @@ cert-review rules --standard misra-c-2012 --classification mandatory
 cert-review explain MISRA-C-2012-17.2
 ```
 
-`--fail-on error|warning|note` sets the exit code for CI. Silence one rule on a line with
+`--fail-on error|warning|note` sets the exit code for CI; with `--baseline` only new findings count. Silence one rule on a line with
 `// cert-review: ignore EXP34-C reason`.
 
 ## Profiles

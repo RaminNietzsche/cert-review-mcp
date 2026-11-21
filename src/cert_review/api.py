@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from . import baseline as BL
 from . import checkers_map as CM
 from . import diffutil
 from . import engine
@@ -99,6 +100,21 @@ def explain_rule(rule_id: str, profile: str = "default") -> dict:
     }
 
 
+def explain_finding(finding: dict, profile: str = "default", context_lines: int = 3) -> dict:
+    from . import explain as EX
+    return EX.explain(finding, profile, context_lines)
+
+
+def write_baseline(result: dict, path: str, update: bool = False) -> dict:
+    """Create or update a baseline file from a check_file/check_diff result."""
+    root = BL.root_of(path)
+    old = BL.load(path) if update and Path(path).expanduser().exists() else None
+    data, stats = BL.update(old, result["findings"], result.get("files", []), root)
+    BL.dump(data, Path(path).expanduser())
+    stats["path"] = str(Path(path).expanduser().resolve())
+    return stats
+
+
 def search_rules(query: str, limit: int = 10, lang: str | None = None, standard: Any = None) -> dict:
     return {"query": query, "results": R.search(query, limit, lang, standard)}
 
@@ -111,14 +127,17 @@ def check_file(path: str | list[str], profile: str = "default", lang: str | None
                compdb: str | None = None, root: str | None = None,
                tools: list[str] | None = None, min_confidence: float = 0.0,
                include_suppressed: bool = False, jobs: int = 4,
-               max_rules_per_location: int = 2, standards: Any = None) -> dict:
+               max_rules_per_location: int = 2, standards: Any = None,
+               baseline: str | None = None) -> dict:
     paths = [path] if isinstance(path, str) else list(path)
     res = engine.check(_collect(paths), profile, lang, compdb, root,
                        tuple(tools) if tools else engine.DEFAULT_TOOLS,
                        None, jobs, max_rules_per_location, min_confidence, include_suppressed,
                        standards)
     d = res.to_dict(include_suppressed)
-    d["summary"] = summarize(res.findings)
+    if baseline:
+        BL.apply(d, baseline, scope="files")
+    d["summary"] = summarize(d["findings"])
     return d
 
 
@@ -134,7 +153,8 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
                diff_text: str | None = None, profile: str = "default",
                compdb: str | None = None, tools: list[str] | None = None,
                min_confidence: float = 0.0, include_suppressed: bool = False, jobs: int = 4,
-               max_rules_per_location: int = 2, standards: Any = None) -> dict:
+               max_rules_per_location: int = 2, standards: Any = None,
+               baseline: str | None = None) -> dict:
     text = _diff_text(repo, base, head, diff_text)
     changed = diffutil.parse_unified_diff(text)
     root_p, abs_changed = diffutil.prepare_diff_workspace(repo, text)
@@ -146,7 +166,9 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
                        abs_changed, jobs, max_rules_per_location, min_confidence, include_suppressed,
                        standards)
     d = res.to_dict(include_suppressed)
-    d["summary"] = summarize(res.findings)
+    if baseline:
+        BL.apply(d, baseline, scope="diff")
+    d["summary"] = summarize(d["findings"])
     d["changed_files"] = sorted(changed)
     d["root"] = root
     return d
