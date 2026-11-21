@@ -1,0 +1,133 @@
+name: SEI CERT C/C++ review
+description: Check C and C++ changes against the SEI CERT C and C++ Coding Standards (clang-tidy, Clang Static Analyzer, cppcheck mapped to rule IDs).
+author: Ramin Najarbashi
+branding:
+  icon: shield
+  color: blue
+inputs:
+  profile:
+    description: 'Review profile: default, ceph, or a path to a profile YAML in the repository.'
+    default: default
+  mode:
+    description: 'diff (changed lines only) or full. Default: diff on pull_request events, full otherwise.'
+    required: false
+  base-ref:
+    description: 'Base ref/branch for diff mode. Default: the pull request base. Needs history (actions/checkout with fetch-depth: 0).'
+    required: false
+  paths:
+    description: Files or directories to analyse in full mode (newline or comma separated).
+    default: .
+  include:
+    description: Only report findings in files matching these globs, relative to the repository (newline or comma separated).
+    required: false
+  exclude:
+    description: Drop findings in files matching these globs.
+    required: false
+  compile-commands:
+    description: Path to compile_commands.json or its directory. Strongly recommended; without it many files do not parse.
+    required: false
+  tools:
+    description: 'Comma separated: clang-tidy, clangsa, cppcheck.'
+    default: clang-tidy,cppcheck
+  min-confidence:
+    description: Hide findings below this confidence (0..1).
+    default: '0.5'
+  fail-on:
+    description: 'Fail the job when a finding at or above this severity exists: error, warning, note or never.'
+    default: never
+  sarif-file:
+    description: Where to write the SARIF 2.1.0 report (relative to the workspace).
+    default: cert-review.sarif
+  upload-sarif:
+    description: 'Upload the SARIF report to GitHub code scanning (needs security-events: write; not available for fork PRs).'
+    default: 'false'
+  review-comments:
+    description: Post one pull-request review with inline comments for the most important findings. Off by default.
+    default: 'false'
+  max-comments:
+    description: Maximum inline comments per review.
+    default: '30'
+  github-token:
+    description: 'Token used only when review-comments is true (needs pull-requests: write).'
+    required: false
+  working-directory:
+    description: Project directory inside the workspace.
+    default: .
+  sarif-category:
+    description: Code scanning category for the upload.
+    default: cert-review
+  image:
+    description: Optional prebuilt image (for example ghcr.io/<owner>/cert-review:v1) used instead of building the Dockerfile.
+    required: false
+outputs:
+  sarif-file:
+    description: Path of the SARIF report.
+    value: ${{ steps.run.outputs.sarif-file }}
+  findings:
+    description: Number of findings reported.
+    value: ${{ steps.run.outputs.findings }}
+  errors:
+    description: Number of findings with severity error.
+    value: ${{ steps.run.outputs.errors }}
+runs:
+  using: composite
+  steps:
+  - name: Build the pinned toolchain image
+    id: build
+    if: ${{ inputs.image == '' }}
+    shell: bash
+    run: |
+      docker build -t cert-review-action:local "$GITHUB_ACTION_PATH"
+      echo "tag=cert-review-action:local" >> "$GITHUB_OUTPUT"
+  - name: Run cert-review
+    id: run
+    shell: bash
+    env:
+      IMAGE: ${{ inputs.image != '' && inputs.image || 'cert-review-action:local' }}
+      INPUT_PROFILE: ${{ inputs.profile }}
+      INPUT_MODE: ${{ inputs.mode }}
+      INPUT_BASE_REF: ${{ inputs.base-ref }}
+      INPUT_PATHS: ${{ inputs.paths }}
+      INPUT_INCLUDE: ${{ inputs.include }}
+      INPUT_EXCLUDE: ${{ inputs.exclude }}
+      INPUT_COMPILE_COMMANDS: ${{ inputs.compile-commands }}
+      INPUT_TOOLS: ${{ inputs.tools }}
+      INPUT_MIN_CONFIDENCE: ${{ inputs.min-confidence }}
+      INPUT_FAIL_ON: ${{ inputs.fail-on }}
+      INPUT_SARIF_FILE: ${{ inputs.sarif-file }}
+      INPUT_REVIEW_COMMENTS: ${{ inputs.review-comments }}
+      INPUT_MAX_COMMENTS: ${{ inputs.max-comments }}
+      INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+      INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+    run: |
+      set -o pipefail
+      touch "$GITHUB_OUTPUT" "$GITHUB_STEP_SUMMARY"
+      docker run --rm --workdir "$GITHUB_WORKSPACE" \
+        -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+        -v "$GITHUB_EVENT_PATH:$GITHUB_EVENT_PATH:ro" \
+        -v "$GITHUB_OUTPUT:$GITHUB_OUTPUT" -v "$GITHUB_STEP_SUMMARY:$GITHUB_STEP_SUMMARY" \
+        -e GITHUB_ACTIONS -e GITHUB_WORKSPACE -e GITHUB_EVENT_PATH -e GITHUB_EVENT_NAME \
+        -e GITHUB_OUTPUT -e GITHUB_STEP_SUMMARY -e GITHUB_REPOSITORY -e GITHUB_BASE_REF \
+        -e GITHUB_API_URL \
+        -e INPUT_PROFILE \
+        -e INPUT_MODE \
+        -e INPUT_BASE_REF \
+        -e INPUT_PATHS \
+        -e INPUT_INCLUDE \
+        -e INPUT_EXCLUDE \
+        -e INPUT_COMPILE_COMMANDS \
+        -e INPUT_TOOLS \
+        -e INPUT_MIN_CONFIDENCE \
+        -e INPUT_FAIL_ON \
+        -e INPUT_SARIF_FILE \
+        -e INPUT_REVIEW_COMMENTS \
+        -e INPUT_MAX_COMMENTS \
+        -e INPUT_GITHUB_TOKEN \
+        -e INPUT_WORKING_DIRECTORY \
+        "$IMAGE"
+  - name: Upload SARIF
+    if: ${{ always() && inputs.upload-sarif == 'true' && steps.run.outputs.sarif-file != '' }}
+    uses: github/codeql-action/upload-sarif@v3
+    with:
+      sarif_file: ${{ inputs.sarif-file }}
+      category: ${{ inputs.sarif-category }}
