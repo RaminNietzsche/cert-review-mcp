@@ -1,0 +1,254 @@
+# SEI CERT STR, FIO, ENV and POS rules. See int.yml for the metadata conventions.
+rules:
+  - id: fio30-c-non-literal-format-string
+    languages: [c, cpp]
+    severity: ERROR
+    options:
+      constant_propagation: false
+    message: >-
+      The format string `$FMT` is not a string literal and no arguments follow it; if it
+      can contain user input, its conversion specifiers read or write arbitrary memory.
+      Use a literal format such as "%s" (FIO30-C).
+    metadata:
+      cert: [FIO30-C]
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - patterns:
+              - pattern: $FN($FMT)
+              - metavariable-regex:
+                  metavariable: $FN
+                  regex: ^(std::)?(printf|wprintf)$
+          - patterns:
+              - pattern: $FN($DST, $FMT)
+              - metavariable-regex:
+                  metavariable: $FN
+                  regex: ^(std::)?(fprintf|fwprintf|dprintf|sprintf|syslog|err|errx|warn|warnx)$
+          - patterns:
+              - pattern: $FN($DST, $SZ, $FMT)
+              - metavariable-regex:
+                  metavariable: $FN
+                  regex: ^(std::)?(snprintf|swprintf)$
+      - metavariable-pattern:
+          metavariable: $FMT
+          patterns:
+            - pattern-not: '"..."'
+            - pattern-not-regex: ^\s*(_|gettext|N_|tr)\s*\(\s*"
+            - pattern-not-regex: ^\s*L?"
+            - pattern-not-regex: ^\s*[A-Z][A-Z0-9_]*\s*$
+
+  - id: fio34-c-character-input-stored-in-char
+    languages: [c, cpp]
+    severity: WARNING
+    options:
+      constant_propagation: false
+    message: >-
+      The result of $FN() is stored in `$C` of type $T, which cannot hold every character
+      value and EOF/WEOF distinctly; use int (or wint_t for wide input) (FIO34-C).
+    metadata:
+      cert: [FIO34-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $T $C;
+              ...
+              $C = $FN(...);
+          - pattern: |
+              $T $C = $FN(...);
+          - patterns:
+              - pattern-inside: |
+                  $T $C;
+                  ...
+              - pattern: ($C = $FN(...)) != $E
+      - metavariable-regex:
+          metavariable: $FN
+          regex: ^(getc|fgetc|getchar|getwc|fgetwc|getwchar)$
+      - metavariable-regex:
+          metavariable: $T
+          regex: ^(char|signed char|unsigned char|wchar_t)$
+      - focus-metavariable: $C
+
+  - id: fio37-c-fgets-result-assumed-nonempty
+    languages: [c, cpp]
+    severity: WARNING
+    options:
+      constant_propagation: false
+    message: >-
+      `$B[strlen($B) - 1]` writes before the buffer when fgets() read an empty string (a
+      line starting with a null character); find the newline with strchr() instead
+      (FIO37-C).
+    metadata:
+      cert: [FIO37-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: $B[strlen($B) - 1] = $V
+          - pattern: $B[std::strlen($B) - 1] = $V
+      # Only buffers filled by fgets() in the same function.
+      - pattern-either:
+          - pattern-inside: |
+              fgets($B, ...);
+              ...
+          - pattern-inside: |
+              if (<... fgets($B, ...) ...>) $S;
+              ...
+          - pattern-inside: |
+              if (<... fgets($B, ...) ...>) $S; else $E;
+              ...
+          - pattern-inside: |
+              if (<... fgets($B, ...) ...>) $S;
+          - pattern-inside: |
+              if (<... fgets($B, ...) ...>) $S; else $E;
+          - pattern-inside: |
+              while (<... fgets($B, ...) ...>) $S;
+
+  - id: str30-c-string-literal-modified
+    languages: [c, cpp]
+    severity: ERROR
+    options:
+      constant_propagation: false
+    message: >-
+      `$P` points to a string literal, which must not be modified (STR30-C).
+    metadata:
+      cert: [STR30-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              char *$P = "...";
+              ...
+          - pattern-inside: |
+              $P = "...";
+              ...
+      - pattern-not-inside: |
+          $P = "...";
+          ...
+          $P = $X;
+          ...
+      - pattern-not-inside: |
+          char $P[] = "...";
+          ...
+      - pattern-not-inside: |
+          char $P[$N] = "...";
+          ...
+      - pattern-not-inside: |
+          static char $P[] = "...";
+          ...
+      - pattern-either:
+          - pattern: $P[$I] = $V
+          - pattern: "*$P = $V"
+          - pattern: strcpy($P, ...)
+          - pattern: strcat($P, ...)
+          - pattern: strncpy($P, ...)
+          - pattern: memset($P, ...)
+          - pattern: memcpy($P, ...)
+
+  - id: str30-c-string-literal-passed-to-mutating-function
+    languages: [c, cpp]
+    severity: ERROR
+    options:
+      constant_propagation: false
+    message: >-
+      $FN() modifies its template argument in place; passing a string literal is undefined
+      behavior. Copy it into a char array first (STR30-C).
+    metadata:
+      cert: [STR30-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: $FN("...", ...)
+      - metavariable-regex:
+          metavariable: $FN
+          regex: ^(mkstemp|mkstemps|mkostemp|mkdtemp|mktemp|strtok)$
+
+  - id: str30-c-write-through-search-result-of-const-string
+    languages: [c, cpp]
+    severity: ERROR
+    options:
+      constant_propagation: false
+    message: >-
+      `$P` points into `$S`, which is a pointer to const; $FN() drops the qualifier but
+      writing through `$P` may modify a string literal (STR30-C).
+    metadata:
+      cert: [STR30-C]
+      confidence: medium
+    patterns:
+      - pattern-inside: |
+          $R $F(..., const char *$S, ...) { ... }
+      - pattern-either:
+          - pattern-inside: |
+              $P = $FN($S, ...);
+              ...
+          - pattern-inside: |
+              char *$P = $FN($S, ...);
+              ...
+      - metavariable-regex:
+          metavariable: $FN
+          regex: ^(strchr|strrchr|strstr|strpbrk|memchr)$
+      - pattern-either:
+          - pattern: "*$P = $V"
+          - pattern: $P[$I] = $V
+
+  - id: pos34-c-putenv-automatic-array
+    languages: [c, cpp]
+    severity: ERROR
+    options:
+      constant_propagation: false
+    message: >-
+      putenv() keeps the pointer it is given; `$B` is an automatic array that goes out of
+      scope when the function returns. Use setenv() or static or heap storage (POS34-C).
+    metadata:
+      cert: [POS34-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              $R $F(...) { ... $T $B[$N]; ... }
+          - pattern-inside: |
+              $R $F(...) { ... $T $B[$N] = $I; ... }
+          - pattern-inside: |
+              $R $F(...) { ... $T $B[] = $I; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... static $T $B[$N]; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... static $T $B[$N] = $I; ... }
+      - pattern-not-inside: |
+          $R $F(...) { ... static $T $B[] = $I; ... }
+      - pattern: putenv($B)
+
+  - id: env30-c-modifies-returned-environment-object
+    languages: [c, cpp]
+    severity: ERROR
+    options:
+      constant_propagation: false
+    message: >-
+      `$P` points to an object returned by $FN(), which the program must not modify
+      (ENV30-C).
+    metadata:
+      cert: [ENV30-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              $P = $FN(...);
+              ...
+          - pattern-inside: |
+              $T $P = $FN(...);
+              ...
+      - metavariable-regex:
+          metavariable: $FN
+          regex: ^(std::)?(getenv|localeconv|setlocale|strerror)$
+      - pattern-not-inside: |
+          $P = $FN(...);
+          ...
+          $P = $X;
+          ...
+      - pattern-either:
+          - pattern: $P[$I] = $V
+          - pattern: "*$P = $V"
+          - pattern: $P->$FLD = $V
+          - pattern: strcpy($P, ...)
+          - pattern: strcat($P, ...)
+          - pattern: memset($P, ...)
+          - pattern: memcpy($P, ...)

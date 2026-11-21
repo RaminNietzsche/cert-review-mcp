@@ -14,40 +14,76 @@
   },
   "overlay": {
    "file": "data/checker_overlay.yaml",
-   "entries": 10
+   "entries": 38
   },
   "exclusions": {
    "file": "data/checker_exclusions.yaml",
    "entries": 3
   },
+  "semgrep": {
+   "files": "data/semgrep/*.yml",
+   "rules": 40
+  },
+  "codeql": {
+   "repository": "https://github.com/github/codeql-coding-standards",
+   "license": "MIT",
+   "packs": {
+    "codeql/cert-c-coding-standards": "2.63.0",
+    "codeql/cert-cpp-coding-standards": "2.63.0"
+   },
+   "queries": 232
+  },
   "toolchain_versions": {
    "clang-tidy": "19.1.7",
    "clangsa": "19.1.7",
-   "cppcheck": "2.17.1"
-  }
+   "cppcheck": "2.17.1",
+   "semgrep": "1.186.0",
+   "infer": "1.3.0",
+   "codeql": "2.27.5"
+  },
+  "reference_toolchain": [
+   "clang-tidy",
+   "clangsa",
+   "cppcheck",
+   "semgrep"
+  ],
+  "extended_toolchain": [
+   "clang-tidy",
+   "clangsa",
+   "codeql",
+   "cppcheck",
+   "infer",
+   "semgrep"
+  ]
  },
  "tier_definitions": {
-  "deterministic": "a rule-specific checker exists (clang-tidy cert-* alias)",
-  "partial": "only general checkers are mapped; some violation patterns are caught",
+  "deterministic": "a rule-specific checker exists (clang-tidy cert-* alias or CodeQL CERT query)",
+  "partial": "only general checkers or narrow Semgrep pattern rules are mapped; some violation patterns are caught",
   "llm-only": "no checker is mapped; needs review"
  },
  "summary": {
   "c_rule_tier": {
-   "deterministic": 18,
-   "partial": 53,
-   "llm-only": 51,
+   "deterministic": 100,
+   "partial": 12,
+   "llm-only": 10,
    "total": 122
   },
   "c_rule_tier_runnable": {
    "deterministic": 16,
-   "partial": 34,
-   "llm-only": 72,
+   "partial": 51,
+   "llm-only": 55,
+   "total": 122
+  },
+  "c_rule_tier_extended": {
+   "deterministic": 100,
+   "partial": 8,
+   "llm-only": 14,
    "total": 122
   },
   "c_recommendation_tier": {
    "deterministic": 4,
-   "partial": 3,
-   "llm-only": 176,
+   "partial": 4,
+   "llm-only": 175,
    "total": 183
   },
   "c_recommendation_tier_runnable": {
@@ -56,16 +92,28 @@
    "llm-only": 177,
    "total": 183
   },
+  "c_recommendation_tier_extended": {
+   "deterministic": 4,
+   "partial": 3,
+   "llm-only": 176,
+   "total": 183
+  },
   "cpp_rule_tier": {
-   "deterministic": 18,
-   "partial": 37,
-   "llm-only": 28,
+   "deterministic": 82,
+   "partial": 0,
+   "llm-only": 1,
    "total": 83
   },
   "cpp_rule_tier_runnable": {
    "deterministic": 18,
-   "partial": 29,
-   "llm-only": 36,
+   "partial": 31,
+   "llm-only": 34,
+   "total": 83
+  },
+  "cpp_rule_tier_extended": {
+   "deterministic": 82,
+   "partial": 0,
+   "llm-only": 1,
    "total": 83
   }
  },
@@ -73,78 +121,91 @@
   "API00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "API01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "API02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "API03-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "API04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "API05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "API07-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "API09-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "API10-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "ARR00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "ARR01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "ARR02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "ARR30-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -155,6 +216,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-form-out-of-bounds-pointers-or-array-subscripts",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -194,13 +264,50 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "infer",
+     "checker": "BUFFER_OVERRUN_L1",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "BUFFER_OVERRUN_L2",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "BUFFER_OVERRUN_L3",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "BUFFER_OVERRUN_S2",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "ARR32-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -211,13 +318,23 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/variable-length-array-size-not-in-valid-range",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "ARR36-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -228,6 +345,24 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-relate-pointers-that-do-not-refer-to-the-same-array",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-subtract-pointers-that-do-not-refer-to-the-same-array",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -253,14 +388,26 @@
    "cert_detectable": false
   },
   "ARR37-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-use-pointer-arithmetic-on-non-array-object-pointers",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "ARR38-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -271,6 +418,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/library-function-argument-out-of-bounds",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "gcc",
@@ -298,6 +454,7 @@
   "ARR39-C": {
    "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -330,6 +487,15 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-add-or-subtract-a-scaled-integer-to-a-pointer",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "gcc",
      "checker": "gcc-analyzer-out-of-bounds",
      "origins": [
@@ -345,78 +511,140 @@
   "CON01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "CON02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "CON03-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "CON04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "CON05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "CON06-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "CON07-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "CON08-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "CON09-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "CON30-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/clean-up-thread-specific-storage",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CON31-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-allow-a-mutex-to-go-out-of-scope-while-locked",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-destroy-a-mutex-while-it-is-locked",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "con31-c-mutex-destroyed-while-locked",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    }
+   ],
    "cert_detectable": false
   },
   "CON32-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/prevent-data-races-with-multiple-threads",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CON33-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -427,25 +655,85 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/race-conditions-when-using-library-functions",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "CON34-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/appropriate-thread-object-storage-durations",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/thread-object-storage-durations-not-initialized",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "con34-c-automatic-variable-passed-to-thread",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
+    }
+   ],
    "cert_detectable": false
   },
   "CON35-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/deadlock-by-locking-in-predefined-order",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "DEADLOCK",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CON36-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -466,73 +754,289 @@
      "specific": true,
      "available": true,
      "alias_of": "bugprone-spuriously-wake-up-functions"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/wrap-functions-that-can-spuriously-wake-up-in-loop",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "con36-c-condition-wait-outside-loop",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
     }
    ],
    "cert_detectable": true
   },
   "CON37-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-call-signal-in-multithreaded-program",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "CON38-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/preserve-safety-when-using-condition-variables",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CON39-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/thread-was-previously-joined-or-detached",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "con39-c-thread-joined-or-detached-twice",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    }
+   ],
    "cert_detectable": false
   },
   "CON40-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/atomic-variable-twice-in-expression",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "con40-c-atomic-read-modify-write-not-atomic",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    },
+    {
+     "tool": "semgrep",
+     "checker": "con40-c-atomic-variable-twice-in-expression",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
+    }
+   ],
    "cert_detectable": true
   },
   "CON41-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/wrap-functions-that-can-fail-spuriously-in-loop",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "con41-c-weak-compare-exchange-outside-loop",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    }
+   ],
    "cert_detectable": true
   },
   "CON43-C": {
-   "tier": "llm-only",
+   "tier": "partial",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "partial",
+   "checkers": [
+    {
+     "tool": "infer",
+     "checker": "GUARDEDBY_VIOLATION",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "LOCK_CONSISTENCY_VIOLATION",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "THREAD_SAFETY_VIOLATION",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CON50-CPP": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-allow-a-mutex-to-go-out-of-scope-while-locked",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-destroy-a-mutex-while-it-is-locked",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "con50-cpp-local-mutex-shared-with-unjoined-threads",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
+    }
+   ],
    "cert_detectable": false
   },
   "CON51-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/ensure-actively-held-locks-are-released-on-exceptional-conditions",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "CON52-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/prevent-bit-field-access-from-multiple-threads",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CON53-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/deadlock-by-locking-in-predefined-order",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "DEADLOCK",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CON54-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -553,26 +1057,86 @@
      "specific": true,
      "available": true,
      "alias_of": "bugprone-spuriously-wake-up-functions"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/wrap-functions-that-can-spuriously-wake-up-in-loop",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "con54-cpp-condition-wait-outside-loop",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
     }
    ],
    "cert_detectable": true
   },
   "CON55-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/preserve-safety-when-using-condition-variables",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CON56-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-speculatively-lock-a-locked-non-recursive-mutex",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/locked-a-locked-non-recursive-mutex-audit",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CTR50-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/container-access-without-range-check-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "cppcheck",
      "checker": "algorithmOutOfBounds",
@@ -625,12 +1189,31 @@
    "cert_detectable": false
   },
   "CTR51-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/uses-valid-container-element-access",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "cppcheck",
      "checker": "invalidContainer",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "VECTOR_INVALIDATION",
      "origins": [
       "curated-overlay"
      ],
@@ -641,32 +1224,77 @@
    "cert_detectable": false
   },
   "CTR52-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/guarantee-generic-cpp-library-functions-do-not-overflow",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CTR53-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/use-valid-iterator-ranges",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CTR54-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-subtract-iterators-for-different-containers",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CTR55-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-use-an-additive-operator-on-an-iterator",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CTR56-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -687,43 +1315,78 @@
      "specific": true,
      "available": true,
      "alias_of": "bugprone-pointer-arithmetic-on-polymorphic-object"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-use-pointer-arithmetic-on-polymorphic-objects",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "CTR57-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/provide-a-valid-ordering-predicate",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CTR58-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/predicate-function-objects-should-not-be-mutable",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "DCL00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL03-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -743,72 +1406,84 @@
   "DCL04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL06-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL07-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL08-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "DCL09-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "DCL10-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "DCL11-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL12-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "DCL13-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL15-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "DCL16-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -828,48 +1503,56 @@
   "DCL17-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "DCL18-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "DCL19-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL20-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL21-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "DCL22-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "DCL23-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL30-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -899,6 +1582,24 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/appropriate-storage-durations-function-return",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/appropriate-storage-durations-stack-adress-escape",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -939,13 +1640,23 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "infer",
+     "checker": "STACK_VARIABLE_ADDRESS_ESCAPE",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "DCL31-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -976,6 +1687,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/declare-identifiers-before-using-them",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -983,12 +1703,14 @@
   "DCL36-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL37-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1029,31 +1751,92 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-declare-or-define-a-reserved-identifier",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "DCL38-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/declaring-a-flexible-array-member",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "DCL39-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/information-leakage-across-trust-boundaries-c",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "DCL40-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/excess-length-names-identifiers-not-distinct",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/incompatible-function-declarations",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/incompatible-object-declarations",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "DCL41-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1076,6 +1859,15 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "c/cert/variables-inside-switch-statement",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "gcc",
      "checker": "gcc-analyzer-use-of-uninitialized-value",
      "origins": [
@@ -1091,12 +1883,14 @@
   "DCL42-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "DCL50-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1109,6 +1903,15 @@
      "available": true,
      "severity_hint": "LOW",
      "alias_of": "modernize-avoid-variadic-functions"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-define-ac-style-variadic-function",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "gcc",
@@ -1126,6 +1929,7 @@
   "DCL51-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1186,6 +1990,78 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/enumerator-reuses-reserved-name",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/function-reuses-reserved-name",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/object-reuses-reserved-name",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/redefining-of-standard-library-name",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/reuse-of-reserved-identifier",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/use-of-double-underscore-reserved-prefix",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/use-of-reserved-literal-suffix-identifier",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/use-of-single-underscore-reserved-prefix",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -1193,12 +2069,14 @@
   "DCL52-CPP": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "DCL53-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1209,6 +2087,24 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/local-constructor-initialized-object-hides-identifier",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/local-function-declaration",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -1216,6 +2112,7 @@
   "DCL54-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1236,19 +2133,40 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/singular-overload-of-memory-function",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "DCL55-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/information-leakage-across-trust-boundaries",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "DCL56-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1259,13 +2177,32 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/cycles-during-static-object-init",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "STATIC_INITIALIZATION_ORDER_FIASCO",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "DCL57-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1286,6 +2223,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-let-exceptions-escape-from-destructors-or-deallocation-functions",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -1293,6 +2239,7 @@
   "DCL58-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1315,6 +2262,15 @@
      "available": true,
      "severity_hint": "HIGH",
      "alias_of": "bugprone-std-namespace-modification"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/modification-of-the-standard-namespaces",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -1322,6 +2278,7 @@
   "DCL59-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1342,49 +2299,95 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/unnamed-namespace-in-header-file",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "DCL60-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/one-definition-rule-not-obeyed",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "ENV01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "ENV02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "ENV03-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "ENV04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": null
   },
   "ENV30-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-modify-the-return-value-of-certain-functions",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "env30-c-modifies-returned-environment-object",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    }
+   ],
    "cert_detectable": false
   },
   "ENV31-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -1395,19 +2398,40 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/env-pointer-is-invalid-after-certain-operations",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "ENV32-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/exit-handlers-must-return-normally",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "ENV33-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1430,13 +2454,23 @@
      "available": true,
      "severity_hint": "MEDIUM",
      "alias_of": "bugprone-command-processor"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-call-system",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "ENV34-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -1447,6 +2481,24 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-store-pointers-returned-by-env-functions",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-store-pointers-returned-by-environment-fun-warn",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -1454,48 +2506,56 @@
   "ERR00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "ERR01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "ERR02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "ERR04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "ERR05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "ERR06-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "ERR07-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "ERR30-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -1506,19 +2566,67 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/errno-not-set-to-zero",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/errno-read-before-return",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/function-call-before-errno-check",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/setlocale-might-set-errno",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "ERR32-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-rely-on-indeterminate-values-of-errno",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "ERR33-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1560,6 +2668,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/detect-and-handle-standard-library-errors",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -1647,6 +2764,7 @@
   "ERR34-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1674,14 +2792,62 @@
    "cert_detectable": true
   },
   "ERR50-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/condition-variable-post-condition-failed-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/exit-handler-throws-exception-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/explicit-abrupt-termination-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/joinable-thread-copied-or-destroyed-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/rethrow-nested-without-capture-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "ERR51-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1702,6 +2868,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/handle-all-exceptions",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -1709,6 +2884,7 @@
   "ERR52-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1721,13 +2897,23 @@
      "available": true,
      "severity_hint": "LOW",
      "alias_of": "modernize-avoid-setjmp-longjmp"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-use-setjmp-or-longjmp",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "ERR53-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1738,13 +2924,23 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/destroyed-value-referenced-in-constructor-destructor-catch-block",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "ERR54-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1755,13 +2951,23 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/catch-block-shadowing-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "ERR55-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1784,6 +2990,15 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "cpp/cert/honor-exception-specifications",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "gcc",
      "checker": "gcc-analyzer-throw-of-unexpected-type",
      "origins": [
@@ -1797,9 +3012,19 @@
    "cert_detectable": false
   },
   "ERR56-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/guarantee-exception-safety",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "gcc",
      "checker": "gcc-analyzer-use-of-uninitialized-value",
@@ -1814,9 +3039,19 @@
    "cert_detectable": false
   },
   "ERR57-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-leak-resources-when-handling-exceptions",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "gcc",
      "checker": "gcc-analyzer-malloc-leak",
@@ -1833,6 +3068,7 @@
   "ERR58-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1845,19 +3081,40 @@
      "available": true,
      "severity_hint": "LOW",
      "alias_of": "bugprone-throwing-static-initialization"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/handle-all-exceptions-thrown-before-main-begins-executing",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "ERR59-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-throw-an-exception-across-execution-boundaries",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "ERR60-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1880,6 +3137,15 @@
      "available": true,
      "severity_hint": "MEDIUM",
      "alias_of": "bugprone-exception-copy-constructor-throws"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/exception-objects-must-be-nothrow-copy-constructible",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -1887,6 +3153,7 @@
   "ERR61-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -1907,115 +3174,152 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/catch-exceptions-by-lvalue-reference",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "ERR62-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/detect-errors-when-converting-a-string-to-a-number",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "EXP00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "EXP02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "EXP03-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "EXP05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "EXP07-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "EXP08-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "EXP09-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "EXP10-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "EXP11-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "EXP12-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "EXP13-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "EXP14-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "EXP15-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "EXP16-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "EXP19-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "EXP20-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "EXP30-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2038,6 +3342,24 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "c/cert/dependence-on-order-of-function-arguments-for-side-effects",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/dependence-on-order-of-scalar-evaluation-for-side-effects",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "unknownEvaluationOrder",
      "origins": [
@@ -2051,8 +3373,9 @@
    "cert_detectable": false
   },
   "EXP32-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2073,13 +3396,23 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-access-volatile-object-with-non-volatile-reference",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "EXP33-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2212,6 +3545,15 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-read-uninitialized-memory",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "legacyUninitvar",
      "origins": [
@@ -2249,13 +3591,23 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "infer",
+     "checker": "PULSE_UNINITIALIZED_VALUE",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "EXP34-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -2367,6 +3719,15 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-dereference-null-pointers",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "ctunullpointer",
      "origins": [
@@ -2455,20 +3816,88 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "infer",
+     "checker": "COMPARED_TO_NULL_AND_DEREFERENCED",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "NULLPTR_DEREFERENCE",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "NULL_ARGUMENT",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "exp34-c-dereference-before-null-check",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
+    },
+    {
+     "tool": "semgrep",
+     "checker": "exp34-c-unchecked-allocation-result",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
     }
    ],
    "cert_detectable": false
   },
   "EXP35-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-modify-objects-with-temporary-lifetime",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "EXP36-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-cast-pointer-to-more-strictly-aligned-pointer-type",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "gcc",
      "checker": "gcc-analyzer-allocation-size",
@@ -2493,8 +3922,9 @@
    "cert_detectable": false
   },
   "EXP37-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2515,13 +3945,41 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/call-posix-open-with-correct-argument-count",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-call-function-pointer-with-incompatible-type",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-call-functions-with-incompatible-arguments",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "EXP39-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -2532,19 +3990,40 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-access-variable-via-pointer-of-incompatible-type",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "EXP40-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-modify-constant-objects",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "EXP42-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2565,14 +4044,42 @@
      "specific": true,
      "available": true,
      "alias_of": "bugprone-suspicious-memory-comparison"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-compare-padding-data",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "EXP43-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-pass-aliased-pointer-to-restrict-qualified-param",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/restrict-pointer-references-overlapping-object",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "gcc",
      "checker": "gcc-analyzer-overlapping-buffers",
@@ -2587,8 +4094,9 @@
    "cert_detectable": false
   },
   "EXP44-C": {
-   "tier": "partial",
-   "tier_runnable": "llm-only",
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2599,13 +4107,43 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/unevaluated-operand-with-side-effect",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "exp44-c-side-effect-in-alignof-or-generic",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    },
+    {
+     "tool": "semgrep",
+     "checker": "exp44-c-side-effect-in-unevaluated-operand",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
     }
    ],
    "cert_detectable": true
   },
   "EXP45-C": {
    "tier": "deterministic",
-   "tier_runnable": "llm-only",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2638,6 +4176,15 @@
      "severity_hint": "MEDIUM"
     },
     {
+     "tool": "codeql",
+     "checker": "c/cert/assignments-in-selection-statements",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "gcc",
      "checker": "gcc-analyzer-infinite-loop",
      "origins": [
@@ -2646,19 +4193,51 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "semgrep",
+     "checker": "exp45-c-assignment-in-condition",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
     }
    ],
    "cert_detectable": true
   },
   "EXP46-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-use-a-bitwise-operator-with-a-boolean-like-operand",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "exp46-c-bitwise-operator-on-boolean-operands",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    }
+   ],
    "cert_detectable": true
   },
   "EXP47-C": {
    "tier": "partial",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2694,8 +4273,9 @@
    "cert_detectable": false
   },
   "EXP50-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2728,6 +4308,24 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-depend-on-the-order-of-evaluation-for-side-effects-in-function-calls-as-function-arguments",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-depend-on-the-order-of-scalar-object-evaluation-for-side-effects",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "unknownEvaluationOrder",
      "origins": [
@@ -2741,8 +4339,9 @@
    "cert_detectable": false
   },
   "EXP51-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -2753,6 +4352,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-delete-an-array-through-a-pointer-of-the-incorrect-type",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "gcc",
@@ -2768,15 +4376,92 @@
    "cert_detectable": false
   },
   "EXP52-CPP": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-rely-on-side-effects-in-decl-type-operand",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-rely-on-side-effects-in-decl-val-expression",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-rely-on-side-effects-in-no-except-operand",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-rely-on-side-effects-in-size-of-operand",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-rely-on-side-effects-in-type-id-operand",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "exp44-c-side-effect-in-unevaluated-operand",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    },
+    {
+     "tool": "semgrep",
+     "checker": "exp52-cpp-side-effect-in-unevaluated-operand",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    }
+   ],
    "cert_detectable": true
   },
   "EXP53-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-read-uninitialized-memory",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "cppcheck",
      "checker": "legacyUninitvar",
@@ -2815,13 +4500,23 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "infer",
+     "checker": "PULSE_UNINITIALIZED_VALUE",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "EXP54-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2863,6 +4558,24 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "cpp/cert/object-accessed-after-lifetime-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/object-accessed-before-lifetime-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "danglingLifetime",
      "origins": [
@@ -2890,13 +4603,23 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "infer",
+     "checker": "USE_AFTER_LIFETIME",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "EXP55-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2907,19 +4630,40 @@
      "specific": false,
      "available": true,
      "severity_hint": "LOW"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/remove-const-or-volatile-qualification-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "EXP56-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/function-with-mismatched-language-linkage",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "EXP57-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2930,13 +4674,32 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/cast-of-pointer-to-incomplete-class",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/deleting-pointer-to-incomplete-class",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "EXP58-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -2947,6 +4710,33 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/pass-non-trivial-object-to-va-start",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/pass-promotable-primitive-type-to-va-start",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/pass-reference-type-to-va-start",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -2972,20 +4762,43 @@
    "cert_detectable": true
   },
   "EXP59-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/offset-used-on-invalid-type-or-member",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "EXP60-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-pass-a-nonstandard-object-across-boundaries",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "EXP61-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3017,6 +4830,24 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "cpp/cert/escaping-lambda-object-with-capture-by-reference",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/returning-lambda-object-with-capture-by-reference",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "returnDanglingLifetime",
      "origins": [
@@ -3040,8 +4871,9 @@
    "cert_detectable": false
   },
   "EXP62-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3074,6 +4906,33 @@
      "severity_hint": "MEDIUM"
     },
     {
+     "tool": "codeql",
+     "checker": "cpp/cert/memcmp-used-to-access-object-representation",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/memcpy-used-to-access-object-representation",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/memset-used-to-access-object-representation",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "memsetClass",
      "origins": [
@@ -3087,8 +4946,9 @@
    "cert_detectable": true
   },
   "EXP63-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3119,6 +4979,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-rely-on-the-value-of-a-moved-from-object",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -3126,126 +4995,147 @@
   "FIO01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "FIO02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO03-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO06-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO08-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO09-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO10-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO11-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO13-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO14-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO15-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO17-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO18-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO19-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "FIO20-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO21-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO22-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO23-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO24-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FIO30-C": {
-   "tier": "partial",
-   "tier_runnable": "llm-only",
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3266,31 +5156,113 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/exclude-user-input-from-format-strings",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "fio30-c-non-literal-format-string",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
     }
    ],
    "cert_detectable": true
   },
   "FIO32-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-perform-file-operations-on-devices",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "FIO34-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/distinguish-between-char-read-from-a-file-and-eof-or-weof",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/end-of-file-check-portability",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "fio34-c-character-input-stored-in-char",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    }
+   ],
    "cert_detectable": true
   },
   "FIO37-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/successful-fgets-or-fgetws-may-return-an-empty-string",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "fio37-c-fgets-result-assumed-nonempty",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    }
+   ],
    "cert_detectable": true
   },
   "FIO38-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3311,14 +5283,33 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-copy-a-file-object",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "FIO39-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-alternately-io-from-a-stream-without-positioning",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "cppcheck",
      "checker": "IOWithoutPositioning",
@@ -3333,20 +5324,43 @@
    "cert_detectable": true
   },
   "FIO40-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/reset-strings-on-fgets-or-fgetws-failure",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "FIO41-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-call-getc-and-putc-with-side-effects",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "FIO42-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -3357,6 +5371,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/close-files-when-they-are-no-longer-needed",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -3397,26 +5420,67 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "infer",
+     "checker": "PULSE_RESOURCE_LEAK",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "FIO44-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/only-use-values-for-fsetpos-that-are-returned-from-fgetpos",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "FIO45-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/toctou-race-conditions-while-accessing-files",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "FIO46-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/undefined-behavior-accessing-a-closed-file",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "cppcheck",
      "checker": "fcloseInLoopCondition",
@@ -3431,8 +5495,9 @@
    "cert_detectable": false
   },
   "FIO47-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3443,73 +5508,140 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/use-valid-specifiers",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/wrong-number-of-format-arguments",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/wrong-type-format-arguments",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "FIO50-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/interleaved-input-output-without-position",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "FIO51-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/close-files-when-they-are-no-longer-needed",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "PULSE_RESOURCE_LEAK",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "FLP00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FLP01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FLP02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FLP03-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FLP04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FLP05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FLP06-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FLP07-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "FLP30-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3542,13 +5674,23 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/floating-point-loop-counters",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "FLP32-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3559,6 +5701,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/unchecked-range-domain-pole-errors",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -3574,8 +5725,9 @@
    "cert_detectable": true
   },
   "FLP34-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3607,19 +5759,40 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/unchecked-floating-point-conversion",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "FLP36-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/int-to-float-preserve-precision",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "FLP37-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3640,6 +5813,15 @@
      "specific": true,
      "available": true,
      "alias_of": "bugprone-suspicious-memory-comparison"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/memcmp-used-to-compare-floats",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -3647,54 +5829,63 @@
   "FLP38-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "INT00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "INT01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "INT02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "INT04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "INT05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "INT07-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "INT08-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "INT09-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3722,6 +5913,7 @@
   "INT10-C": {
    "tier": "partial",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [
     {
      "tool": "gcc",
@@ -3739,54 +5931,101 @@
   "INT12-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "INT13-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "INT14-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "INT15-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "INT16-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "INT17-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "INT18-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "INT30-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/unsigned-integer-operations-wrap-around",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "INTEGER_OVERFLOW_L1",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "INTEGER_OVERFLOW_L2",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "int30-c-unchecked-alloc-size-multiplication",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
+    }
+   ],
    "cert_detectable": false
   },
   "INT31-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3806,13 +6045,23 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/integer-conversion-causes-data-loss",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "INT32-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -3825,6 +6074,15 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "c/cert/signed-integer-overflow",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "integerOverflow",
      "origins": [
@@ -3833,13 +6091,32 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "infer",
+     "checker": "INTEGER_OVERFLOW_L1",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "INTEGER_OVERFLOW_L2",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "INT33-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -3852,6 +6129,15 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "c/cert/div-or-rem-by-zero",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "zerodiv",
      "origins": [
@@ -3860,13 +6146,24 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "semgrep",
+     "checker": "int33-c-divisor-not-checked-for-zero",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
     }
    ],
    "cert_detectable": false
   },
   "INT34-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -3877,6 +6174,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/expr-shiftedby-negative-or-greater-precision-operand",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -3917,19 +6223,41 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "semgrep",
+     "checker": "int34-c-shift-amount-not-range-checked",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
     }
    ],
    "cert_detectable": false
   },
   "INT35-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/use-correct-integer-precisions",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "INT36-C": {
-   "tier": "partial",
-   "tier_runnable": "llm-only",
+   "tier": "deterministic",
+   "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -3960,85 +6288,147 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/converting-a-pointer-to-integer-or-integer-to-pointer",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "int36-c-integer-literal-to-pointer",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
+    },
+    {
+     "tool": "semgrep",
+     "checker": "int36-c-pointer-truncated-to-narrow-integer",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
     }
    ],
    "cert_detectable": true
   },
   "INT50-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-cast-to-an-out-of-range-enumeration-value",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "MEM00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "MEM01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "MEM02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "MEM03-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MEM04-C": {
-   "tier": "llm-only",
+   "tier": "partial",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "partial",
+   "checkers": [
+    {
+     "tool": "infer",
+     "checker": "INFERBO_ALLOC_IS_ZERO",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "MEM05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MEM06-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MEM07-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MEM10-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MEM11-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MEM12-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MEM30-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -4059,6 +6449,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-access-freed-memory",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -4098,13 +6497,53 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "infer",
+     "checker": "USE_AFTER_FREE",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "mem30-c-double-free",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    },
+    {
+     "tool": "semgrep",
+     "checker": "mem30-c-free-in-list-traversal",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    },
+    {
+     "tool": "semgrep",
+     "checker": "mem30-c-use-after-free",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
     }
    ],
    "cert_detectable": false
   },
   "MEM31-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -4115,6 +6554,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/free-memory-when-no-longer-needed-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -4144,14 +6592,51 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "infer",
+     "checker": "MEMORY_LEAK_C",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "MEMORY_LEAK_CPP",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "MEM33-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/alloc-structs-with-a-flexible-array-member-dynamically",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/copy-structs-with-a-flexible-array-member-dynamically",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "gcc",
      "checker": "gcc-analyzer-out-of-bounds",
@@ -4166,8 +6651,9 @@
    "cert_detectable": true
   },
   "MEM34-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -4178,6 +6664,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/only-free-memory-allocated-dynamically-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -4198,13 +6693,24 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "semgrep",
+     "checker": "mem34-c-free-of-non-heap-memory",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
     }
    ],
    "cert_detectable": false
   },
   "MEM35-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -4257,6 +6763,15 @@
      "severity_hint": "MEDIUM"
     },
     {
+     "tool": "codeql",
+     "checker": "c/cert/insufficient-memory-allocated-for-object",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "gcc",
      "checker": "gcc-analyzer-allocation-size",
      "origins": [
@@ -4275,13 +6790,52 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "infer",
+     "checker": "INFERBO_ALLOC_IS_NEGATIVE",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "INFERBO_ALLOC_MAY_BE_NEGATIVE",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "mem35-c-allocation-element-type-mismatch",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    },
+    {
+     "tool": "semgrep",
+     "checker": "mem35-c-allocation-sized-by-pointer",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
     }
    ],
    "cert_detectable": false
   },
   "MEM36-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -4292,6 +6846,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-modify-alignment-of-memory-with-realloc",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -4307,8 +6870,9 @@
    "cert_detectable": false
   },
   "MEM50-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -4339,6 +6903,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/use-after-free",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -4378,13 +6951,42 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "infer",
+     "checker": "USE_AFTER_DELETE",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "USE_AFTER_FREE",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "mem50-cpp-use-after-delete",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
     }
    ],
    "cert_detectable": false
   },
   "MEM51-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -4457,6 +7059,15 @@
      "severity_hint": "MEDIUM"
     },
     {
+     "tool": "codeql",
+     "checker": "cpp/cert/properly-deallocate-dynamically-allocated-resources",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "mismatchAllocDealloc",
      "origins": [
@@ -4485,13 +7096,44 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "semgrep",
+     "checker": "mem51-cpp-delete-of-placement-new",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    },
+    {
+     "tool": "semgrep",
+     "checker": "mem51-cpp-mismatched-deallocation",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    },
+    {
+     "tool": "semgrep",
+     "checker": "mem51-cpp-smart-pointer-owns-array-without-array-deleter",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
     }
    ],
    "cert_detectable": false
   },
   "MEM52-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -4514,6 +7156,15 @@
      "severity_hint": "MEDIUM"
     },
     {
+     "tool": "codeql",
+     "checker": "cpp/cert/detect-and-handle-memory-allocation-errors",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "nullPointerOutOfMemory",
      "origins": [
@@ -4527,9 +7178,28 @@
    "cert_detectable": true
   },
   "MEM53-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/missing-constructor-call-for-manually-managed-object",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/missing-destructor-call-for-manually-managed-object",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "cppcheck",
      "checker": "uninitdata",
@@ -4544,8 +7214,9 @@
    "cert_detectable": false
   },
   "MEM54-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -4556,6 +7227,24 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/placement-new-insufficient-storage-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/placement-new-not-properly-aligned-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "gcc",
@@ -4581,15 +7270,63 @@
    "cert_detectable": false
   },
   "MEM55-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/operator-delete-missing-partner-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/throwing-no-throw-operator-new-delete-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/throwing-operator-new-returns-null-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/throwing-operator-new-throws-invalid-exception-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "MEM56-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/owned-pointer-value-stored-in-unrelated-smart-pointer-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "cppcheck",
      "checker": "doubleFree",
@@ -4606,6 +7343,7 @@
   "MEM57-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -4640,6 +7378,15 @@
      "severity_hint": "MEDIUM"
     },
     {
+     "tool": "codeql",
+     "checker": "cpp/cert/using-default-operator-new-for-over-aligned-types",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "gcc",
      "checker": "gcc-analyzer-mismatching-deallocation",
      "origins": [
@@ -4655,60 +7402,70 @@
   "MSC00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "MSC05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "MSC06-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "MSC07-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC09-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "MSC10-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC11-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC12-C": {
    "tier": "partial",
    "tier_runnable": "partial",
+   "tier_extended": "partial",
    "checkers": [
     {
      "tool": "clangsa",
@@ -4719,6 +7476,24 @@
      "specific": false,
      "available": true,
      "severity_hint": "LOW"
+    },
+    {
+     "tool": "infer",
+     "checker": "DEAD_STORE",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "infer",
+     "checker": "UNREACHABLE_CODE",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": false
@@ -4726,66 +7501,77 @@
   "MSC13-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "MSC14-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC15-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC17-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "MSC18-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC19-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "MSC20-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "MSC21-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC22-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC23-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC24-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -4813,12 +7599,14 @@
   "MSC25-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC30-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -4849,6 +7637,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/rand-used-for-generating-pseudorandom-numbers",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -4856,6 +7653,7 @@
   "MSC32-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -4886,6 +7684,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/properly-seed-pseudorandom-number-generators",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -4893,6 +7700,7 @@
   "MSC33-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -4913,13 +7721,23 @@
      "specific": true,
      "available": true,
      "alias_of": "bugprone-unsafe-functions"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-pass-invalid-data-to-the-asctime-function",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "MSC37-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -4930,6 +7748,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/control-flow-reaches-the-end-of-a-non-void-function",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -4945,15 +7772,36 @@
    "cert_detectable": true
   },
   "MSC38-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-treat-a-predefined-identifier-as-object",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "MSC39-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-call-va-arg-on-a-va-list-that-has-an-indeterminate-value",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "gcc",
      "checker": "gcc-analyzer-va-arg-type-mismatch",
@@ -4968,8 +7816,9 @@
    "cert_detectable": true
   },
   "MSC40-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -4980,6 +7829,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-violate-in-line-linkage-constraints",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
@@ -4987,12 +7845,14 @@
   "MSC41-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "MSC50-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5015,6 +7875,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-use-rand-for-generating-pseudorandom-numbers",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -5022,6 +7891,7 @@
   "MSC51-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5044,13 +7914,23 @@
      "available": true,
      "severity_hint": "MEDIUM",
      "alias_of": "bugprone-random-generator-seed"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/badly-seeded-random-number-generator",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "MSC52-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5061,6 +7941,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/non-void-function-does-not-return-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -5076,8 +7965,9 @@
    "cert_detectable": true
   },
   "MSC53-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5098,6 +7988,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/function-no-return-attribute-condition-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -5105,6 +8004,7 @@
   "MSC54-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5125,13 +8025,23 @@
      "specific": true,
      "available": true,
      "alias_of": "bugprone-signal-handler"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/signal-handler-must-be-a-plain-old-function",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "OOP50-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -5142,6 +8052,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-invoke-virtual-functions-from-constructors-or-destructors",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -5156,8 +8075,9 @@
    "cert_detectable": true
   },
   "OOP51-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5168,13 +8088,23 @@
      "specific": false,
      "available": true,
      "severity_hint": "LOW"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-slice-derived-objects",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "OOP52-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5217,6 +8147,15 @@
      "severity_hint": "MEDIUM"
     },
     {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-delete-a-polymorphic-object-without-a-virtual-destructor",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "virtualDestructor",
      "origins": [
@@ -5230,8 +8169,9 @@
    "cert_detectable": false
   },
   "OOP53-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5254,6 +8194,15 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "codeql",
+     "checker": "cpp/cert/use-canonical-order-for-member-init",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "gcc",
      "checker": "gcc-analyzer-use-of-uninitialized-value",
      "origins": [
@@ -5269,6 +8218,7 @@
   "OOP54-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5321,6 +8271,15 @@
      "severity_hint": "MEDIUM"
     },
     {
+     "tool": "codeql",
+     "checker": "cpp/cert/gracefully-handle-self-copy-assignment",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "cppcheck",
      "checker": "selfAssignment",
      "origins": [
@@ -5343,9 +8302,37 @@
    "cert_detectable": true
   },
   "OOP55-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/member-access-with-uninitialized-static-pointer-to-member",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/use-of-pointer-to-member-to-access-nonexistent-member",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/use-of-pointer-to-member-to-access-undefined-member",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "gcc",
      "checker": "gcc-analyzer-jump-through-null",
@@ -5370,14 +8357,35 @@
    "cert_detectable": false
   },
   "OOP56-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/honor-new-replacement-handler-requirements",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/honor-termination-replacement-handler-requirements",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "OOP57-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5420,6 +8428,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/prefer-special-member-functions-and-overloaded-operators-to-c-standard-library-functions",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -5427,6 +8444,7 @@
   "OOP58-CPP": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5449,6 +8467,15 @@
      "available": true,
      "severity_hint": "MEDIUM",
      "alias_of": "bugprone-copy-constructor-mutates-argument"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/copy-operations-must-not-mutate-the-source-object",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -5456,36 +8483,42 @@
   "POS01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "POS02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "POS04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "POS05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "POS30-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "POS34-C": {
    "tier": "partial",
    "tier_runnable": "partial",
+   "tier_extended": "partial",
    "checkers": [
     {
      "tool": "clangsa",
@@ -5506,6 +8539,16 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "semgrep",
+     "checker": "pos34-c-putenv-automatic-array",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
     }
    ],
    "cert_detectable": true
@@ -5513,6 +8556,7 @@
   "POS35-C": {
    "tier": "partial",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [
     {
      "tool": "gcc",
@@ -5550,6 +8594,7 @@
   "POS36-C": {
    "tier": "partial",
    "tier_runnable": "partial",
+   "tier_extended": "partial",
    "checkers": [
     {
      "tool": "clangsa",
@@ -5567,12 +8612,14 @@
   "POS37-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "POS38-C": {
    "tier": "partial",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [
     {
      "tool": "gcc",
@@ -5600,12 +8647,14 @@
   "POS39-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "POS44-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5633,6 +8682,7 @@
   "POS47-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5658,32 +8708,69 @@
    "cert_detectable": false
   },
   "POS48-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "tier_extended": "partial",
+   "checkers": [
+    {
+     "tool": "semgrep",
+     "checker": "con31-c-mutex-destroyed-while-locked",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    }
+   ],
    "cert_detectable": false
   },
   "POS49-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "POS50-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "tier_extended": "partial",
+   "checkers": [
+    {
+     "tool": "semgrep",
+     "checker": "pos50-c-automatic-variable-passed-to-pthread",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
+    }
+   ],
    "cert_detectable": false
   },
   "POS51-C": {
-   "tier": "llm-only",
+   "tier": "partial",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "partial",
+   "checkers": [
+    {
+     "tool": "infer",
+     "checker": "DEADLOCK",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "POS52-C": {
    "tier": "partial",
    "tier_runnable": "partial",
+   "tier_extended": "partial",
    "checkers": [
     {
      "tool": "clangsa",
@@ -5699,14 +8786,27 @@
    "cert_detectable": false
   },
   "POS53-C": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "tier_extended": "partial",
+   "checkers": [
+    {
+     "tool": "semgrep",
+     "checker": "con36-c-condition-wait-outside-loop",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    }
+   ],
    "cert_detectable": true
   },
   "POS54-C": {
    "tier": "partial",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [
     {
      "tool": "gcc",
@@ -5724,18 +8824,21 @@
   "PRE00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "PRE01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "PRE02-C": {
    "tier": "partial",
    "tier_runnable": "partial",
+   "tier_extended": "partial",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5753,72 +8856,84 @@
   "PRE04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "PRE05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "PRE06-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "PRE07-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "PRE08-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "PRE09-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "PRE10-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "PRE11-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "PRE12-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "PRE13-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "PRE30-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "PRE31-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5849,13 +8964,23 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/side-effects-in-arguments-to-unsafe-macros",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "PRE32-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5866,6 +8991,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/macro-or-function-args-contain-hash-token",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -5883,24 +9017,28 @@
   "SIG00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "SIG01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "SIG02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "SIG30-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -5923,6 +9061,15 @@
      "alias_of": "bugprone-signal-handler"
     },
     {
+     "tool": "codeql",
+     "checker": "c/cert/call-only-async-safe-functions-within-signal-handlers",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
      "tool": "gcc",
      "checker": "gcc-analyzer-unsafe-call-within-signal-handler",
      "origins": [
@@ -5936,87 +9083,140 @@
    "cert_detectable": true
   },
   "SIG31-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-access-shared-objects-in-signal-handlers",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "SIG34-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-call-signal-from-interruptible-signal-handlers",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "SIG35-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-return-from-a-computational-exception-handler",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "STR00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "STR01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "STR02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "STR03-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "STR04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "STR05-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "STR06-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "STR09-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "STR10-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "STR11-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "STR30-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-attempt-to-modify-string-literals",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "cppcheck",
      "checker": "stringLiteralWrite",
@@ -6046,13 +9246,44 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "semgrep",
+     "checker": "str30-c-string-literal-modified",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    },
+    {
+     "tool": "semgrep",
+     "checker": "str30-c-string-literal-passed-to-mutating-function",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.8
+    },
+    {
+     "tool": "semgrep",
+     "checker": "str30-c-write-through-search-result-of-const-string",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.65
     }
    ],
    "cert_detectable": false
   },
   "STR31-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -6093,14 +9324,33 @@
      "specific": false,
      "available": false,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/strings-has-sufficient-space-for-the-null-terminator",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "STR32-C": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/non-null-terminated-to-function-that-expects-a-string",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "cppcheck",
      "checker": "terminateStrncpy",
@@ -6117,6 +9367,7 @@
   "STR34-C": {
    "tier": "deterministic",
    "tier_runnable": "deterministic",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clang-tidy",
@@ -6137,31 +9388,83 @@
      "specific": true,
      "available": true,
      "alias_of": "bugprone-signed-char-misuse"
+    },
+    {
+     "tool": "codeql",
+     "checker": "c/cert/cast-char-before-converting-to-larger-sizes",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": true
   },
   "STR37-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/to-character-handling-functions-representable-as-u-char",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "STR38-C": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "c/cert/do-not-confuse-narrow-and-wide-functions",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": true
   },
   "STR50-CPP": {
-   "tier": "llm-only",
+   "tier": "deterministic",
    "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier_extended": "deterministic",
+   "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/basic-string-may-not-be-null-terminated-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/operation-may-not-null-terminate-c-style-string-cert",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "STR51-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -6172,13 +9475,23 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/do-not-attempt-to-create-a-string-from-a-null-pointer",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "STR52-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
     {
      "tool": "clangsa",
@@ -6189,6 +9502,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/use-valid-references-for-elements-of-string",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -6204,9 +9526,19 @@
    "cert_detectable": false
   },
   "STR53-CPP": {
-   "tier": "partial",
+   "tier": "deterministic",
    "tier_runnable": "partial",
+   "tier_extended": "deterministic",
    "checkers": [
+    {
+     "tool": "codeql",
+     "checker": "cpp/cert/range-check-string-element-access",
+     "origins": [
+      "codeql-coding-standards"
+     ],
+     "specific": true,
+     "available": true
+    },
     {
      "tool": "cppcheck",
      "checker": "containerOutOfBounds",
@@ -6223,36 +9555,42 @@
   "WIN00-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "WIN01-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "WIN02-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": true
   },
   "WIN03-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "WIN04-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   },
   "WIN30-C": {
    "tier": "llm-only",
    "tier_runnable": "llm-only",
+   "tier_extended": "llm-only",
    "checkers": [],
    "cert_detectable": false
   }

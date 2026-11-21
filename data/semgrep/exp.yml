@@ -1,0 +1,231 @@
+# SEI CERT EXP rules (expressions). See int.yml for the metadata conventions.
+rules:
+  - id: exp34-c-unchecked-allocation-result
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      `$P` holds the result of $ALLOC(), which returns a null pointer on failure, and is
+      used before any null check (EXP34-C).
+    metadata:
+      cert: [EXP34-C]
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              $P = $ALLOC(...);
+              ...
+          - pattern-inside: |
+              $P = ($CT) $ALLOC(...);
+              ...
+          - pattern-inside: |
+              $T $P = $ALLOC(...);
+              ...
+          - pattern-inside: |
+              $T $P = ($CT) $ALLOC(...);
+              ...
+      - metavariable-regex:
+          metavariable: $ALLOC
+          regex: ^(std::)?(malloc|calloc|realloc|reallocarray|aligned_alloc|strdup|strndup|png_malloc)$
+      - pattern-either:
+          - pattern: memcpy($P, ...)
+          - pattern: memmove($P, ...)
+          - pattern: memset($P, ...)
+          - pattern: strcpy($P, ...)
+          - pattern: strncpy($P, ...)
+          - pattern: strcat($P, ...)
+          - pattern: std::memcpy($P, ...)
+          - pattern: std::memset($P, ...)
+          - pattern: $P->$FLD
+          - pattern: "*$P"
+          - pattern: $P[$I]
+      - pattern-not-inside: |
+          if (<... $P ...>) $S;
+          ...
+      - pattern-not-inside: |
+          if (<... $P ...>) $S; else $E;
+          ...
+      - pattern-not-inside: |
+          if (<... $P ...>) $S;
+      - pattern-not-inside: |
+          if (<... $P ...>) $S; else $E;
+      - pattern-not-inside: |
+          assert(<... $P ...>);
+          ...
+      - pattern-not-inside: |
+          while (<... $P ...>) $S;
+      - pattern-not-inside: $P && <... $P ...>
+      - pattern-not-inside: sizeof(...)
+      - pattern-not-inside: $P = $ALLOC(...)
+      - pattern-not-inside: $P = ($CT) $ALLOC(...)
+      - pattern-not-inside: $T $P = $ALLOC(...);
+      - pattern-not-inside: $T $P = ($CT) $ALLOC(...);
+      - pattern-not-inside: "$P ? $X : $Y"
+
+  - id: exp34-c-dereference-before-null-check
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      `$P` is dereferenced and only afterwards compared against null; if it can be null
+      the dereference has already happened (EXP34-C).
+    metadata:
+      cert: [EXP34-C]
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $T $V = <... $P->$FLD ...>;
+              ...
+              if (!$P) $S;
+          - pattern: |
+              $T $V = <... $P->$FLD ...>;
+              ...
+              if ($P == NULL) $S;
+          - pattern: |
+              $T $V = <... $P->$FLD ...>;
+              ...
+              if (NULL == $P) $S;
+          - pattern: |
+              $T $V = <... $P->$FLD ...>;
+              ...
+              if ($P == nullptr) $S;
+          - pattern: |
+              <... $P->$FLD ...>;
+              ...
+              if (!$P) $S;
+          - pattern: |
+              <... $P->$FLD ...>;
+              ...
+              if ($P == NULL) $S;
+          - pattern: |
+              <... $P->$FLD ...>;
+              ...
+              if (NULL == $P) $S;
+      - pattern-not: |
+          $T $V = <... $P->$FLD ...>;
+          ...
+          $P = $X;
+          ...
+      - pattern-not: |
+          <... $P->$FLD ...>;
+          ...
+          $P = $X;
+          ...
+      - pattern-not: |
+          <... $P = $X ...>;
+          ...
+      - focus-metavariable: $FLD
+
+  - id: exp44-c-side-effect-in-unevaluated-operand
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      The operand of sizeof, decltype, noexcept or typeid has a side effect that is not evaluated (or evaluated only for a
+      variable length array), so the increment or assignment silently does not happen
+      (EXP44-C, EXP52-CPP).
+    metadata:
+      cert: [EXP44-C, EXP52-CPP]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: sizeof(<... $X++ ...>)
+          - pattern: sizeof(<... ++$X ...>)
+          - pattern: sizeof(<... $X-- ...>)
+          - pattern: sizeof(<... --$X ...>)
+          - pattern: sizeof(<... $X = $Y ...>)
+          - pattern: sizeof(<... $X += $Y ...>)
+          - pattern: sizeof(<... $X -= $Y ...>)
+          - pattern-regex: \bsizeof\s*\(\s*[\w\s]+\[[^\]\n]*(\+\+|--)
+
+  - id: exp44-c-side-effect-in-alignof-or-generic
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      The operand of _Alignof or _Generic is not evaluated, so its increment or assignment silently does not
+      happen (EXP44-C).
+    metadata:
+      cert: [EXP44-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern-regex: \b(_Alignof|alignof)\s*\([^;{}()]*(\+\+|--)
+          - pattern-regex: \b_Generic\s*\(\s*[^,;{}()]*(\+\+|--)
+  
+  - id: exp45-c-assignment-in-condition
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      An assignment is used as the controlling expression; if a comparison was meant this
+      is a bug, if not compare the result explicitly, e.g. `(x = y) != 0` (EXP45-C).
+    metadata:
+      cert: [EXP45-C]
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern: if ($X = $Y) $S;
+          - pattern: while ($X = $Y) $S;
+          - pattern: do $S; while ($X = $Y);
+          - pattern: do $S; while ($A, $X = $Y);
+          - pattern: while ($A, $X = $Y) $S;
+          - pattern: if ($A, $X = $Y) $S;
+      # `if ((x = f()))` marks the assignment as intended; C++ condition declarations
+      # (`if (T *p = f())`) are not assignments.
+      - pattern-not-regex: \b(if|while)\s*\(\s*\(
+      - pattern-not-regex: \b(if|while)\s*\(\s*(const\s+)?[\w:<>]+[\s*&]+\w+\s*=[^=]
+      # in `x = y, p == q` the last operand decides
+      - pattern-not-regex: \b(while|if)\s*\(\s*[\w.>-]+\s*=\s*[^,;()=]+,\s*[^;]*(==|!=|<|>)
+
+  - id: exp46-c-bitwise-operator-on-boolean-operands
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      A bitwise `&` or `|` is applied to two Boolean-like operands; `&&` or `||` was probably intended
+      (EXP46-C).
+    metadata:
+      cert: [EXP46-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern: $L & $R
+          - pattern: $L | $R
+      # Parser combinators (Boost.Spirit and similar) overload these operators.
+      - pattern-not-regex: '>>'
+      - metavariable-pattern:
+          metavariable: $L
+          pattern-either:
+            - pattern: $A == $B
+            - pattern: $A != $B
+            - pattern: $A < $B
+            - pattern: $A > $B
+            - pattern: $A <= $B
+            - pattern: $A >= $B
+            - pattern: "!$A"
+            - pattern: $A && $B
+            - pattern: $A || $B
+      - metavariable-pattern:
+          metavariable: $R
+          pattern-either:
+            - pattern: $A == $B
+            - pattern: $A != $B
+            - pattern: $A < $B
+            - pattern: $A > $B
+            - pattern: $A <= $B
+            - pattern: $A >= $B
+            - pattern: "!$A"
+            - pattern: $A && $B
+            - pattern: $A || $B
+
+  - id: exp52-cpp-side-effect-in-unevaluated-operand
+    languages: [cpp]
+    severity: WARNING
+    message: >-
+      The operand of decltype, noexcept or typeid has a side effect that is not evaluated
+      (EXP52-CPP).
+    metadata:
+      cert: [EXP52-CPP]
+      confidence: high
+    pattern-either:
+      - pattern-regex: \bdecltype\s*\([^;{}()]*(\+\+|--)
+      - pattern: noexcept(<... $X++ ...>)
+      - pattern: noexcept(<... ++$X ...>)
+      - pattern: typeid(<... $X++ ...>)
+      - pattern: typeid(<... ++$X ...>)

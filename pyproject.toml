@@ -23,6 +23,7 @@ where = ["src"]
 
 [tool.setuptools.data-files]
 "share/cert-review/data" = ["data/*.json", "data/*.yaml"]
+"share/cert-review/data/semgrep" = ["data/semgrep/*.yml"]
 "share/cert-review/profiles" = ["profiles/*.yaml"]
 
 [tool.pytest.ini_options]
