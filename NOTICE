@@ -29,7 +29,7 @@ SEI CERT C Coding Standard and the SEI CERT C++ Coding Standard.
   license: https://opensource.org/license/mit
 
 Changes made: the Markdown source was parsed into a JSON structure; links
-were reduced to text, HTML table markup was removed, and the examples were
+were reduced to text where they pointed into the standard's own site, HTML table markup was removed, and the examples were
 paired (noncompliant with compliant). No rule wording was changed.
 Rule IDs, titles and risk assessments are reproduced as published.
 

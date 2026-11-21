@@ -47,6 +47,9 @@ LINK_ID_RE = re.compile(
     r"\[([A-Z]{3}\d{2}-(?:C|CPP))\.(?:\\.|[^\]\\])*\]\(([^)]+)\)")
 
 
+REL_LINK_RE = re.compile(r"\[((?:\\.|[^\]\\])+)\]\(/[^)]*\)")
+
+
 def strip_html(s: str) -> str:
     s = re.sub(r"<br\s*/?>", "\n", s)
     s = re.sub(r"<[^>]+>", "", s)
@@ -54,6 +57,7 @@ def strip_html(s: str) -> str:
 
 
 def clean_inline(s: str) -> str:
+    s = REL_LINK_RE.sub(lambda m: m.group(1).strip(), s)
     return re.sub(r"\s+", " ", strip_html(s)).strip()
 
 
@@ -90,8 +94,14 @@ def parse_code_blocks(text: str):
     return blocks
 
 
+def md_clean(text: str) -> str:
+    """Reduce links into the standard's own site to their text."""
+    text = REL_LINK_RE.sub(lambda m: m.group(1).strip(), text)
+    return re.sub(r"[ \t]+\n", "\n", text).strip()
+
+
 def prose_of(text: str) -> str:
-    return CODE_RE.sub("[code]", text).strip()
+    return md_clean(CODE_RE.sub("[code]", text))
 
 
 def parse_html_table(text: str):
@@ -237,7 +247,7 @@ def parse_rule_file(path: Path, std, lang, kind, category_dir):
         "source_path": str(path.relative_to(path.parents[
             len(path.relative_to(path.parents[-1]).parts) - 2]))
         if False else None,
-        "intro": intro.strip(),
+        "intro": md_clean(intro),
         "examples": pair_examples(secs),
         "exceptions": prose_of(sec.get("Exceptions", "")) or None,
         "risk": None, "automated_detection": [], "related_guidelines": [],
