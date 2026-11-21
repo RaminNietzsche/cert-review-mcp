@@ -5,48 +5,53 @@ How the deterministic layer does on real security bugs, not on the CERT rule exa
 ## Setup
 
 - Corpus: 62 upstream fixes; 62 ran, 0 failed to run. By project: ceph 38, curl 12, libtiff 4, libexpat 3, libarchive 2, openssl 2, c-ares 1. 39 have a CVE, 23 are memory-safety or input-handling fixes from the Ceph history without a CVE.
-- Each case: the vulnerable revision (first parent of the fix) and the fixed revision, only the non-test C/C++ files the fix touches. Toolchain: clang-tidy 19.1.7, cppcheck 2.17.1.
+- Each case: the vulnerable revision (first parent of the fix) and the fixed revision, only the non-test C/C++ files the fix touches. Toolchain: clang-tidy 19.1.7, clangsa 19.1.7, cppcheck 2.17.1, semgrep 1.186.0 (analyzers: clang-tidy, clangsa, cppcheck, semgrep).
 - Profile: `default` with every level and the C recommendations enabled, no suppressions, `max_rules_per_location` 99, no confidence cut-off (the same settings as [accuracy.md](accuracy.md)).
 - A finding is *in the region* when it is within 3 lines of a line the fix removes or rewrites (for a pure insertion, of the insertion point). *Detected* means a finding in the region whose CERT rule is one of the case's `cert` rules or shares a CWE with the case. *Wrong rule* means findings in the region, none matching. *Miss* means nothing in the region.
 - *Fix-sensitive*: detected on the vulnerable side and no matching finding in the corresponding region of the fixed revision.
 - No project was built. Ceph gets the generated compile database of `tools/ceph_compdb.py`; the C projects get include paths and a small generated config header. A case is *partial* when clang-tidy reported compile errors in a touched file or an analysis timed out.
-- Run on 2026-11-21, 11101s of analysis.
+- Run on 2026-11-22, 7404s of analysis.
 
 ## Headline
 
 | Measure | Value |
 |---|---|
 | Cases with a CERT rule (scored) | 57 |
-| Detected | 5 (9%) |
-| Detected and fix-sensitive | 2 (4%) |
+| Detected | 6 (11%) |
+| Detected and fix-sensitive | 3 (5%) |
 | Wrong rule only | 12 (21%) |
-| Miss | 40 (70%) |
-| Detected, cases that parsed cleanly | 4 of 29 (14%) |
-| Partial cases (compile errors or timeout) | 33 of 62 |
+| Miss | 39 (68%) |
+| Detected, cases that parsed cleanly | 5 of 38 (13%) |
+| Partial cases (compile errors or timeout) | 24 of 62 |
+| Detected, Ceph | 2 of 33 (6%) |
+| Detected, other projects | 4 of 24 (17%) |
+| Detected, findings with confidence >= 0.5 only | 5 (9%) |
+| Wrong rule only, confidence >= 0.5 | 5 (9%) |
 | Design/logic flaws without a CERT rule (not scored) | 5 |
-| Findings in the fixed code's region (all rules) | 54 in 17 of 62 cases |
+| Findings in the fixed code's region (all rules) | 41 in 17 of 62 cases |
+| Same, confidence >= 0.5 | 28 |
 | Matching findings still present after the fix | 4 cases |
 
 ## By category
 
 | Category | Cases | Detected | Fix-sensitive | Wrong rule | Miss | Partial | Recall |
 |---|---|---|---|---|---|---|---|
-| bounds | 25 | 2 | 1 | 7 | 16 | 11 | 8% |
-| integer | 9 | 0 | 0 | 2 | 7 | 0 | 0% |
-| null-deref | 8 | 1 | 0 | 3 | 4 | 7 | 12% |
-| injection | 4 | 0 | 0 | 0 | 4 | 3 | 0% |
+| bounds | 25 | 2 | 1 | 7 | 16 | 7 | 8% |
+| integer | 9 | 1 | 1 | 2 | 6 | 0 | 11% |
+| null-deref | 8 | 1 | 0 | 3 | 4 | 5 | 12% |
+| injection | 4 | 0 | 0 | 0 | 4 | 1 | 0% |
 | use-after-free | 4 | 1 | 1 | 0 | 3 | 2 | 25% |
 | double-free | 2 | 0 | 0 | 0 | 2 | 2 | 0% |
 | error-handling | 2 | 1 | 0 | 0 | 1 | 1 | 50% |
 | uninitialized | 2 | 0 | 0 | 0 | 2 | 1 | 0% |
-| format-string | 1 | 0 | 0 | 0 | 1 | 1 | 0% |
+| format-string | 1 | 0 | 0 | 0 | 1 | 0 | 0% |
 
 ## By project
 
 | Project | Cases scored | Detected | Partial | Recall |
 |---|---|---|---|---|
-| ceph | 33 | 2 | 27 | 6% |
-| curl | 12 | 1 | 1 | 8% |
+| ceph | 33 | 2 | 18 | 6% |
+| curl | 12 | 2 | 1 | 17% |
 | libtiff | 4 | 1 | 0 | 25% |
 | libexpat | 3 | 0 | 0 | 0% |
 | libarchive | 2 | 1 | 0 | 50% |
@@ -57,10 +62,10 @@ How the deterministic layer does on real security bugs, not on the CERT rule exa
 
 | Case | Category | Expected | Outcome | Rules in vulnerable region | Fixed region | Partial |
 |---|---|---|---|---|---|---|
-| [ceph-CVE-2021-3524](https://nvd.nist.gov/vuln/detail/CVE-2021-3524) | injection | STR02-C | miss | - | 0 | yes |
-| [ceph-CVE-2020-10753](https://nvd.nist.gov/vuln/detail/CVE-2020-10753) | injection | STR02-C | miss | - | 0 | yes |
+| [ceph-CVE-2021-3524](https://nvd.nist.gov/vuln/detail/CVE-2021-3524) | injection | STR02-C | miss | - | 0 |  |
+| [ceph-CVE-2020-10753](https://nvd.nist.gov/vuln/detail/CVE-2020-10753) | injection | STR02-C | miss | - | 0 |  |
 | [ceph-CVE-2020-1760](https://nvd.nist.gov/vuln/detail/CVE-2020-1760) | injection | STR02-C | miss | - | 0 | yes |
-| [ceph-CVE-2021-3531](https://nvd.nist.gov/vuln/detail/CVE-2021-3531) | bounds | STR53-CPP, CTR50-CPP | miss | - | 0 | yes |
+| [ceph-CVE-2021-3531](https://nvd.nist.gov/vuln/detail/CVE-2021-3531) | bounds | STR53-CPP, CTR50-CPP | miss | - | 0 |  |
 | [ceph-CVE-2019-10222](https://nvd.nist.gov/vuln/detail/CVE-2019-10222) | error-handling | ERR51-CPP, ERR50-CPP | miss | - | 0 | yes |
 | [ceph-CVE-2020-1700](https://nvd.nist.gov/vuln/detail/CVE-2020-1700) | logic | - | not-applicable | - | 0 | yes |
 | [ceph-CVE-2018-16889](https://nvd.nist.gov/vuln/detail/CVE-2018-16889) | logic | - | not-applicable | - | 0 | yes |
@@ -69,9 +74,9 @@ How the deterministic layer does on real security bugs, not on the CERT rule exa
 | [ceph-CVE-2016-8626](https://nvd.nist.gov/vuln/detail/CVE-2016-8626) | null-deref | CTR51-CPP, EXP34-C | miss | - | 0 | yes |
 | [ceph-CVE-2020-12059](https://nvd.nist.gov/vuln/detail/CVE-2020-12059) | null-deref | EXP34-C | miss | - | 0 | yes |
 | [ceph-CVE-2018-7262](https://nvd.nist.gov/vuln/detail/CVE-2018-7262) | null-deref | EXP34-C | wrong-rule | ERR33-C | 1 | yes |
-| [ceph-CVE-2017-7519](https://nvd.nist.gov/vuln/detail/CVE-2017-7519) | format-string | FIO30-C | miss | - | 0 | yes |
+| [ceph-CVE-2017-7519](https://nvd.nist.gov/vuln/detail/CVE-2017-7519) | format-string | FIO30-C | miss | - | 0 |  |
 | [ceph-CVE-2026-50152](https://nvd.nist.gov/vuln/detail/CVE-2026-50152) | logic | - | not-applicable | - | 0 | yes |
-| [ceph-CVE-2026-54330](https://nvd.nist.gov/vuln/detail/CVE-2026-54330) | logic | - | not-applicable | - | 6 | yes |
+| [ceph-CVE-2026-54330](https://nvd.nist.gov/vuln/detail/CVE-2026-54330) | logic | - | not-applicable | - | 3 | yes |
 | [ceph-fix-1b489f51](https://github.com/ceph/ceph/commit/1b489f51efc2a0167a0d339d146fc8a0d6e4fa97) | double-free | EXP63-CPP, MEM50-CPP | miss | - | 0 | yes |
 | [ceph-fix-2b4bef17](https://github.com/ceph/ceph/commit/2b4bef17e4104696f0da9a9b0760cdcef89d8c2f) | bounds | STR34-C, ARR30-C | detected (fix-sensitive) | STR34-C | 0 | yes |
 | [ceph-fix-63be44a4](https://github.com/ceph/ceph/commit/63be44a47bb577508fd58bcbd5ff898dd51d1439) | bounds | CTR50-CPP | miss | - | 0 | yes |
@@ -81,95 +86,113 @@ How the deterministic layer does on real security bugs, not on the CERT rule exa
 | [ceph-fix-0c66b1c5](https://github.com/ceph/ceph/commit/0c66b1c5b526373ea6aad421adeb18700647c8a4) | bounds | ARR38-C | miss | - | 0 |  |
 | [ceph-fix-38601d0c](https://github.com/ceph/ceph/commit/38601d0c9ea0b6fe32a27cebeb34ec785c7df676) | bounds | ARR38-C, ERR33-C | miss | - | 1 |  |
 | [ceph-fix-e6468f3d](https://github.com/ceph/ceph/commit/e6468f3db174a41dd0c5b9b05e870a2c05f0d042) | bounds | ARR30-C | wrong-rule | ERR33-C | 1 |  |
-| [ceph-fix-bf494e94](https://github.com/ceph/ceph/commit/bf494e94556f9a4a27e17347f428abe8acda6e05) | bounds | ARR30-C | miss | - | 0 | yes |
+| [ceph-fix-bf494e94](https://github.com/ceph/ceph/commit/bf494e94556f9a4a27e17347f428abe8acda6e05) | bounds | ARR30-C | miss | - | 0 |  |
 | [ceph-fix-1c4ec37d](https://github.com/ceph/ceph/commit/1c4ec37d179f897fc936c96c3183d42b98c49883) | null-deref | EXP34-C | miss | - | 0 | yes |
-| [ceph-fix-f5e819cd](https://github.com/ceph/ceph/commit/f5e819cda150805029c1cf071c0e8382dee80b95) | null-deref | EXP34-C | miss | - | 0 | yes |
-| [ceph-fix-caba2e25](https://github.com/ceph/ceph/commit/caba2e25ce9c615b41d229c1d583609ced06b891) | null-deref | EXP34-C | wrong-rule | CON33-C, ERR34-C | 4 | yes |
+| [ceph-fix-f5e819cd](https://github.com/ceph/ceph/commit/f5e819cda150805029c1cf071c0e8382dee80b95) | null-deref | EXP34-C | miss | - | 0 |  |
+| [ceph-fix-caba2e25](https://github.com/ceph/ceph/commit/caba2e25ce9c615b41d229c1d583609ced06b891) | null-deref | EXP34-C | wrong-rule | CON33-C, ERR34-C, STR51-CPP | 4 |  |
 | [ceph-fix-e54e68ad](https://github.com/ceph/ceph/commit/e54e68ad3c88766ac370dfe2bbb5b123e18a7392) | use-after-free | MEM50-CPP | miss | - | 0 | yes |
 | [ceph-fix-8377ba65](https://github.com/ceph/ceph/commit/8377ba6525de5ebfe33a7dda14f17d96e8ac4ef4) | use-after-free | CTR51-CPP | miss | - | 0 | yes |
 | [ceph-fix-ce5493ca](https://github.com/ceph/ceph/commit/ce5493cab0e85acd5a3ac9bebae5cf7741c73d53) | double-free | MEM51-CPP, MEM50-CPP | miss | - | 0 | yes |
 | [ceph-fix-6fb2e060](https://github.com/ceph/ceph/commit/6fb2e060dab19a1cec1e7d3d98346e2393285db2) | bounds | ARR38-C, STR31-C | miss | - | 0 | yes |
-| [ceph-fix-2ac2592e](https://github.com/ceph/ceph/commit/2ac2592e1d5548b40f7311840360968040614208) | bounds | ARR38-C | wrong-rule | FLP34-C, INT31-C | 2 | yes |
-| [ceph-fix-7809af7a](https://github.com/ceph/ceph/commit/7809af7a91ba99f6cf6f71cc55198b15d94cccac) | bounds | CTR50-CPP | miss | - | 2 | yes |
-| [ceph-fix-b2ab8510](https://github.com/ceph/ceph/commit/b2ab85101e2ddf92a8e6318ae874f8e82be054b3) | bounds | ARR38-C, STR32-C | wrong-rule | FLP34-C, INT31-C | 2 | yes |
-| [ceph-fix-52deb168](https://github.com/ceph/ceph/commit/52deb168b29ab59ea90623301fee39eefabfea62) | bounds | ARR30-C | wrong-rule | FLP34-C, INT31-C | 2 | yes |
+| [ceph-fix-2ac2592e](https://github.com/ceph/ceph/commit/2ac2592e1d5548b40f7311840360968040614208) | bounds | ARR38-C | wrong-rule | INT31-C | 1 |  |
+| [ceph-fix-7809af7a](https://github.com/ceph/ceph/commit/7809af7a91ba99f6cf6f71cc55198b15d94cccac) | bounds | CTR50-CPP | miss | - | 1 |  |
+| [ceph-fix-b2ab8510](https://github.com/ceph/ceph/commit/b2ab85101e2ddf92a8e6318ae874f8e82be054b3) | bounds | ARR38-C, STR32-C | wrong-rule | INT31-C | 1 | yes |
+| [ceph-fix-52deb168](https://github.com/ceph/ceph/commit/52deb168b29ab59ea90623301fee39eefabfea62) | bounds | ARR30-C | wrong-rule | INT31-C | 1 | yes |
 | [ceph-fix-566c8e6b](https://github.com/ceph/ceph/commit/566c8e6b4b71b8b88a819e1274ed458c1751df10) | integer | INT30-C | miss | - | 0 |  |
 | [ceph-fix-0a64d970](https://github.com/ceph/ceph/commit/0a64d970a9ff8acec13440e8213f6a5c4739a530) | uninitialized | EXP53-CPP | miss | - | 0 | yes |
-| [curl-CVE-2023-38545](https://curl.se/docs/CVE-2023-38545.html) | bounds | INT31-C, ARR38-C | detected | FLP34-C, INT31-C | 2 |  |
+| [curl-CVE-2023-38545](https://curl.se/docs/CVE-2023-38545.html) | bounds | INT31-C, ARR38-C | detected | INT31-C | 1 |  |
 | [curl-CVE-2019-5482](https://curl.se/docs/CVE-2019-5482.html) | bounds | ARR38-C | miss | - | 0 |  |
 | [curl-CVE-2019-3822](https://curl.se/docs/CVE-2019-3822.html) | bounds | INT30-C, ARR38-C | miss | - | 0 |  |
 | [curl-CVE-2018-16890](https://curl.se/docs/CVE-2018-16890.html) | bounds | INT30-C, ARR30-C | miss | - | 0 |  |
 | [curl-CVE-2018-14618](https://curl.se/docs/CVE-2018-14618.html) | integer | INT30-C, MEM35-C | miss | - | 0 |  |
-| [curl-CVE-2017-8816](https://curl.se/docs/CVE-2017-8816.html) | integer | INT30-C, MEM35-C | miss | - | 0 |  |
+| [curl-CVE-2017-8816](https://curl.se/docs/CVE-2017-8816.html) | integer | INT30-C, MEM35-C | detected (fix-sensitive) | INT30-C | 0 |  |
 | [curl-CVE-2017-1000254](https://curl.se/docs/CVE-2017-1000254.html) | bounds | STR32-C | miss | - | 0 |  |
 | [curl-CVE-2016-8622](https://curl.se/docs/CVE-2016-8622.html) | integer | INT31-C | miss | - | 0 |  |
 | [curl-CVE-2021-22898](https://curl.se/docs/CVE-2021-22898.html) | uninitialized | ERR33-C, EXP33-C | miss | - | 0 |  |
-| [curl-CVE-2018-1000121](https://curl.se/docs/CVE-2018-1000121.html) | null-deref | EXP34-C | wrong-rule | FLP34-C, INT31-C | 2 | yes |
+| [curl-CVE-2018-1000121](https://curl.se/docs/CVE-2018-1000121.html) | null-deref | EXP34-C | wrong-rule | INT31-C | 1 | yes |
 | [curl-CVE-2022-35260](https://curl.se/docs/CVE-2022-35260.html) | bounds | FIO20-C, STR31-C | miss | - | 0 |  |
 | [curl-CVE-2018-1000120](https://curl.se/docs/CVE-2018-1000120.html) | bounds | STR02-C | miss | - | 0 |  |
 | [expat-CVE-2022-23852](https://nvd.nist.gov/vuln/detail/CVE-2022-23852) | integer | INT32-C | miss | - | 0 |  |
 | [expat-CVE-2022-23990](https://nvd.nist.gov/vuln/detail/CVE-2022-23990) | integer | INT30-C, INT31-C | miss | - | 0 |  |
 | [expat-CVE-2022-25235](https://nvd.nist.gov/vuln/detail/CVE-2022-25235) | injection | MSC10-C | miss | - | 0 |  |
-| [libtiff-CVE-2018-8905](https://nvd.nist.gov/vuln/detail/CVE-2018-8905) | bounds | ARR30-C | wrong-rule | FLP34-C, INT31-C | 0 |  |
+| [libtiff-CVE-2018-8905](https://nvd.nist.gov/vuln/detail/CVE-2018-8905) | bounds | ARR30-C | wrong-rule | INT31-C | 0 |  |
 | [libtiff-CVE-2018-18661](https://nvd.nist.gov/vuln/detail/CVE-2018-18661) | null-deref | ERR33-C, EXP34-C | detected | ERR33-C | 4 |  |
 | [libtiff-CVE-2016-3623](https://nvd.nist.gov/vuln/detail/CVE-2016-3623) | integer | INT33-C | wrong-rule | ERR34-C | 3 |  |
-| [libtiff-CVE-2019-14973](https://nvd.nist.gov/vuln/detail/CVE-2019-14973) | integer | INT32-C, INT30-C | wrong-rule | DCL37-C, DCL51-CPP | 12 |  |
-| [libarchive-CVE-2016-1541](https://nvd.nist.gov/vuln/detail/CVE-2016-1541) | bounds | ARR38-C | wrong-rule | FLP34-C, INT31-C | 4 |  |
+| [libtiff-CVE-2019-14973](https://nvd.nist.gov/vuln/detail/CVE-2019-14973) | integer | INT32-C, INT30-C | wrong-rule | DCL37-C, DCL51-CPP, INT33-C | 12 |  |
+| [libarchive-CVE-2016-1541](https://nvd.nist.gov/vuln/detail/CVE-2016-1541) | bounds | ARR38-C | wrong-rule | INT31-C | 2 |  |
 | [libarchive-CVE-2025-25724](https://nvd.nist.gov/vuln/detail/CVE-2025-25724) | error-handling | ERR33-C | detected | ERR33-C | 2 |  |
 | [c-ares-CVE-2016-5180](https://nvd.nist.gov/vuln/detail/CVE-2016-5180) | bounds | ARR30-C, STR31-C | miss | - | 0 |  |
-| [openssl-CVE-2014-0160](https://nvd.nist.gov/vuln/detail/CVE-2014-0160) | bounds | ARR38-C | wrong-rule | FLP34-C, INT31-C | 4 |  |
+| [openssl-CVE-2014-0160](https://nvd.nist.gov/vuln/detail/CVE-2014-0160) | bounds | ARR38-C | wrong-rule | INT31-C | 2 |  |
 | [openssl-CVE-2016-2105](https://nvd.nist.gov/vuln/detail/CVE-2016-2105) | integer | INT32-C | miss | - | 0 |  |
 
 ## What the run shows
 
-Read against the per-case table above (run of 2026-11-21).
+Read against the per-case table above (run of 2026-11-22, analyzers of the Docker images:
+clang-tidy, Clang Static Analyzer, cppcheck and Semgrep).
 
-**What was found.** Five detections, all from narrow, syntactic checks that fire on the exact
-construct the fix changed:
+**Before and after this round of checker work.** Same 62 cases, same analyzer versions; *before*
+is release 1.2.0 run with the same four analyzers (adding Semgrep to the 1.2.0 core set changed
+nothing: 5 of 57 either way).
+
+| Measure | 1.2.0 | Now |
+|---|---|---|
+| Detected (all findings) | 5 of 57 | 6 of 57 |
+| Detected and fix-sensitive | 2 | 3 |
+| Detected, Ceph | 2 of 33 | 2 of 33 |
+| Detected, other projects | 3 of 24 | 4 of 24 |
+| Wrong rule only (all findings) | 12 | 12 |
+| Wrong rule only, confidence >= 0.5 | n/a | 5 |
+| Partial cases (Ceph) | 27 of 33 scored | 18 of 33 scored |
+| Findings in the fixed code's region | 54 | 41 |
+
+The one new detection is curl CVE-2017-8816 (NTLM `(userlen + domlen) * 2` style size
+arithmetic feeding an allocation): the new `int30-c-unchecked-size-arithmetic` rule reports
+INT30-C on the vulnerable line and not on the fixed one. That rule was designed after reading the
+integer-overflow misses of the previous run, so this hit is not an independent measurement.
+
+**What was found.** Six detections, all from narrow checks that fire on the exact construct the
+fix changed:
 
 - `cert-str34-c` on Ceph's `url_decode` table lookup with a plain `char` index
   (ceph-fix-2b4bef17), and `bugprone-use-after-move` on `m->get_cost()` after `std::move(m)` in
   `DispatchQueue::enqueue` (ceph-fix-58a75129). Both disappear on the fixed revision.
+- INT30-C size arithmetic in curl's NTLM code (curl CVE-2017-8816), gone after the fix.
 - `cert-err33-c` on an unchecked `_TIFFmalloc` (libtiff CVE-2018-18661) and an unchecked
-  `strftime` (libarchive CVE-2025-25724), and `bugprone-narrowing-conversions` (INT31-C) on the
-  one-byte SOCKS5 length (curl CVE-2023-38545). In these three cases a matching finding is still
-  reported near the fixed code, so the hit points at the right line but does not tell the
-  vulnerable version from the fixed one.
+  `strftime` (libarchive CVE-2025-25724), and integer narrowing (INT31-C) on the one-byte SOCKS5
+  length (curl CVE-2023-38545). In these three a matching finding is still reported near the
+  fixed code. The SOCKS5 hit comes from the INT31-C narrowing report, which now has confidence
+  0.45, so it drops out at `--min-confidence 0.5` (5 detections instead of 6).
 
-**Wrong-rule hits.** Twelve cases have findings in the region but under another rule. Most are
-INT31-C/FLP34-C narrowing reports on lines next to the bug (Heartbleed, libtiff LZW, libarchive
-zip, several Ceph buffer handlers): noise that happens to sit near the defect. Two are close
-calls: ERR34-C on the `atoi` that feeds the divisor in libtiff CVE-2016-3623 (the fix validates
-exactly that value; the case is scored against INT33-C), and ERR33-C next to the NULL header in
-Ceph CVE-2018-7262.
+**Wrong-rule hits.** Narrowing reports used to be filed as both INT31-C and FLP34-C; they are now
+split by message, so integer narrowing is INT31-C only and FLP34-C is left for floating
+conversions (Heartbleed now shows INT31-C alone). With the 0.5 cut-off the wrong-rule cases fall
+from 12 to 5, at the cost of the SOCKS5 detection above. The remaining close calls are unchanged:
+ERR34-C on the `atoi` feeding the divisor in libtiff CVE-2016-3623 and ERR33-C next to the NULL
+header in Ceph CVE-2018-7262.
 
-**Misses that point at checker work** (useful for the analyzer work in progress):
+**What did not help.**
 
-- *Integer overflow in size computations* (0 of 9): `malloc(len * 2)`, `(userlen + domlen) * 2`,
-  `neededSize += keep`, `ctx->num + inl < ctx->length`, unsigned `rem -= line_len + 1`. No current
-  checker models INT30-C/INT32-C wrap in an allocation size or a bound check. A taint-style check
-  (Semgrep or CodeQL: attacker-sized length reaching `malloc`/`memcpy` without an overflow guard)
-  is the obvious gap; this is also the biggest Ceph-relevant group (INT).
-- *Length-from-input reaching `memcpy`/`recv`* (Heartbleed, curl NTLM, TFTP, Ceph STS
-  `recv_body` into `char buf[256]`, admin socket `message_size`): ARR38-C. The Clang Static
-  Analyzer's taint checkers (`alpha.security.taint`, `optin.taint`) are not enabled here and
-  would be the first thing to try.
-- *Use-after-free through ownership* (`delete lock` inside a loop in RGWLC, a ReadOp freed before
-  logging, a reference into a vector kept across `emplace_back`): MEM50-CPP and CTR51-CPP.
-  Path-sensitive analysis across the whole function is needed; in this run the Clang Static
-  Analyzer reported nothing in any region, partly because many Ceph files did not parse.
-- *Null dereference after a missing check* (Ceph CVE-2020-12059, CVE-2016-8626, mds
-  `handle_client_link`, `rgw_user`): EXP34-C. Same analyzer limitation.
-- *Header/CRLF injection* (three Ceph CORS/response-header CVEs) and the *format string* in
-  libradosstriper (built in one statement, used in another): STR02-C and FIO30-C need data-flow
-  rules, not AST checks.
+- *Clang Static Analyzer taint checkers* produced no finding in any case region. In clang 19
+  `read`/`recv` only propagate taint from an already tainted descriptor, the taint configuration
+  file cannot override that built-in rule, and `fgets` loses taint on the path where its result is
+  tested. Ceph receives input through `bufferlist` and wrapper classes the checkers do not model.
+- *Bounds checkers* (`ArrayBoundV2` with a tainted index, `cstring.OutOfBounds`) found nothing in
+  the regions either; `MallocOverflow` was left out because most of its reports on the dev rules
+  were on compliant examples.
+- *Better Ceph parsing* (C++ standard read from the tree's `CMakeLists.txt`, bundled fmt no
+  longer hiding `<format>`, pre-included standard headers for old trees, `HAVE_LINUX_TYPES_H`,
+  rgw include paths) cut the partial Ceph cases from 27 to 18 but turned no miss into a
+  detection: the nine cases that now parse cleanly are still misses or wrong-rule. The Ceph bugs
+  in this set (header injection, ownership and lifetime errors, missing null checks after lookups,
+  lengths taken from decoded messages) need data-flow or whole-function analysis that these
+  checkers do not do on this code.
 
-**Ceph parsing.** 27 of 33 scored Ceph cases are partial. Ceph builds with GCC and pins its own
-Boost; analysing old revisions with clang 19, libstdc++ 14 and Boost 1.83 fails in different
-ways per era (missing `fmt` or generated headers before the submodule is fetched, consteval
-`StructVChecker` in recent `rgw_zone_types.h`, `<chrono>`/`<format>` mismatches for 2020-era
-code, `int_types.h` typedef clashes). A real build of each revision would remove most of this and
-is the main way to make the Ceph numbers firmer; the C projects parsed cleanly in 23 of 24 cases.
+**Still partial.** Most remaining Ceph partial cases are 2025-26 trees where clang 19 rejects
+calls to the consteval `StructVChecker` constructor in `include/denc.h` (GCC accepts them; a
+`-Dconsteval=constexpr` workaround breaks libstdc++ and was dropped), plus missing optional
+dependencies (`liboath`, `civetweb`, `lua.hpp`, FastCGI, generated `*.frag.cc`) and pre-2019 crypto
+headers. A real build of each revision remains the way to firm up the Ceph numbers; the C
+projects parse cleanly in 23 of 24 cases.
 
 ## Reading these numbers
 

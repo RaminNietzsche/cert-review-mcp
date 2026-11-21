@@ -33,6 +33,10 @@
 - Accuracy on the CERT examples (reference toolchain, corpus-wide): dev rules recall 24% -> 25%
   at 96% precision; held-out rules recall 17% -> 17% (64 -> 65 TP) with precision 97% -> 96%
   (one INT04-C false positive). See [docs/accuracy.md](docs/accuracy.md).
+- Real-code benchmark (same analyzers as the images): 6 of 57 detected (was 5; the new one,
+  curl CVE-2017-8816, comes from the size-arithmetic rule), Ceph 2 of 33 (unchanged), partial
+  Ceph cases 27 -> 18 of 33 scored, wrong-rule-only cases 12 -> 5 at confidence >= 0.5. See
+  [docs/benchmark-real.md](docs/benchmark-real.md).
 
 ## 1.2.0 (2026-11-21)
 
