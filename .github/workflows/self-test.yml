@@ -1,0 +1,75 @@
+name: self-test
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Install analyzers
+        run: sudo apt-get update && sudo apt-get install -y clang clang-tidy cppcheck
+      - run: pip install -e '.[dev]'
+      - run: pytest -q
+
+  action:
+    # Runs the action from this checkout on a few corpus examples.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Full mode on corpus samples
+        id: full
+        uses: ./
+        with:
+          mode: full
+          paths: |
+            corpus/ERR34-C
+            corpus/MSC30-C
+            corpus/EXP42-C
+          profile: default
+          min-confidence: "0.5"
+          fail-on: never
+          sarif-file: cert-review-full.sarif
+      - name: Check the outputs
+        run: |
+          echo "findings=${{ steps.full.outputs.findings }}"
+          test "${{ steps.full.outputs.findings }}" -ge 3
+          python3 - <<'PY'
+          import json
+          d = json.load(open("cert-review-full.sarif"))
+          assert d["version"] == "2.1.0"
+          ids = {r["ruleId"] for r in d["runs"][0]["results"]}
+          assert {"ERR34-C", "MSC30-C", "EXP42-C"} <= ids, ids
+          PY
+      - name: fail-on makes the step fail
+        id: gate
+        continue-on-error: true
+        uses: ./
+        with:
+          mode: full
+          paths: corpus/ERR34-C
+          fail-on: warning
+          sarif-file: cert-review-gate.sarif
+      - name: Gate must have failed
+        run: test "${{ steps.gate.outcome }}" = "failure"
+      - name: Diff mode on this pull request
+        if: github.event_name == 'pull_request'
+        uses: ./
+        with:
+          mode: diff
+          include: "src/**,tools/**"
+          sarif-file: cert-review-diff.sarif
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sarif
+          path: "*.sarif"

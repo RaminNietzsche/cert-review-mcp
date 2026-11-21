@@ -1,0 +1,32 @@
+# Copy to .github/workflows/cert-review.yml in your project.
+name: cert-review
+on:
+  pull_request:
+    paths: ["**/*.c", "**/*.cc", "**/*.cpp", "**/*.h", "**/*.hpp"]
+
+permissions:
+  contents: read
+  security-events: write      # SARIF upload to code scanning
+  pull-requests: write        # only needed when review-comments is true
+
+jobs:
+  cert-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0       # diff mode needs history
+
+      # Optional: a real compile database makes results far more accurate.
+      # - run: cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - uses: RaminNietzsche/cert-review-mcp@v1
+        with:
+          profile: default            # or: ceph, or a path such as .github/cert-review.yaml
+          mode: diff
+          # compile-commands: build
+          exclude: "third_party/**,vendor/**"
+          fail-on: never              # error | warning | note | never
+          upload-sarif: "true"
+          review-comments: "false"    # "true" posts one PR review with inline comments
+          github-token: ${{ secrets.GITHUB_TOKEN }}
