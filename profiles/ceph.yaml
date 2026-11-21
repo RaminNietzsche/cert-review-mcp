@@ -164,6 +164,24 @@ suppress:
     checker: "bugprone-narrowing-conversions"
     message_regex: 'to signed type .* is implementation-defined'
     reason: "Same-width unsigned-to-signed conversions (version_t/uint64_t into int64_t for Formatter::dump_int, ids, epochs) are pervasive in Ceph's interfaces. Real narrowing (uint64_t to uint32_t, size to int) is still reported."
+  - id: "INT31-C"
+    checker: "bugprone-narrowing-conversions"
+    message_regex: "to '(double|float)'"
+    reason: "Integer-to-double conversions in timing and ratio arithmetic (tv_sec + usec/1e6, mapped/target) lose at most sub-microsecond precision; INT31-C is about integer value loss."
+  - id: "CTR50-CPP"
+    paths: ["src/common/freebsd_errno.cc"]
+    reason: "cppcheck evaluates the H2C_ERRNO table with Linux errno constants against a 256-entry array; the file is a platform translation table that is only compiled meaningfully on FreeBSD/macOS."
+  - id: "MEM35-C"
+    checker: "bugprone-sizeof-expression"
+    message_regex: "pointer-to-aggregate"
+    paths: ["src/include/*"]
+    reason: "Template code (mempool, cpp-btree) where sizeof(T) is instantiated with pointer types intentionally."
+  - id: "MSC32-C"
+    paths: ["src/common/CDC.cc", "src/common/FastCDC.cc"]
+    reason: "Content-defined chunking needs a deterministic, identically seeded generator on every node."
+  - id: "MSC51-CPP"
+    paths: ["src/common/CDC.cc", "src/common/FastCDC.cc"]
+    reason: "Same as MSC32-C: determinism is the requirement."
   - id: "DCL58-CPP"
     code_not_regex: 'namespace\s+(std|posix)\b'
     reason: "clang-tidy 19's cert-dcl58-cpp reports declarations that merely derive from or mention std types (399 hits in 5 directories, none inside a namespace std block). Only a line opening `namespace std` is a real candidate."
