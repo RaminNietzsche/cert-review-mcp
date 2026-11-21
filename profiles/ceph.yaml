@@ -1,0 +1,312 @@
+# Ceph profile.
+#
+# Facts below were checked against a Ceph `main` checkout (src/CMakeLists.txt,
+# src/include/ceph_assert.h, src/common/ceph_mutex.h, src/common/RefCountedObj.h,
+# src/common/dout.h, src/include/buffer.h, src/crimson/, CodingStyle,
+# SubmittingPatches.rst). `evidence` fields cite the files; counts are rough
+# grep counts of the pattern in src/ (third-party trees and test/ excluded) and
+# are only meant to show how common an idiom is.
+name: ceph
+description: >
+  Ceph review profile: C++23 (CMAKE_CXX_STANDARD 23), C11 with GNU extensions,
+  its own assert/log/mutex/buffer/refcount idioms, crimson (seastar) and
+  boost::asio code. Keeps CERT meaning but tunes severity and noise.
+languages:
+  c_standard: 11          # src/CMakeLists.txt: CMAKE_C_STANDARD 11, C extensions ON
+  cpp_standard: 23        # src/CMakeLists.txt: "require c++23"
+  cpp_extensions: false   # CMAKE_CXX_EXTENSIONS OFF
+file_extensions:
+  c: [".c"]
+  cpp: [".cc", ".cpp", ".h", ".hpp"]
+severity_from_cert: {High: error, Medium: warning, Low: note}
+min_level: L2            # L3 rules are mostly style for an existing C++ codebase
+include_recommendations: false
+
+# Ceph vendors many third-party trees under src/ and has its own test dir.
+exclude_paths:
+  - "src/boost/*"
+  - "src/rocksdb/*"
+  - "src/seastar/*"
+  - "src/spdk/*"
+  - "src/dpdk/*"
+  - "src/googletest/*"
+  - "src/fmt/*"
+  - "src/arrow/*"
+  - "src/isa-l/*"
+  - "src/c-ares/*"
+  - "src/blkin/*"
+  - "src/jaegertracing/*"
+  - "src/opentelemetry-cpp/*"
+  - "src/xxHash/*"
+  - "src/zstd/*"
+  - "src/lua/*"
+  - "src/libkmip/*"
+  - "src/rgw/jwt-cpp/*"
+  - "src/rgw/picojson/*"
+  - "src/rgw/madler/*"
+  - "src/BLAKE3/*"
+  - "src/erasure-code/jerasure/jerasure/*"
+  - "src/erasure-code/jerasure/gf-complete/*"
+  - "src/pybind/*"
+  - "*/build/*"
+
+# Ceph has no checked-in .clang-tidy (there is none in the main tree), so the
+# engine passes checks explicitly. compile_commands.json from a Ceph build
+# (cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON) is strongly preferred.
+clang_tidy:
+  checks_extra: []
+  extra_args:
+    - "-std=c++23"
+    - "-Wno-unknown-warning-option"
+    - "-DCEPH_REVIEW=1"
+  header_filter: "src/(common|include|osd|mon|mds|mgr|rgw|librados|librbd|osdc|msg|os|client|crush|crimson|cls|tools)/.*"
+
+# ---------------------------------------------------------------------------
+# Rule tuning. `severity` replaces the CERT-derived severity; `priority_delta`
+# shifts ordering (higher = more important); `note` is shown with the finding.
+# ---------------------------------------------------------------------------
+rule_overrides:
+  # Memory lifetime: the bugs that actually take down daemons.
+  MEM50-CPP: {priority_delta: 5, note: "Check ref-counted objects: use after put()/intrusive_ptr release."}
+  MEM51-CPP: {priority_delta: 4, note: "Objects deriving RefCountedObject must be released with put()/ceph::ref_t, never delete."}
+  MEM52-CPP: {priority_delta: 3, note: "Detect and handle memory allocation errors (new throws; malloc returns null)."}
+  MEM53-CPP: {priority_delta: 2}
+  MEM54-CPP: {priority_delta: 2}
+  MEM30-C:   {priority_delta: 5}
+  MEM31-C:   {priority_delta: 3}
+  EXP54-CPP: {priority_delta: 5, note: "Lifetime: lambdas passed to asio/seastar/finishers often outlive their stack."}
+  EXP61-CPP: {priority_delta: 5, severity: error, note: "Reference captures in async callbacks (boost::asio handlers, seastar continuations, Context/Finisher) are a frequent source of use-after-scope."}
+  EXP34-C:   {priority_delta: 3}
+  EXP53-CPP: {priority_delta: 3}
+  # Bounds: buffer::list / bufferptr / encode/decode.
+  ARR30-C:   {priority_delta: 4, note: "buffer::ptr::operator[] and iterator copy() are bounds-checked via ceph_assert/end_of_buffer; raw c_str()+offset arithmetic is not."}
+  ARR38-C:   {priority_delta: 4}
+  STR50-CPP: {priority_delta: 3}
+  STR53-CPP: {priority_delta: 2}
+  CTR50-CPP: {priority_delta: 4, note: "Guarantee container indices and iterators are within bounds."}
+  CTR51-CPP: {priority_delta: 3, note: "Iterator invalidation across calls that may insert/erase (map/vector in OSD/PG code)."}
+  CTR52-CPP: {priority_delta: 4}
+  INT30-C:   {priority_delta: 3, note: "Wraparound on size/offset/length arithmetic (object offsets are uint64_t, buffer lengths unsigned)."}
+  INT31-C:   {priority_delta: 4, note: "Narrowing between uint64_t object sizes/offsets and unsigned buffer lengths."}
+  INT32-C:   {priority_delta: 2}
+  INT34-C:   {priority_delta: 2}
+  # Concurrency: Ceph's lock discipline is enforced with ceph::mutex + lockdep.
+  CON50-CPP: {priority_delta: 3}
+  CON51-CPP: {priority_delta: 3, note: "Take locks via std::lock_guard/std::unique_lock on ceph::mutex (RAII); raw lock()/unlock() pairs leak the lock on exceptions."}
+  CON52-CPP: {priority_delta: 2}
+  CON53-CPP: {priority_delta: 3, note: "Lock ordering is validated by lockdep only in debug builds; cross-component lock order still needs review."}
+  CON54-CPP: {priority_delta: 3, note: "Condition variables: always wait with a predicate (ceph::condition_variable::wait(lock, pred))."}
+  CON55-CPP: {priority_delta: 2}
+  CON56-CPP: {priority_delta: 2}
+  CON33-C:   {note: "C library thread-safety; prefer *_r variants (strerror_r, localtime_r)."}
+  # Error handling.
+  ERR33-C:   {priority_delta: 3, note: "Ceph uses negative errno return values; ignoring `int r = f();` is the same bug class."}
+  ERR34-C:   {priority_delta: 3, note: "Prefer strict_strtol/strict_strtoll/strict_si_cast (src/common/strtol.h) or std::from_chars over atoi/strtol."}
+  ERR50-CPP: {severity: note, note: "ceph_assert/ceph_abort are the sanctioned fatal-error mechanism; flag only raw std::abort/exit/_exit."}
+  ERR51-CPP: {priority_delta: 1}
+  ERR52-CPP: {priority_delta: 0}
+  ERR55-CPP: {priority_delta: 1}
+  ERR56-CPP: {priority_delta: 1}
+  ERR58-CPP: {priority_delta: 3, note: "Static initializers (global ceph::mutex, std::map, std::string) must not throw."}
+  ERR60-CPP: {priority_delta: 2, note: "Exception objects thrown across encode/decode (buffer::error, malformed_input) must be nothrow-copyable."}
+  # Randomness / misc.
+  MSC30-C:   {note: "Use ceph::util::generate_random_number / <random> for non-crypto needs and get_random_bytes/OpenSSL for secrets."}
+  MSC32-C:   {priority_delta: 1}
+  MSC50-CPP: {note: "Use ceph::util::generate_random_number / std::mt19937 with a proper seed."}
+  MSC51-CPP: {priority_delta: 1}
+  MSC41-C:   {priority_delta: 3, note: "Never hard-code sensitive information (keys, secrets, passwords)."}
+  # Format strings: dout/ldout/derr use ostream and fmt, not printf.
+  FIO30-C:   {priority_delta: 3, note: "Applies to printf-family calls only; dout/ldout/derr stream operators and fmt::format are not format-string sinks."}
+  FIO47-C:   {priority_delta: 1}
+  # Style-like recommendations Ceph decides for itself in CodingStyle.
+  DCL51-CPP: {note: "Reserved identifiers: Ceph macros such as __ceph_assert_fail are deliberate internal names."}
+  OOP54-CPP: {priority_delta: 1}
+  OOP57-CPP: {priority_delta: 2, note: "memcpy/memset on non-trivial types; check structs with encode()/decode() that hold bufferlist."}
+  OOP58-CPP: {priority_delta: 0}
+  DCL50-CPP: {priority_delta: 0, note: "C-style variadics in logging helpers wrapping vsnprintf are a known pattern."}
+
+# Rules that are not meaningful in Ceph's configuration; disabled with a reason.
+disabled_rules:
+  - {id: DCL59-CPP, reason: "Anonymous namespaces in headers are checked by project review; the vendored headers trigger it constantly."}
+  - {id: MSC54-CPP, reason: "Ceph installs signal handlers via its own async signal infrastructure; the generic handler check misfires on it. Re-enable per file if you add a handler."}
+  - {id: MSC53-CPP, reason: "Low value: [[noreturn]] misuse is caught by compiler warnings under -Werror."}
+  - {id: MSC52-CPP, reason: "Value-returning functions that fall off the end are compile errors in Ceph's build (-Werror=return-type)."}
+
+# ---------------------------------------------------------------------------
+# Noise suppressions: (rule and/or checker) x (path globs and/or code regex).
+# ---------------------------------------------------------------------------
+suppress:
+  - id: "PRE31-C"
+    code_regex: '\b(ceph_assert|ceph_assert_always|ceph_assertf|ceph_abort_msg|ldout|dout|derr|lderr|ldpp_dout|ldpp_dout_fmt|dout_fmt|lgeneric_dout)\b'
+    reason: "ceph_assert evaluates its argument exactly once (it forwards `(bool)(expr)` into a lambda) and the dout macros evaluate the stream expression once, so PRE31-C's multiple-evaluation concern does not apply."
+    evidence: "src/include/ceph_assert.h, src/common/dout.h"
+  - id: "PRE30-C"
+    code_regex: '\b(dendl|ldout|dout)\b'
+    reason: "dout macros paste tokens deliberately (dout_prefix hooks)."
+  - checker: "bugprone-macro-parentheses"
+    code_regex: '\b(dout_prefix|dout_context|dout_subsys|ldout|dendl)\b'
+    reason: "dout_* macros intentionally expand to partial expressions."
+  - id: "DCL37-C"
+    code_regex: '\b__(ceph_assert|ceph_abort|CEPH_ASSERT)'
+    reason: "Intentional reserved-prefix internal helper names in include/ceph_assert.h."
+  - id: "DCL51-CPP"
+    code_regex: '\b__(ceph_assert|ceph_abort|CEPH_ASSERT|STRING)'
+    reason: "Same as DCL37-C."
+  - id: "ERR33-C"
+    code_regex: '\b(ceph_assert|ceph_assert_always)\s*\(.*\b(==|!=|<|>)\b'
+    reason: "The return value is consumed by the assertion, which is Ceph's idiom for 'this call must succeed'."
+  - id: "EXP45-C"
+    code_regex: '\bwhile\s*\(\s*\(?\s*\w+\s*=\s*[^=]'
+    reason: "Intentional assignment-in-condition loops such as `while ((r = read(...)) > 0)` are idiomatic C in Ceph's C utilities."
+    paths: ["src/*.c", "src/common/*.c", "src/tools/*", "src/tools/**/*.c"]
+  # Tests, benchmarks and tools are not shipped daemons; keep only memory and UB rules.
+  - id_prefixes: ["ERR", "MSC", "STR", "DCL", "OOP", "CON", "FIO", "INT"]
+    paths: ["src/test/*", "src/tools/*bench*", "src/common/obj_bencher.cc", "src/*/test_*", "src/test_*", "src/*fuzz*"]
+    reason: "Test and benchmark code: only memory, expression and array rules are reported there."
+  # Vendored generated parsers.
+  - id_prefixes: [""]
+    paths: ["src/rgw/rgw_*_parser*.cc", "src/*/y.tab.c", "src/*/lex.*.c"]
+    reason: "Machine-written parser output."
+  # Crimson: seastar futures replace locks and threads.
+  - id_prefixes: ["CON50", "CON51", "CON52", "CON53", "CON54", "CON55", "CON56"]
+    paths: ["src/crimson/*"]
+    reason: "crimson is a shard-per-core seastar design; ceph::mutex is a dummy there (src/common/ceph_mutex.h under WITH_CRIMSON). Concurrency problems appear as future/lifetime bugs (EXP54-CPP/EXP61-CPP), not lock bugs."
+  # Seastar/asio coroutine frames capture by reference by design.
+  - id: "EXP61-CPP"
+    code_regex: '\b(co_await|co_return|co_yield)\b'
+    reason: "Coroutine frames own their parameters/locals; reference captures in a coroutine lambda that is itself co_awaited in the same scope are safe. Review only when the lambda is stored or detached."
+
+# ---------------------------------------------------------------------------
+# Ceph idioms: how project constructs relate to rules. The engine uses
+#  * `detect` (regex on source lines) to decide which idioms a hunk contains,
+#  * `rules` to pull the relevant rule texts into LLM review packets,
+#  * `hint` to give the reviewer the project-specific interpretation.
+# ---------------------------------------------------------------------------
+idioms:
+  - id: ceph_assert
+    detect: '\b(ceph_assert|ceph_assert_always|ceph_assertf|ceph_abort|ceph_abort_msg)\b'
+    rules: [ERR50-CPP, MSC11-C, EXP30-C, PRE31-C, EXP34-C]
+    hint: >
+      ceph_assert is always active today (the header says it may become
+      NDEBUG-sensitive in future; ceph_assert_always never is). It is the
+      accepted way to state invariants and to abort on programmer error, so do
+      not report 'assert is compiled out' (MSC11/ERR rules). It is NOT a way to
+      validate untrusted input or to handle I/O and allocation errors: an
+      assertion on data that came from the network, disk or a client is a
+      remote crash (ERR50-CPP spirit, EXP34-C). Side effects inside
+      ceph_assert are discouraged because of the NDEBUG caveat.
+    evidence: ["src/include/ceph_assert.h"]
+  - id: dout
+    detect: '\b(dout|ldout|derr|lderr|ldpp_dout|ldpp_dout_fmt|dout_fmt|dendl)\b'
+    rules: [FIO30-C, FIO47-C, STR50-CPP, MEM52-CPP]
+    hint: >
+      dout/ldout/derr write to an ostream (or, in crimson, a seastar logger);
+      they are not printf-style, so FIO30-C/FIO47-C do not apply to them.
+      Apply them to snprintf/sprintf/fmt-less printf-family calls only.
+      Logging untrusted strings is a log-injection concern, not a CERT
+      format-string one. Streaming an uninitialised or dangling object (EXP53,
+      EXP54) inside a dout statement is still a real bug.
+    evidence: ["src/common/dout.h"]
+  - id: bufferlist
+    detect: '\b(bufferlist|buffer::list|bufferptr|buffer::ptr|ceph::buffer::|bl\.c_str\(\)|bl\.length\(\)|copy_out|copy_in|DECODE_START|DECODE_FINISH|ENCODE_START|ENCODE_FINISH|decode\(|encode\()'
+    rules: [ARR30-C, ARR38-C, ARR39-C, STR50-CPP, INT30-C, INT31-C, CTR50-CPP, EXP62-CPP]
+    hint: >
+      buffer::list iterators throw buffer::end_of_buffer when asked for more
+      than remains, buffer::ptr::operator[] is bounds-checked with ceph_assert,
+      and DECODE_START/DECODE_FINISH validate the versioned struct wrapper. The
+      remaining risks are (a) raw pointers taken from c_str() and indexed by an
+      unchecked offset, (b) lengths decoded from the wire used as allocation
+      sizes or loop bounds before being validated (INT30/INT31/ARR38), and (c)
+      decode paths that catch buffer::error and continue with a half-decoded
+      object. encode()/decode() of a struct must stay symmetric.
+    evidence: ["src/include/buffer.h", "src/include/encoding.h"]
+  - id: ceph_mutex
+    detect: '\b(ceph::mutex|ceph::make_mutex|ceph::make_recursive_mutex|ceph::recursive_mutex|ceph::shared_mutex|ceph::condition_variable|std::mutex|std::lock_guard|std::unique_lock|std::scoped_lock|ceph_mutex_is_locked|ceph_mutex_is_locked_by_me|std::condition_variable)\b'
+    rules: [CON50-CPP, CON51-CPP, CON52-CPP, CON53-CPP, CON54-CPP, CON55-CPP, CON56-CPP, CON31-C, CON41-C]
+    hint: >
+      Ceph code should use ceph::mutex created with ceph::make_mutex("name")
+      (src/common/ceph_mutex.h), which is a lockdep-instrumented mutex in debug
+      builds and std::mutex in release builds; plain std::mutex bypasses
+      lockdep. Locks are normally held through std::lock_guard / unique_lock
+      RAII. Check for: manual lock()/unlock() pairs, condition variable waits
+      without a predicate, locks held across calls into other components
+      (CON53-CPP) and asserts on ceph_mutex_is_locked_by_me for 'must hold'
+      contracts. Under WITH_CRIMSON ceph::mutex is a dummy, so the same code
+      must also be correct without mutual exclusion.
+    evidence: ["src/common/ceph_mutex.h"]
+  - id: refcounted
+    detect: '\b(RefCountedObject|RefCountedObjectSafe|RefCountedWaitObject|ceph::ref_t|ceph::make_ref|boost::intrusive_ptr|intrusive_ptr_add_ref|intrusive_ptr_release|->put\(\)|->get\(\)|MRef|make_message|FRIEND_MAKE_REF|get_nref)\b'
+    rules: [MEM50-CPP, MEM51-CPP, MEM53-CPP, EXP54-CPP, OOP52-CPP, MEM56-CPP]
+    hint: >
+      RefCountedObject starts with nref == 1 ("manually set to 1"), so an
+      intrusive_ptr must adopt rather than add a reference when wrapping a raw
+      pointer from `new`; ceph::make_ref<T>() and make_message<T>() do this
+      correctly. Typical bugs: calling put() and then touching a member
+      (MEM50/EXP54), `delete` on a refcounted object (MEM51), wrapping `this`
+      in an intrusive_ptr from a destructor path, raw RefCountedObject*
+      stored in a container without get(), and a missing put() on early return
+      (leak; MEM51).
+    evidence: ["src/common/RefCountedObj.h", "src/msg/Message.h"]
+  - id: errno_returns
+    detect: '\bint\s+r\s*=|\breturn\s+-[A-Z]{3,}|\b-E[A-Z0-9]{3,}\b'
+    rules: [ERR33-C, ERR30-C, EXP12-C, ERR34-C]
+    hint: >
+      Ceph functions report failure with negative errno ints (return -ENOENT)
+      and often propagate `r`. An ignored `r` or a `-errno` that is compared
+      with a positive errno constant is the usual defect. Library calls that
+      set errno (strtol family) must be checked as in ERR30-C/ERR34-C.
+  - id: string_to_number
+    detect: '\b(atoi|atol|atoll|atof|strtol|strtoul|strtoll|strtoull|stoi|stol|stoul|stoll|strict_strtol|strict_strtoll|strict_strtod|strict_si_cast|from_chars)\b'
+    rules: [ERR34-C, INT31-C, STR38-C]
+    hint: "Prefer src/common/strtol.h helpers (strict_strtol, strict_strtoll, strict_si_cast) or std::from_chars; they report failure instead of silently returning 0."
+    evidence: ["src/common/strtol.h"]
+  - id: asio_seastar_async
+    detect: '\b(boost::asio::|asio::|co_spawn|spawn::|yield_context|seastar::|seastar::future|\.then\(|\.then_wrapped\(|do_with|with_lock|co_await|Finisher|Context\b|C_OnFinisher|GenContext|make_lambda_context|MOSDOp)\b'
+    rules: [EXP54-CPP, EXP61-CPP, MEM50-CPP, EXP62-CPP, OOP53-CPP]
+    hint: >
+      Callbacks (asio handlers, seastar continuations, Context/Finisher
+      completions) run after the calling frame has gone. A lambda capturing
+      locals, `this` or a stack object by reference outlives them (EXP61-CPP);
+      in seastar use do_with or capture by value/ref_t, and make sure every
+      future is awaited or explicitly detached (unconsumed futures leak the
+      referenced objects).
+    evidence: ["src/crimson/", "src/common/async/"]
+  - id: random_numbers
+    detect: '\b(rand|srand|random|drand48|rand_r|std::rand|std::random_device|ceph::util::generate_random_number|get_random_bytes|std::mt19937|std::uniform_int_distribution|ceph::util::random_number_generator)\b'
+    rules: [MSC30-C, MSC32-C, MSC50-CPP, MSC51-CPP]
+    hint: "Ceph's ceph::util::generate_random_number (src/include/random.h) is the project default; secrets must come from get_random_bytes/OpenSSL, never rand()/mt19937."
+  - id: signals_and_threads
+    detect: '\b(signal|sigaction|SIGINT|SIGTERM|SIGSEGV|SIGHUP|sigaltstack|pthread_[a-z_]+|std::thread|std::jthread|ceph_pthread_setname|Thread::create|ThreadPool|ShardedThreadPool)\b'
+    rules: [SIG30-C, SIG31-C, SIG34-C, SIG35-C, POS47-C, POS44-C, CON50-CPP, CON52-CPP, CON40-C, CON41-C]
+    hint: "Signal handlers must only call async-signal-safe functions; Ceph registers handlers through its own signal-handling layer. Threads should be created through Ceph's Thread/ThreadPool wrappers so they get names and are joined."
+  - id: raw_allocation
+    detect: '\b(new\s+\w[\w:<>,\s\*]*\[|malloc|calloc|realloc|free|delete\s*\[|delete\s+\w|strdup|alloca|posix_memalign|aligned_alloc)\b'
+    rules: [MEM30-C, MEM31-C, MEM34-C, MEM35-C, MEM36-C, MEM51-CPP, MEM52-CPP, MEM53-CPP, MEM54-CPP, MEM55-CPP, EXP51-CPP]
+    hint: "Prefer containers, unique_ptr, ceph::buffer or make_ref; raw new[]/malloc need an owner and a size check. new throws on failure in Ceph's C++ code, so null checks after `new` are dead, while malloc/realloc results must be checked (MEM52-CPP / MEM32-C)."
+  - id: c_strings
+    detect: '\b(strcpy|strcat|sprintf|vsprintf|gets|strncpy|strncat|strlcpy|strlcat|snprintf|memcpy|memmove|memset|strlen|strdup|stpcpy|wcscpy)\b'
+    rules: [STR31-C, STR32-C, STR38-C, ARR38-C, ARR30-C, MSC24-C, MSC33-C]
+    hint: "strcpy/strcat/sprintf are the highest-priority findings in C files. strncpy does not NUL-terminate (STR32-C). snprintf's return value is the length that would have been written, not what was written."
+  - id: encode_decode_symmetry
+    detect: '\b(ENCODE_START|DECODE_START|WRITE_CLASS_ENCODER|encode_nohead|decode_nohead|decode_n)\b'
+    rules: [INT30-C, INT31-C, ARR38-C, MEM52-CPP, EXP53-CPP]
+    hint: "Fields decoded from untrusted bytes: validate counts/lengths before reserve()/resize()/loops; initialise every member before decode so partial decodes leave a defined state."
+
+# Where the LLM review layer should spend its tokens, by path (evidence-based
+# from the idioms above). `boost` raises the priority of rule categories.
+path_focus:
+  - paths: ["src/msg/*", "src/messages/*", "src/auth/*", "src/mon/*", "src/mds/*", "src/osd/*", "src/rgw/*", "src/librados/*", "src/librbd/*"]
+    boost_categories: [ARR, INT, MEM, STR]
+    reason: "Parse untrusted network/client input."
+  - paths: ["src/crimson/*"]
+    boost_categories: [EXP, MEM, OOP]
+    reason: "seastar futures: lifetime of captured state."
+  - paths: ["src/common/*", "src/include/*"]
+    boost_categories: [ARR, INT, CON, MEM]
+    reason: "Shared building blocks used by every daemon."
+  - paths: ["src/os/bluestore/*", "src/os/*", "src/blk/*", "src/kv/*"]
+    boost_categories: [INT, ARR, FIO, ERR]
+    reason: "On-disk formats, offsets and I/O error handling."
+  - paths: ["src/rgw/*"]
+    boost_categories: [STR, ERR, INT]
+    reason: "HTTP/S3 request parsing and string handling."

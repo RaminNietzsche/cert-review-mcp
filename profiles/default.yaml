@@ -1,0 +1,25 @@
+# Default profile: plain CERT semantics with no project assumptions.
+name: default
+description: Plain SEI CERT C/C++ review; severities come straight from the CERT risk table.
+languages:
+  c_standard: 11
+  cpp_standard: 17
+file_extensions:
+  c: [".c"]
+  cpp: [".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"]
+# Severity of a finding is derived from the CERT risk row:
+#   High -> error, Medium -> warning, Low -> note
+severity_from_cert: {High: error, Medium: warning, Low: note}
+# Findings below this CERT level are hidden unless include_low is set.
+min_level: L3
+include_recommendations: false   # C recommendations are advisory; rules only by default
+exclude_paths: ["build/*", "third_party/*", "vendor/*", "*/node_modules/*"]
+clang_tidy:
+  checks_extra: []
+  extra_args: []
+rule_overrides: {}
+suppress: []
+idioms: []
+llm_review:
+  max_rules_per_hunk: 6
+  max_hunk_lines: 60
