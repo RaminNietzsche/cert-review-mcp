@@ -7,12 +7,15 @@ import pytest
 
 from cert_review.mcp_server import build_server
 
-EXPECTED_TOOLS = {"list_rules", "explain_rule", "search_rules", "check_file", "check_diff",
-                  "review_packet", "validate_findings", "rule_coverage", "format_review"}
+EXPECTED_TOOLS = {"list_rules", "get_rule", "search_rules", "check_files", "check_diff",
+                  "build_review_packet", "validate_findings", "get_rule_coverage", "format_findings"}
 
 
 def _text(result):
-    return result.content[0].text
+    if isinstance(result, tuple):          # mcp 1.x: (content, structured)
+        result = result[0]
+    content = result.content if hasattr(result, "content") else result
+    return content[0].text
 
 
 def test_tools_resources_prompts_registered():
@@ -20,7 +23,7 @@ def test_tools_resources_prompts_registered():
 
     async def go():
         tools = {t.name for t in await s.list_tools()}
-        templates = {t.uri_template for t in await s.list_resource_templates()}
+        templates = {getattr(t, "uri_template", None) or t.uriTemplate for t in await s.list_resource_templates()}
         prompts = {p.name for p in await s.list_prompts()}
         return tools, templates, prompts
     tools, templates, prompts = asyncio.run(go())
@@ -33,15 +36,30 @@ def test_explain_and_list_in_process():
     s = build_server()
 
     async def go():
-        a = json.loads(_text(await s.call_tool("explain_rule", {"id": "EXP34-C"})))
+        a = json.loads(_text(await s.call_tool("get_rule", {"rule_id": "EXP34-C"})))
         b = json.loads(_text(await s.call_tool(
             "list_rules", {"lang": "cpp", "coverage": "deterministic", "limit": 100})))
-        c = json.loads(_text(await s.call_tool("rule_coverage", {"lang": "cpp"})))
+        c = json.loads(_text(await s.call_tool("get_rule_coverage", {"lang": "cpp"})))
         return a, b, c
     a, b, c = asyncio.run(go())
     assert a["risk"]["priority"] == "P18" and a["coverage"]["checkers"]
     assert b["count"] == 18 and all(r["lang"] == "cpp" for r in b["rules"])
     assert c["total"] == 83
+
+
+def test_annotations_and_titles():
+    s = build_server()
+
+    async def go():
+        return await s.list_tools()
+    for t in asyncio.run(go()):
+        d = t.model_dump(by_alias=True, exclude_none=True)
+        a = d.get("annotations") or {}
+        assert d.get("title") and d.get("description") and a
+        assert a["readOnlyHint"] is True and a["destructiveHint"] is False
+        assert a["idempotentHint"] is True and a["openWorldHint"] is False
+        props = d["inputSchema"].get("properties", {})
+        assert all(v.get("description") for v in props.values()), t.name
 
 
 def test_prompts_forbid_posting():
@@ -75,3 +93,15 @@ def test_stdio_round_trip():
     assert tools == EXPECTED_TOOLS
     assert any(x["id"] == "EXP34-C" for x in search["results"])
     assert "EXP34-C" in str(rr)
+
+
+@pytest.mark.parametrize("tool,args,msg", [
+    ("check_diff", {"repo": "."}, "provide base"),
+    ("get_rule", {"rule_id": "XYZ99-C"}, "unknown rule"),
+    ("check_files", {"path": "/nonexistent/cert-review"}, "path not found"),
+    ("get_rule", {"rule_id": "EXP34-C", "profile": "nope"}, "Available profiles"),
+])
+def test_errors_carry_a_message(tool, args, msg):
+    s = build_server()
+    with pytest.raises(Exception, match=msg):
+        asyncio.run(s.call_tool(tool, args))
