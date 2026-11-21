@@ -1,5 +1,5 @@
 name: SEI CERT C/C++ review
-description: Check C and C++ changes against the SEI CERT C and C++ Coding Standards (clang-tidy, Clang Static Analyzer, cppcheck mapped to rule IDs).
+description: Check C and C++ code against the SEI CERT C and C++ Coding Standards with clang-tidy, cppcheck and rule IDs.
 author: Ramin Najarbashi
 branding:
   icon: shield
