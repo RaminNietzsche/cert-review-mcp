@@ -12,6 +12,10 @@
    "commit": "5689d1bcbc57030e576c74b1ee5dd0bd936247d6",
    "files": "clang-tools-extra/docs/clang-tidy/checks/cert/*.md"
   },
+  "overlay": {
+   "file": "data/checker_overlay.yaml",
+   "entries": 9
+  },
   "toolchain_versions": {
    "clang-tidy": "19.1.7",
    "clangsa": "19.1.7",
@@ -50,14 +54,14 @@
   },
   "cpp_rule_tier": {
    "deterministic": 18,
-   "partial": 36,
-   "llm-only": 29,
+   "partial": 37,
+   "llm-only": 28,
    "total": 83
   },
   "cpp_rule_tier_runnable": {
    "deterministic": 18,
-   "partial": 28,
-   "llm-only": 37,
+   "partial": 29,
+   "llm-only": 36,
    "total": 83
   }
  },
@@ -167,6 +171,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "negativeIndex",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     },
     {
      "tool": "gcc",
@@ -585,14 +598,42 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "negativeIndex",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "stlOutOfBounds",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": false
   },
   "CTR51-CPP": {
-   "tier": "llm-only",
-   "tier_runnable": "llm-only",
-   "checkers": [],
+   "tier": "partial",
+   "tier_runnable": "partial",
+   "checkers": [
+    {
+     "tool": "cppcheck",
+     "checker": "invalidContainer",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    }
+   ],
    "cert_detectable": false
   },
   "CTR52-CPP": {
@@ -2177,6 +2218,15 @@
     },
     {
      "tool": "cppcheck",
+     "checker": "uninitStructMember",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "cppcheck",
      "checker": "uninitvar",
      "origins": [
       "codechecker"
@@ -2754,6 +2804,15 @@
     },
     {
      "tool": "cppcheck",
+     "checker": "uninitStructMember",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
+     "tool": "cppcheck",
      "checker": "uninitdata",
      "origins": [
       "codechecker"
@@ -2827,6 +2886,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "danglingLifetime",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -4040,6 +4108,15 @@
      "severity_hint": "HIGH"
     },
     {
+     "tool": "cppcheck",
+     "checker": "doubleFree",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
+    },
+    {
      "tool": "gcc",
      "checker": "gcc-analyzer-double-free",
      "origins": [
@@ -4085,6 +4162,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "memleakOnRealloc",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     },
     {
      "tool": "gcc",
@@ -4310,6 +4396,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "HIGH"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "doubleFree",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     },
     {
      "tool": "cppcheck",
@@ -5094,6 +5189,15 @@
      "specific": false,
      "available": true,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "virtualCallInConstructor",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     }
    ],
    "cert_detectable": true
@@ -5262,6 +5366,15 @@
      "specific": false,
      "available": false,
      "severity_hint": "MEDIUM"
+    },
+    {
+     "tool": "cppcheck",
+     "checker": "selfAssignment",
+     "origins": [
+      "curated-overlay"
+     ],
+     "specific": false,
+     "available": true
     },
     {
      "tool": "gcc",

@@ -1,0 +1,40 @@
+# Curated additions to the CodeChecker-derived map. Each entry adds a mapping
+# that is missing or wrong upstream; it never removes one. Entries are checked
+# by the corpus evaluation (docs/accuracy.md) and must name a checker that
+# exists in the supported toolchain.
+- tool: cppcheck
+  checker: doubleFree
+  rules: [MEM30-C, MEM50-CPP]
+  reason: "Freeing memory twice is use of freed memory under MEM30-C / MEM50-CPP; upstream maps it to MEM36-C and MEM56-CPP only."
+- tool: cppcheck
+  checker: stlOutOfBounds
+  rules: [CTR50-CPP]
+  reason: "Out-of-range container index; CTR50-CPP is the matching rule."
+- tool: cppcheck
+  checker: invalidContainer
+  rules: [CTR51-CPP]
+  reason: "Use of an invalidated iterator or reference is CTR51-CPP."
+- tool: cppcheck
+  checker: danglingLifetime
+  rules: [EXP54-CPP]
+  reason: "Object accessed outside its lifetime."
+- tool: cppcheck
+  checker: selfAssignment
+  rules: [OOP54-CPP]
+  reason: "Gracefully handle self-copy assignment."
+- tool: cppcheck
+  checker: virtualCallInConstructor
+  rules: [OOP50-CPP]
+  reason: "Do not invoke virtual functions from constructors or destructors."
+- tool: cppcheck
+  checker: negativeIndex
+  rules: [ARR30-C, CTR50-CPP]
+  reason: "Negative array/container index is an out-of-bounds access."
+- tool: cppcheck
+  checker: memleakOnRealloc
+  rules: [MEM31-C]
+  reason: "Assigning realloc's result to the only pointer leaks on failure."
+- tool: cppcheck
+  checker: uninitStructMember
+  rules: [EXP33-C, EXP53-CPP]
+  reason: "Read of an uninitialized struct member."

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import yaml
 import re
 import subprocess
 import sys
@@ -119,6 +120,10 @@ def main():
     for name, rid, target in load_aliases(a.llvm):
         add(rid, "clang-tidy", name, "clang-tidy-alias", True, None, target)
 
+    overlay = yaml.safe_load((ROOT / "data/checker_overlay.yaml").read_text())
+    for o in overlay:
+        for rid in o["rules"]:
+            add(rid, o["tool"], o["checker"], "curated-overlay", False)
     out_rules = {}
     tiers = {"all": {}, "runnable": {}}
     for rid, r in sorted(rules.items()):
@@ -153,6 +158,7 @@ def main():
             "llvm": {"repository": "https://github.com/llvm/llvm-project",
                      "commit": git_head(a.llvm),
                      "files": "clang-tools-extra/docs/clang-tidy/checks/cert/*.md"},
+            "overlay": {"file": "data/checker_overlay.yaml", "entries": len(overlay)},
             "toolchain_versions": versions,
         },
         "tier_definitions": {
