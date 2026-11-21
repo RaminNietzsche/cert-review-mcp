@@ -22,6 +22,7 @@ from pathlib import Path
 EXTRA_DEFS = """
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_LINUX_TYPES_H 1
+#define USE_OPENSSL 1
 #define HAVE_STDINT_H 1
 #define HAVE_UNISTD_H 1
 #define HAVE_PTHREAD_H 1
@@ -34,6 +35,10 @@ EXTRA_DEFS = """
 #define CEPH_INSTALL_FULL_PKGLIBDIR "/usr/lib/ceph"
 #define CEPH_INSTALL_DATADIR "/usr/share/ceph"
 """
+
+
+COMPAT_INCLUDES = ["cstdint", "cstring", "memory", "string", "stdexcept", "limits", "algorithm",
+                   "functional"]
 
 
 OPTION_VARS = {"ms_bind_retry_count": "3", "ms_bind_retry_delay": "5"}
@@ -104,11 +109,22 @@ def main() -> int:
     flags = [f"-std={a.std}", "-DHAVE_CONFIG_H", "-D_FILE_OFFSET_BITS=64", "-D__linux__=1",
              "-DBOOST_ASIO_DISABLE_THREAD_KEYWORD_EXTENSION", "-Wno-everything", *sysroot]
     flags += [f"-I{p}" for p in incs if p.exists()]
-    # The bundled fmt ships a file named `format`; searched before the system headers it would
-    # replace the standard <format> that newer libstdc++ <chrono> includes. After them,
-    # <fmt/format.h> still resolves.
-    if (src / "fmt/include").exists():
-        flags += ["-idirafter", str(src / "fmt/include")]
+    # Older trees used std::unique_ptr, std::runtime_error, uint64_t ... after headers that
+    # pulled these in through older libstdc++ versions; current libstdc++ includes less.
+    for h in COMPAT_INCLUDES:
+        flags += ["-include", h]
+    # The bundled fmt ships a file named `format` next to its fmt/ directory; with
+    # -Isrc/fmt/include it would replace the standard <format> that newer libstdc++ <chrono>
+    # includes. A side directory holding only a link to fmt/ keeps <fmt/...> on the bundled
+    # copy (ahead of any system fmt) without hiding <format>.
+    if (src / "fmt/include/fmt").is_dir():
+        side = a.out / "fmt-include"
+        side.mkdir(exist_ok=True)
+        link = side / "fmt"
+        if link.is_symlink() or link.exists():
+            link.unlink()
+        link.symlink_to((src / "fmt/include/fmt").resolve())
+        flags.append(f"-I{side}")
     cmds = []
     for d in a.dirs:
         for f in sorted((a.ceph / d).rglob("*.cc")):

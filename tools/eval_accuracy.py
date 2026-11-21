@@ -221,6 +221,8 @@ def main() -> int:
                     help="measure only the dev or the held-out half of the rules (see half())")
     ap.add_argument("--compare", default="",
                     help="an earlier --out-json to show as the 'before' column")
+    ap.add_argument("--compare-label", default="",
+                    help="how the Markdown names the --compare run (default: its file name)")
     ap.add_argument("--tools", default="core,semgrep,infer,codeql",
                     help="analyzer groups to measure: core (clang-tidy+clangsa+cppcheck), semgrep, "
                          "infer, codeql; missing ones are skipped")
@@ -308,7 +310,7 @@ def main() -> int:
            "baseline_rules": sorted(base_ids)}
     if a.compare:
         before = json.loads(Path(a.compare).read_text())
-        out["compare"] = {"file": Path(a.compare).name,
+        out["compare"] = {"file": a.compare_label or f"`{Path(a.compare).name}`",
                           "halves": {r["label"]: r["summary"].get("halves", {})
                                      for r in before.get("toolsets", [])}}
     if results:
@@ -338,7 +340,7 @@ def _render_halves(out) -> list[str]:
          f"(`sha256(\"{SPLIT_SALT}:<rule>\") % 2`). Checkers and mappings were tuned on dev rules "
          "only; held-out rules show whether that generalises. Precision and recall are corpus-wide "
          "(every example of the half counts)." +
-         (f" *Before* is `{out['compare']['file']}`." if cmp_ else ""), "",
+         (f" *Before* is {out['compare']['file']}." if cmp_ else ""), "",
          "| Toolset | Half | Rules | TP | FN | FP | TN | Precision | Recall |" +
          (" Before: precision | Before: recall |" if cmp_ else ""),
          "|---|---|---|---|---|---|---|---|---|" + ("---|---|" if cmp_ else "")]
