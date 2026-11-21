@@ -70,7 +70,7 @@ counts only checkers present in the supported toolchain (clang-tidy/clang 19.1.7
 
 | Set | Total | Deterministic | Partial | LLM-only | Runnable: det / partial / llm-only |
 |---|---|---|---|---|---|
-| C rules | 122 | 18 | 55 | 49 | 16 / 37 / 69 |
+| C rules | 122 | 18 | 53 | 51 | 16 / 34 / 72 |
 | C recommendations | 183 | 4 | 3 | 176 | 4 / 2 / 177 |
 | C++ rules | 83 | 18 | 37 | 28 | 18 / 29 / 36 |
 
@@ -85,7 +85,7 @@ git clone <this repository> cert-review-mcp && cd cert-review-mcp
 python3 -m venv .venv && . .venv/bin/activate
 pip install -e '.[dev]'
 sudo apt-get install clang clang-tidy cppcheck       # static layer (optional but recommended)
-pytest                                              # 75+ tests
+pytest                                              # 80 tests
 ```
 
 The package reads `data/` and `profiles/` from the checkout (set `CERT_REVIEW_HOME` to point
@@ -107,7 +107,7 @@ elsewhere). Python 3.11+; works with the official `mcp` SDK 1.x (`FastMCP`) and 
 ```
 
 Then ask: "Use the cert-review `ceph_review` prompt on my current diff." Copy `skills/` into your
-skills folder to give the agent the review procedure.
+skills folder to make the review procedure available.
 
 ### Claude Code
 
