@@ -1,0 +1,27 @@
+name: dockerhub-description
+
+# Updates the Docker Hub short description and overview from DOCKERHUB.md.
+# Uses the DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets in the "docker" environment.
+# The token needs the Read, Write, Delete scope to edit repository details.
+on:
+  push:
+    branches: [main]
+    paths: [DOCKERHUB.md, .github/workflows/dockerhub-description.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  description:
+    runs-on: ubuntu-latest
+    environment: docker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/cert-review-mcp
+          short-description: "MCP server that reviews C/C++ code against SEI CERT rules with clang-tidy and cppcheck"
+          readme-filepath: ./DOCKERHUB.md

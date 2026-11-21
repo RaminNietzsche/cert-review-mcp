@@ -5,7 +5,7 @@ Its entrypoint is `cert-review-mcp`, the MCP server over stdio; the `cert-review
 the same image. `./Dockerfile` is a different image: the GitHub Action.
 
 Release tags publish multi-arch images (linux/amd64, linux/arm64) to Docker Hub as
-`<DOCKERHUB_USERNAME>/cert-review-mcp:<version>` and `:latest`
+`raminnietzsche/cert-review-mcp:<version>` and `:latest`
 ([workflow](../.github/workflows/docker-publish.yml)). To build locally instead:
 
 ```bash
@@ -46,7 +46,7 @@ that start stdio servers from a command:
 }
 ```
 
-Replace `cert-review-mcp` with `<DOCKERHUB_USERNAME>/cert-review-mcp:<version>` to use a
+Replace `cert-review-mcp` with `raminnietzsche/cert-review-mcp:latest` (or a version tag) to use the
 published image. Claude Code:
 
 ```bash
