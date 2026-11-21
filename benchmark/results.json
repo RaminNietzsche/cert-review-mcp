@@ -1,0 +1,1594 @@
+{
+ "meta": {
+  "toolchain": "clang-tidy 19.1.7, cppcheck 2.17.1",
+  "near": 3,
+  "date": "2026-11-21",
+  "seconds": 11101,
+  "wall_seconds": 2974
+ },
+ "results": {
+  "ceph-CVE-2021-3524": {
+   "id": "ceph-CVE-2021-3524",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 6,
+   "file_findings_fixed": 6,
+   "region_lines": 2,
+   "seconds": 141.1,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_cors.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-CVE-2020-10753": {
+   "id": "ceph-CVE-2020-10753",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 6,
+   "file_findings_fixed": 6,
+   "region_lines": 5,
+   "seconds": 158.6,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_cors.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-CVE-2021-3531": {
+   "id": "ceph-CVE-2021-3531",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 43,
+   "file_findings_fixed": 43,
+   "region_lines": 2,
+   "seconds": 97.8,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_rest_swift.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-CVE-2020-1760": {
+   "id": "ceph-CVE-2020-1760",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 29,
+   "file_findings_fixed": 29,
+   "region_lines": 4,
+   "seconds": 647.5,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_rest_s3.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "partial"
+   }
+  },
+  "ceph-CVE-2019-10222": {
+   "id": "ceph-CVE-2019-10222",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 2,
+   "file_findings_fixed": 2,
+   "region_lines": 3,
+   "seconds": 806.5,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_asio_frontend.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "partial"
+   }
+  },
+  "ceph-CVE-2018-16889": {
+   "id": "ceph-CVE-2018-16889",
+   "outcome": "not-applicable",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 50,
+   "file_findings_fixed": 50,
+   "region_lines": 3,
+   "seconds": 340.6,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_auth_s3.cc",
+    "src/rgw/rgw_rest_s3.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-CVE-2020-1700": {
+   "id": "ceph-CVE-2020-1700",
+   "outcome": "not-applicable",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 2,
+   "file_findings_fixed": 2,
+   "region_lines": 2,
+   "seconds": 815.1,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_asio_frontend.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "partial"
+   }
+  },
+  "ceph-CVE-2016-8626": {
+   "id": "ceph-CVE-2016-8626",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 2,
+   "file_findings_fixed": 2,
+   "region_lines": 3,
+   "seconds": 22.1,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_policy_s3.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-CVE-2016-5009": {
+   "id": "ceph-CVE-2016-5009",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 26,
+   "file_findings_fixed": 26,
+   "region_lines": 3,
+   "seconds": 36.2,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/mon/Monitor.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-CVE-2024-48916": {
+   "id": "ceph-CVE-2024-48916",
+   "outcome": "not-applicable",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 6,
+   "file_findings_fixed": 6,
+   "region_lines": 2,
+   "seconds": 97.3,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_rest_sts.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-CVE-2017-7519": {
+   "id": "ceph-CVE-2017-7519",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 11,
+   "file_findings_fixed": 11,
+   "region_lines": 4,
+   "seconds": 48.1,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/libradosstriper/RadosStriperImpl.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-CVE-2020-12059": {
+   "id": "ceph-CVE-2020-12059",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 45,
+   "file_findings_fixed": 45,
+   "region_lines": 2,
+   "seconds": 152.2,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_rest_s3.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-CVE-2026-50152": {
+   "id": "ceph-CVE-2026-50152",
+   "outcome": "not-applicable",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 48,
+   "file_findings_fixed": 48,
+   "region_lines": 20,
+   "seconds": 122.7,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/mon/Monitor.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-1b489f51": {
+   "id": "ceph-fix-1b489f51",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 1,
+   "file_findings_fixed": 1,
+   "region_lines": 1,
+   "seconds": 61.2,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/services/svc_bilog_rados.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-CVE-2026-54330": {
+   "id": "ceph-CVE-2026-54330",
+   "outcome": "not-applicable",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 6,
+   "fixed_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 90,
+   "file_findings_fixed": 96,
+   "region_lines": 26,
+   "seconds": 206.7,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_auth_s3.cc",
+    "src/rgw/rgw_auth_s3.h",
+    "src/rgw/rgw_common.h",
+    "src/rgw/rgw_rest_client.cc",
+    "src/rgw/rgw_rest_s3.cc",
+    "src/rgw/rgw_rest_s3.h"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-CVE-2018-7262": {
+   "id": "ceph-CVE-2018-7262",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [
+    "ERR33-C"
+   ],
+   "matching": [],
+   "fixed_region_findings": 1,
+   "fixed_region_rules": [
+    "ERR33-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 20,
+   "file_findings_fixed": 20,
+   "region_lines": 36,
+   "seconds": 662.8,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_asio_client.cc",
+    "src/rgw/rgw_asio_client.h",
+    "src/rgw/rgw_civetweb.cc",
+    "src/rgw/rgw_civetweb.h",
+    "src/rgw/rgw_client_io.cc",
+    "src/rgw/rgw_client_io.h",
+    "src/rgw/rgw_fcgi.cc",
+    "src/rgw/rgw_fcgi.h",
+    "src/rgw/rgw_lib.h",
+    "src/rgw/rgw_loadgen.cc",
+    "src/rgw/rgw_loadgen.h",
+    "src/rgw/rgw_process.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-2b4bef17": {
+   "id": "ceph-fix-2b4bef17",
+   "outcome": "detected",
+   "fix_sensitive": true,
+   "partial": true,
+   "vulnerable_region_rules": [
+    "STR34-C"
+   ],
+   "matching": [
+    {
+     "file": "src/rgw/rgw_common.cc",
+     "line": 1780,
+     "rule": "STR34-C",
+     "checker": "cert-str34-c"
+    }
+   ],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 33,
+   "file_findings_fixed": 32,
+   "region_lines": 1,
+   "seconds": 86.9,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_common.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-63be44a4": {
+   "id": "ceph-fix-63be44a4",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 12,
+   "file_findings_fixed": 12,
+   "region_lines": 3,
+   "seconds": 70.3,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/driver/rados/rgw_sync.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-58a75129": {
+   "id": "ceph-fix-58a75129",
+   "outcome": "detected",
+   "fix_sensitive": true,
+   "partial": false,
+   "vulnerable_region_rules": [
+    "EXP63-CPP"
+   ],
+   "matching": [
+    {
+     "file": "src/msg/DispatchQueue.cc",
+     "line": 95,
+     "rule": "EXP63-CPP",
+     "checker": "bugprone-use-after-move"
+    }
+   ],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 10,
+   "file_findings_fixed": 9,
+   "region_lines": 3,
+   "seconds": 59.6,
+   "flags": "ceph_compdb.py",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-100c20b7": {
+   "id": "ceph-fix-100c20b7",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 7,
+   "file_findings_fixed": 7,
+   "region_lines": 1,
+   "seconds": 95.3,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/osd/scrubber/scrub_backend.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-0c66b1c5": {
+   "id": "ceph-fix-0c66b1c5",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 1,
+   "file_findings_fixed": 1,
+   "region_lines": 2,
+   "seconds": 62.6,
+   "flags": "ceph_compdb.py",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-38601d0c": {
+   "id": "ceph-fix-38601d0c",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 1,
+   "fixed_region_rules": [
+    "ERR33-C"
+   ],
+   "fixed_region_matching": 1,
+   "file_findings_vulnerable": 1,
+   "file_findings_fixed": 2,
+   "region_lines": 6,
+   "seconds": 11.2,
+   "flags": "ceph_compdb.py",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-606a8170": {
+   "id": "ceph-fix-606a8170",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 37,
+   "file_findings_fixed": 37,
+   "region_lines": 3,
+   "seconds": 165.8,
+   "flags": "ceph_compdb.py",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-e6468f3d": {
+   "id": "ceph-fix-e6468f3d",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [
+    "ERR33-C"
+   ],
+   "matching": [],
+   "fixed_region_findings": 1,
+   "fixed_region_rules": [
+    "ERR33-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 82,
+   "file_findings_fixed": 82,
+   "region_lines": 17,
+   "seconds": 439.1,
+   "flags": "ceph_compdb.py",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-f5e819cd": {
+   "id": "ceph-fix-f5e819cd",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 24,
+   "file_findings_fixed": 24,
+   "region_lines": 2,
+   "seconds": 409.8,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/mds/Server.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-bf494e94": {
+   "id": "ceph-fix-bf494e94",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 71,
+   "file_findings_fixed": 71,
+   "region_lines": 1,
+   "seconds": 536.2,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/crush/CrushWrapper.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-1c4ec37d": {
+   "id": "ceph-fix-1c4ec37d",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 2,
+   "file_findings_fixed": 8,
+   "region_lines": 3,
+   "seconds": 757.5,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/driver/rados/rgw_user.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "partial"
+   }
+  },
+  "ceph-fix-8377ba65": {
+   "id": "ceph-fix-8377ba65",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 4,
+   "file_findings_fixed": 4,
+   "region_lines": 3,
+   "seconds": 68.7,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_iam_policy.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-ce5493ca": {
+   "id": "ceph-fix-ce5493ca",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 8,
+   "file_findings_fixed": 8,
+   "region_lines": 2,
+   "seconds": 25.4,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/libradosstriper/RadosStriperImpl.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-caba2e25": {
+   "id": "ceph-fix-caba2e25",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [
+    "CON33-C",
+    "ERR34-C"
+   ],
+   "matching": [],
+   "fixed_region_findings": 4,
+   "fixed_region_rules": [
+    "CON33-C",
+    "ERR34-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 16,
+   "file_findings_fixed": 19,
+   "region_lines": 9,
+   "seconds": 593.8,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/common/config.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "partial"
+   }
+  },
+  "ceph-fix-6fb2e060": {
+   "id": "ceph-fix-6fb2e060",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 7,
+   "file_findings_fixed": 5,
+   "region_lines": 6,
+   "seconds": 457.3,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_rest_sts.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-7809af7a": {
+   "id": "ceph-fix-7809af7a",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 2,
+   "fixed_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 15,
+   "file_findings_fixed": 17,
+   "region_lines": 1,
+   "seconds": 71.6,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/common/ceph_json.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-b2ab8510": {
+   "id": "ceph-fix-b2ab8510",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "matching": [],
+   "fixed_region_findings": 2,
+   "fixed_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 9,
+   "file_findings_fixed": 9,
+   "region_lines": 5,
+   "seconds": 18.1,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/common/admin_socket_client.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-52deb168": {
+   "id": "ceph-fix-52deb168",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "matching": [],
+   "fixed_region_findings": 2,
+   "fixed_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 8,
+   "file_findings_fixed": 8,
+   "region_lines": 2,
+   "seconds": 16.4,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/common/admin_socket.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-566c8e6b": {
+   "id": "ceph-fix-566c8e6b",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 4,
+   "file_findings_fixed": 4,
+   "region_lines": 2,
+   "seconds": 19.7,
+   "flags": "ceph_compdb.py",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-0a64d970": {
+   "id": "ceph-fix-0a64d970",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 185,
+   "file_findings_fixed": 185,
+   "region_lines": 1,
+   "seconds": 256.6,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/osd/PrimaryLogPG.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "ceph-fix-e54e68ad": {
+   "id": "ceph-fix-e54e68ad",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 56,
+   "file_findings_fixed": 0,
+   "region_lines": 3,
+   "seconds": 1009.6,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/rgw/rgw_lc.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "partial"
+   }
+  },
+  "ceph-fix-2ac2592e": {
+   "id": "ceph-fix-2ac2592e",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "matching": [],
+   "fixed_region_findings": 2,
+   "fixed_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 14,
+   "file_findings_fixed": 14,
+   "region_lines": 3,
+   "seconds": 756.8,
+   "flags": "ceph_compdb.py",
+   "partial_files": [
+    "src/librados/IoCtxImpl.cc"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "partial"
+   }
+  },
+  "curl-CVE-2019-5482": {
+   "id": "curl-CVE-2019-5482",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 10,
+   "file_findings_fixed": 10,
+   "region_lines": 7,
+   "seconds": 15.0,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "curl-CVE-2023-38545": {
+   "id": "curl-CVE-2023-38545",
+   "outcome": "detected",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "matching": [
+    {
+     "file": "lib/socks.c",
+     "line": 908,
+     "rule": "INT31-C",
+     "checker": "bugprone-narrowing-conversions"
+    }
+   ],
+   "fixed_region_findings": 2,
+   "fixed_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "fixed_region_matching": 1,
+   "file_findings_vulnerable": 9,
+   "file_findings_fixed": 9,
+   "region_lines": 4,
+   "seconds": 15.4,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "curl-CVE-2019-3822": {
+   "id": "curl-CVE-2019-3822",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 0,
+   "file_findings_fixed": 0,
+   "region_lines": 6,
+   "seconds": 2.3,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "curl-CVE-2018-16890": {
+   "id": "curl-CVE-2018-16890",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 0,
+   "file_findings_fixed": 0,
+   "region_lines": 3,
+   "seconds": 2.1,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "curl-CVE-2018-14618": {
+   "id": "curl-CVE-2018-14618",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 16,
+   "file_findings_fixed": 16,
+   "region_lines": 3,
+   "seconds": 2.1,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "curl-CVE-2017-8816": {
+   "id": "curl-CVE-2017-8816",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 16,
+   "file_findings_fixed": 16,
+   "region_lines": 6,
+   "seconds": 2.1,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "curl-CVE-2016-8622": {
+   "id": "curl-CVE-2016-8622",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 4,
+   "file_findings_fixed": 4,
+   "region_lines": 7,
+   "seconds": 9.6,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "curl-CVE-2017-1000254": {
+   "id": "curl-CVE-2017-1000254",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 14,
+   "file_findings_fixed": 14,
+   "region_lines": 4,
+   "seconds": 26.0,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "curl-CVE-2021-22898": {
+   "id": "curl-CVE-2021-22898",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 8,
+   "file_findings_fixed": 8,
+   "region_lines": 1,
+   "seconds": 15.8,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "curl-CVE-2018-1000121": {
+   "id": "curl-CVE-2018-1000121",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": true,
+   "vulnerable_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "matching": [],
+   "fixed_region_findings": 2,
+   "fixed_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 8,
+   "file_findings_fixed": 8,
+   "region_lines": 4,
+   "seconds": 1.2,
+   "flags": "generated flags",
+   "partial_files": [
+    "lib/openldap.c"
+   ],
+   "tool_status": {
+    "clang-tidy": "partial",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "curl-CVE-2022-35260": {
+   "id": "curl-CVE-2022-35260",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 2,
+   "file_findings_fixed": 2,
+   "region_lines": 7,
+   "seconds": 10.8,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "curl-CVE-2018-1000120": {
+   "id": "curl-CVE-2018-1000120",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 14,
+   "file_findings_fixed": 14,
+   "region_lines": 4,
+   "seconds": 24.1,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "expat-CVE-2022-23852": {
+   "id": "expat-CVE-2022-23852",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 39,
+   "file_findings_fixed": 39,
+   "region_lines": 2,
+   "seconds": 143.5,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "expat-CVE-2022-25235": {
+   "id": "expat-CVE-2022-25235",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 0,
+   "file_findings_fixed": 0,
+   "region_lines": 4,
+   "seconds": 1.1,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "expat-CVE-2022-23990": {
+   "id": "expat-CVE-2022-23990",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 39,
+   "file_findings_fixed": 39,
+   "region_lines": 2,
+   "seconds": 152.6,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "libtiff-CVE-2018-18661": {
+   "id": "libtiff-CVE-2018-18661",
+   "outcome": "detected",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [
+    "ERR33-C"
+   ],
+   "matching": [
+    {
+     "file": "tools/tiff2bw.c",
+     "line": 220,
+     "rule": "ERR33-C",
+     "checker": "cert-err33-c"
+    }
+   ],
+   "fixed_region_findings": 4,
+   "fixed_region_rules": [
+    "ERR33-C"
+   ],
+   "fixed_region_matching": 4,
+   "file_findings_vulnerable": 22,
+   "file_findings_fixed": 25,
+   "region_lines": 13,
+   "seconds": 5.4,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "libtiff-CVE-2016-3623": {
+   "id": "libtiff-CVE-2016-3623",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [
+    "ERR34-C"
+   ],
+   "matching": [],
+   "fixed_region_findings": 3,
+   "fixed_region_rules": [
+    "ERR34-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 34,
+   "file_findings_fixed": 34,
+   "region_lines": 5,
+   "seconds": 5.7,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "libtiff-CVE-2018-8905": {
+   "id": "libtiff-CVE-2018-8905",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 27,
+   "file_findings_fixed": 25,
+   "region_lines": 8,
+   "seconds": 54.0,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "libarchive-CVE-2016-1541": {
+   "id": "libarchive-CVE-2016-1541",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "matching": [],
+   "fixed_region_findings": 4,
+   "fixed_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 84,
+   "file_findings_fixed": 86,
+   "region_lines": 6,
+   "seconds": 42.4,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "libarchive-CVE-2025-25724": {
+   "id": "libarchive-CVE-2025-25724",
+   "outcome": "detected",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [
+    "ERR33-C"
+   ],
+   "matching": [
+    {
+     "file": "tar/util.c",
+     "line": 772,
+     "rule": "ERR33-C",
+     "checker": "cert-err33-c"
+    },
+    {
+     "file": "tar/util.c",
+     "line": 774,
+     "rule": "ERR33-C",
+     "checker": "cert-err33-c"
+    },
+    {
+     "file": "tar/util.c",
+     "line": 775,
+     "rule": "ERR33-C",
+     "checker": "cert-err33-c"
+    }
+   ],
+   "fixed_region_findings": 2,
+   "fixed_region_rules": [
+    "ERR33-C"
+   ],
+   "fixed_region_matching": 2,
+   "file_findings_vulnerable": 27,
+   "file_findings_fixed": 26,
+   "region_lines": 4,
+   "seconds": 19.8,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "c-ares-CVE-2016-5180": {
+   "id": "c-ares-CVE-2016-5180",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 0,
+   "file_findings_fixed": 0,
+   "region_lines": 57,
+   "seconds": 4.5,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "libtiff-CVE-2019-14973": {
+   "id": "libtiff-CVE-2019-14973",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [
+    "DCL37-C",
+    "DCL51-CPP"
+   ],
+   "matching": [],
+   "fixed_region_findings": 12,
+   "fixed_region_rules": [
+    "DCL37-C",
+    "DCL51-CPP"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 198,
+   "file_findings_fixed": 202,
+   "region_lines": 115,
+   "seconds": 100.6,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "openssl-CVE-2016-2105": {
+   "id": "openssl-CVE-2016-2105",
+   "outcome": "miss",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [],
+   "matching": [],
+   "fixed_region_findings": 0,
+   "fixed_region_rules": [],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 4,
+   "file_findings_fixed": 4,
+   "region_lines": 1,
+   "seconds": 5.2,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  },
+  "openssl-CVE-2014-0160": {
+   "id": "openssl-CVE-2014-0160",
+   "outcome": "wrong-rule",
+   "fix_sensitive": false,
+   "partial": false,
+   "vulnerable_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "matching": [],
+   "fixed_region_findings": 4,
+   "fixed_region_rules": [
+    "FLP34-C",
+    "INT31-C"
+   ],
+   "fixed_region_matching": 0,
+   "file_findings_vulnerable": 86,
+   "file_findings_fixed": 86,
+   "region_lines": 21,
+   "seconds": 34.8,
+   "flags": "generated flags",
+   "partial_files": [],
+   "tool_status": {
+    "clang-tidy": "ok",
+    "clangsa": "ok",
+    "cppcheck": "ok"
+   }
+  }
+ }
+}
