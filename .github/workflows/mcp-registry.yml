@@ -18,6 +18,8 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository &&
        startsWith(github.event.workflow_run.head_branch, 'v'))
     runs-on: ubuntu-latest
     permissions:
@@ -26,6 +28,8 @@ jobs:
     env:
       MCP_PUBLISHER_VERSION: v1.8.11
     steps:
+      # Only tag pushes from this repository reach this point (see the job condition),
+      # so the checked-out commit is trusted.
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
