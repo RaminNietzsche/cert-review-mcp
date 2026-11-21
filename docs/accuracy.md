@@ -1,6 +1,6 @@
 # Accuracy of the deterministic layer
 
-Corpus: 1548 code examples taken from the CERT rule pages (commit `73ee7a0dbe77`); 708 noncompliant, 840 compliant. Run time 169s.
+Corpus: 1548 code examples taken from the CERT rule pages (commit `73ee7a0dbe77`); 708 noncompliant, 840 compliant. Run time 180s.
 
 Toolchain: clang-tidy 19.1.7, clangsa 19.1.7, cppcheck 2.17.1
 
@@ -10,10 +10,10 @@ A noncompliant example is *detected* when the engine reports that example's own 
 
 | Group | Rules | TP | FN | FP | TN | Precision | Recall |
 |---|---|---|---|---|---|---|---|
-| all_scored | 106 | 111 | 148 | 7 | 312 | 94% | 43% |
-| deterministic | 37 | 37 | 24 | 0 | 73 | 100% | 61% |
-| partial | 69 | 74 | 124 | 7 | 239 | 91% | 37% |
-| llm-only(not scored) | 265 | | | | | | |
+| all_scored | 103 | 105 | 147 | 5 | 303 | 95% | 42% |
+| deterministic | 38 | 41 | 25 | 0 | 79 | 100% | 62% |
+| partial | 65 | 64 | 122 | 5 | 224 | 93% | 34% |
+| llm-only(not scored) | 268 | | | | | | |
 
 ## Per rule (rules with a runnable checker)
 
@@ -43,7 +43,7 @@ A noncompliant example is *detected* when the engine reports that example's own 
 | ENV33-C | deterministic | 2 | 0 | 0 | 4 | 100% | 100% |
 | ENV34-C | partial | 0 | 2 | 0 | 4 | n/a | 0% |
 | ERR30-C | partial | 1 | 2 | 0 | 4 | 100% | 33% |
-| ERR33-C | partial | 4 | 1 | 0 | 6 | 100% | 80% |
+| ERR33-C | deterministic | 4 | 1 | 0 | 6 | 100% | 80% |
 | ERR34-C | deterministic | 1 | 0 | 0 | 1 | 100% | 100% |
 | ERR51-CPP | partial | 0 | 2 | 0 | 2 | n/a | 0% |
 | ERR52-CPP | deterministic | 1 | 0 | 0 | 1 | 100% | 100% |
@@ -57,24 +57,21 @@ A noncompliant example is *detected* when the engine reports that example's own 
 | EXP37-C | partial | 0 | 4 | 0 | 5 | n/a | 0% |
 | EXP39-C | partial | 1 | 3 | 0 | 4 | 100% | 25% |
 | EXP42-C | deterministic | 1 | 0 | 0 | 1 | 100% | 100% |
-| EXP45-C | partial | 0 | 3 | 0 | 7 | n/a | 0% |
 | EXP50-CPP | partial | 2 | 2 | 0 | 6 | 100% | 50% |
 | EXP51-CPP | partial | 1 | 0 | 0 | 1 | 100% | 100% |
-| EXP53-CPP | partial | 2 | 2 | 0 | 4 | 100% | 50% |
-| EXP54-CPP | partial | 3 | 4 | 0 | 8 | 100% | 43% |
+| EXP53-CPP | partial | 0 | 4 | 0 | 4 | n/a | 0% |
+| EXP54-CPP | partial | 2 | 5 | 0 | 8 | 100% | 29% |
 | EXP55-CPP | partial | 3 | 0 | 0 | 2 | 100% | 100% |
 | EXP58-CPP | partial | 1 | 1 | 0 | 3 | 100% | 50% |
 | EXP61-CPP | partial | 1 | 0 | 0 | 2 | 100% | 100% |
 | EXP62-CPP | partial | 1 | 1 | 0 | 2 | 100% | 50% |
 | EXP63-CPP | partial | 1 | 1 | 0 | 3 | 100% | 50% |
-| FIO34-C | partial | 2 | 1 | 1 | 2 | 67% | 67% |
 | FIO38-C | deterministic | 1 | 0 | 0 | 1 | 100% | 100% |
 | FIO39-C | partial | 0 | 1 | 0 | 1 | n/a | 0% |
 | FIO42-C | partial | 1 | 3 | 0 | 4 | 100% | 25% |
 | FLP30-C | deterministic | 2 | 0 | 0 | 2 | 100% | 100% |
 | FLP32-C | partial | 0 | 4 | 0 | 4 | n/a | 0% |
 | FLP34-C | partial | 1 | 1 | 1 | 1 | 50% | 50% |
-| FLP36-C | partial | 1 | 0 | 1 | 0 | 50% | 100% |
 | FLP37-C | deterministic | 1 | 0 | 0 | 1 | 100% | 100% |
 | INT09-C | deterministic | 1 | 0 | 0 | 3 | 100% | 100% |
 | INT31-C | partial | 1 | 5 | 0 | 6 | 100% | 17% |
@@ -137,7 +134,7 @@ A noncompliant example is *detected* when the engine reports that example's own 
   Expect low recall; precision on this corpus is high because compliant fragments are tiny.
 * **llm-only** rules are not measured here. Their quality depends on the review packet and the
   reviewer, and is bounded by the grounding validator (rule ID plus a verbatim quote).
-* The seven false positives are mapping noise from general analyzers (for example a leak checker that
+* The five false positives are mapping noise from general analyzers (for example a leak checker that
   maps to MEM34-C); `--max-rules-per-location` and the confidence score exist to rank these below
   rule-specific findings.
 

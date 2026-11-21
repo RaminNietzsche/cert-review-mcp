@@ -33,7 +33,7 @@ NOTE = """
   Expect low recall; precision on this corpus is high because compliant fragments are tiny.
 * **llm-only** rules are not measured here. Their quality depends on the review packet and the
   reviewer, and is bounded by the grounding validator (rule ID plus a verbatim quote).
-* The seven false positives are mapping noise from general analyzers (for example a leak checker that
+* The five false positives are mapping noise from general analyzers (for example a leak checker that
   maps to MEM34-C); `--max-rules-per-location` and the confidence score exist to rank these below
   rule-specific findings.
 """
