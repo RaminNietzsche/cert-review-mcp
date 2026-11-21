@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.2 (2026-11-21)
+
+### Added
+
+- `server.json` for the official MCP Registry: `io.github.RaminNietzsche/cert-review-mcp`,
+  OCI package `docker.io/raminnietzsche/cert-review-mcp`.
+- `Dockerfile.mcp` sets the `io.modelcontextprotocol.server.name` label that the registry uses
+  to verify image ownership.
+- `mcp-registry` workflow: after a release image is pushed, publishes `server.json` to the
+  registry with GitHub OIDC (no stored token).
+
+No changes to the tools, the CLI or the GitHub Action.
+
 ## 1.1.1 (2026-11-21)
 
 ### Fixed

@@ -29,6 +29,7 @@ ENV CERT_REVIEW_HOME=/opt/cert-review PATH=/opt/venv/bin:$PATH PYTHONUNBUFFERED=
 LABEL org.opencontainers.image.title="cert-review-mcp" \
       org.opencontainers.image.description="SEI CERT C/C++ review MCP server (stdio) and CLI with clang-tidy, Clang Static Analyzer and cppcheck" \
       org.opencontainers.image.source="https://github.com/RaminNietzsche/cert-review-mcp" \
-      org.opencontainers.image.licenses="Apache-2.0"
+      org.opencontainers.image.licenses="Apache-2.0" \
+      io.modelcontextprotocol.server.name="io.github.RaminNietzsche/cert-review-mcp"
 WORKDIR /workspace
 ENTRYPOINT ["cert-review-mcp"]

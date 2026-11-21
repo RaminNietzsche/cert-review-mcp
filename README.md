@@ -101,8 +101,16 @@ docker build -f Dockerfile.mcp -t cert-review-mcp .
 ```
 
 The same `mcpServers` block works in Claude Desktop and Cursor. Release tags also publish
-multi-arch images to Docker Hub as `<DOCKERHUB_USERNAME>/cert-review-mcp`. Details, the CLI
-from the image, and a `tools/list` check: [docs/docker.md](docs/docker.md).
+multi-arch images (amd64, arm64) to Docker Hub as
+[`raminnietzsche/cert-review-mcp`](https://hub.docker.com/r/raminnietzsche/cert-review-mcp);
+use `raminnietzsche/cert-review-mcp:latest` instead of `cert-review-mcp` to skip the build.
+Details, the CLI from the image, and a `tools/list` check: [docs/docker.md](docs/docker.md).
+
+### MCP Registry
+
+The server is listed in the official [MCP Registry](https://registry.modelcontextprotocol.io)
+as `io.github.RaminNietzsche/cert-review-mcp` ([server.json](server.json)), so clients that read
+the registry can install the Docker image from there.
 
 ### Claude Code
 

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.RaminNietzsche/cert-review-mcp",
+  "title": "cert-review",
+  "description": "SEI CERT C/C++ code review: rule lookup, clang-tidy and cppcheck findings mapped to CERT rules",
+  "repository": {
+    "url": "https://github.com/RaminNietzsche/cert-review-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://github.com/RaminNietzsche/cert-review-mcp",
+  "version": "1.1.2",
+  "packages": [
+    {
+      "registryType": "oci",
+      "identifier": "docker.io/raminnietzsche/cert-review-mcp:1.1.2",
+      "runtimeHint": "docker",
+      "transport": {
+        "type": "stdio"
+      },
+      "runtimeArguments": [
+        {
+          "type": "named",
+          "name": "-v",
+          "description": "Mount the project read-only at the same absolute path as on the host, so the paths the client passes to the tools resolve inside the container.",
+          "value": "{project_dir}:{project_dir}:ro",
+          "isRequired": true,
+          "isRepeated": true,
+          "variables": {
+            "project_dir": {
+              "description": "Absolute path of the C/C++ project directory on the host",
+              "format": "filepath",
+              "isRequired": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
