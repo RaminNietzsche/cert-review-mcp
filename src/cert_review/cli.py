@@ -32,8 +32,9 @@ def _common(p: argparse.ArgumentParser) -> None:
     p.add_argument("--min-confidence", type=float, default=0.0)
     p.add_argument("--fail-on", choices=["error", "warning", "note", "never"], default="never",
                    help="exit 1 if a finding at or above this severity exists")
-    p.add_argument("--fail-on-parse-error", action="store_true",
-                   help="exit 1 if any file had compile errors and was only partly analysed")
+    p.add_argument("--fail-on-parse-error", "--fail-on-partial", dest="fail_on_parse_error",
+                   action="store_true",
+                   help="exit 1 if the analysis was partial: a file had compile errors or timed out")
     p.add_argument("--include-suppressed", action="store_true")
     p.add_argument("--max-rules-per-location", type=int, default=2,
                    help="many CERT rules map to one checker; keep the best N per line")

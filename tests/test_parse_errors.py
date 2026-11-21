@@ -65,3 +65,32 @@ def test_report_json_has_status(tmp_path):
     d = r.to_dict()
     assert d["tools"][0]["status"] == "partial" and d["warnings"]
     json.dumps(d)
+
+
+def test_timeout_makes_status_partial_and_warns():
+    st = T.ToolStatus("cppcheck", True, timed_out=["/r/big.cc"])
+    assert st.status == "partial"
+    w = T.parse_warnings([st])
+    assert len(w) == 1 and "timed out" in w[0] and "/r/big.cc" in w[0]
+    d = [{"tool": "cppcheck", "available": True, "timed_out": ["/r/big.cc"]}]
+    assert "partial analysis" in Fm.to_markdown([], warnings=T.parse_warnings(d))
+    assert Fm.to_sarif([], warnings=T.parse_warnings(d))["runs"][0]["invocations"][0]["executionSuccessful"] is False
+
+
+@pytest.mark.skipif(not shutil.which("cppcheck"), reason="cppcheck not installed")
+def test_real_timeout_is_recorded(tmp_path):
+    from cert_review import profiles as P
+    src = tmp_path / "a.c"
+    src.write_text("int f(int x) { return x + 1; }\n")
+    _, st = T.run_cppcheck([str(src)], P.load("default"), None, timeout=0.0001)
+    assert st.timed_out == [str(src)] and st.status == "partial"
+    assert any("timed out" in w for w in T.parse_warnings([st]))
+
+
+def test_cli_fail_on_partial_alias(monkeypatch, capsys):
+    res = {"findings": [], "warnings": ["cppcheck: 1 file(s) timed out"], "tools": [], "files": ["a"],
+           "suppressed_count": 0, "notes": [],
+           "summary": {"total": 0, "by_severity": {}, "top_rules": []}}
+    monkeypatch.setattr(cli.api, "check_file", lambda *a, **k: res)
+    assert cli.main(["check", "a.c", "--format", "markdown"]) == 0
+    assert cli.main(["check", "a.c", "--format", "markdown", "--fail-on-partial"]) == 1

@@ -41,7 +41,7 @@ Review flow:
 3. validate_findings to drop ungrounded findings.
 4. format_findings to draft markdown, GitHub or GitLab review payloads, SARIF or GitLab reports.
 Use absolute paths and profile "ceph" for Ceph trees. A tool status "partial" or non-empty
-warnings means some files did not compile, so a clean result is not proof.
+warnings means some files did not compile or timed out, so a clean result is not proof.
 Never post review comments without the user approving the exact text."""
 
 # ---------------------------------------------------------------- shared types
@@ -136,8 +136,8 @@ class CheckResult(_Out):
         "tool, checker, title, cert_severity, also_found_by[], note, url."))
     tools: list[dict[str, Any]] = Field(description=(
         "Per analyzer: tool, available, version, files, raw_findings, parse_errors, "
-        "files_with_errors[], notes[], status ('ok' | 'partial' = some files did not compile | 'missing')."))
-    warnings: list[str] = Field(description="One line per analyzer that could not fully parse its input; non-empty means the result is incomplete.")
+        "files_with_errors[], timed_out[], notes[], status ('ok' | 'partial' = some files did not compile or timed out | 'missing')."))
+    warnings: list[str] = Field(description="One line per analyzer that could not fully analyse its input (compile errors or timeouts); non-empty means the result is incomplete.")
     notes: list[str] = Field(description="Engine notes, e.g. 'no C/C++ files selected'.")
     suppressed_count: int = Field(description="Findings hidden by the profile or inline ignores.")
     summary: dict[str, Any] = Field(description="total, by_severity {error, warning, note}, top_rules [[rule_id, count], ...].")
@@ -352,7 +352,7 @@ def build_server() -> Any:
             "but minutes for large trees. Pass `compdb` when the project has a compilation "
             "database; without it flags are guessed and project headers are often missing. A "
             "tools[].status of 'partial' or non-empty `warnings` means some files did not "
-            "compile, so an empty result is not proof."))
+            "compile or timed out, so an empty result is not proof."))
     @_guard
     def check_files(
         path: Annotated[str, Field(description="Absolute path of a C/C++ file or a directory to scan recursively. Files are picked by the profile's extensions and exclude_paths.", examples=["/home/me/proj/src/buf.c", "/home/me/proj/src"])],

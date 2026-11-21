@@ -40,18 +40,20 @@ class ToolStatus:
     raw_findings: int = 0
     parse_errors: int = 0
     files_with_errors: list[str] = field(default_factory=list)
+    timed_out: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
     @property
     def status(self) -> str:
-        """missing | partial (some files did not parse) | ok."""
+        """missing | partial (some files did not parse or timed out) | ok."""
         if not self.available:
             return "missing"
-        return "partial" if self.parse_errors or self.files_with_errors else "ok"
+        return "partial" if self.parse_errors or self.files_with_errors or self.timed_out else "ok"
 
 
 def parse_warnings(tools) -> list[str]:
-    """One human-readable line per tool that could not fully parse its input.
+    """Human-readable lines for every tool that could not fully analyse its input:
+    files with compile errors and files whose analysis timed out.
     `tools` is a list of ToolStatus or their dict form."""
     out = []
     for t in tools or []:
@@ -62,6 +64,11 @@ def parse_warnings(tools) -> list[str]:
             out.append(f"{g('tool')}: {len(files) or g('parse_errors')} file(s) had compile errors and were "
                        f"only partly analysed, so a clean result is not proof: {shown}. "
                        "Pass a real compile_commands.json (--compdb) built with the project's dependencies.")
+        timed = list(g("timed_out") or [])
+        if timed:
+            shown = ", ".join(timed[:5]) + (f" (+{len(timed) - 5} more)" if len(timed) > 5 else "")
+            out.append(f"{g('tool')}: {len(timed)} file(s) timed out and were not analysed, so a clean "
+                       f"result is not proof: {shown}.")
     return out
 
 
@@ -141,6 +148,7 @@ def run_clang_tidy(files: list[str], profile: Profile, compdb: Path | None,
             st.files += 1
             if out == "TIMEOUT":
                 st.notes.append(f"timeout: {path}")
+                st.timed_out.append(path)
                 continue
             for line in out.splitlines():
                 m = CT_LINE.match(line)
@@ -191,6 +199,7 @@ def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: 
             st.files += 1
             if out == "TIMEOUT":
                 st.notes.append(f"timeout: {path}")
+                st.timed_out.append(path)
                 continue
             for line in out.splitlines():
                 m = CSA_LINE.match(line)
@@ -234,6 +243,7 @@ def run_cppcheck(files: list[str], profile: Profile, root: Path | None, jobs: in
             st.files += 1
             if out == "TIMEOUT":
                 st.notes.append(f"timeout: {path}")
+                st.timed_out.append(path)
                 continue
             for line in out.splitlines():
                 m = CPPCHECK_LINE.match(line)

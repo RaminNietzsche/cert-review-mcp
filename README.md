@@ -224,8 +224,9 @@ python3 tools/ceph_compdb.py --ceph ~/ceph --out /tmp/ceph-compdb src/common   #
   checks are skipped. The engine reports this instead of "no findings": the tool status
   becomes `partial`, the markdown, SARIF (`executionSuccessful: false` plus a
   `toolExecutionNotifications` warning), GitHub review, Action summary and CLI output carry a
-  warning, and `--fail-on-parse-error` (Action input `fail-on-parse-error`) turns it into a
-  failing exit code.
+  warning, and `--fail-on-parse-error` (alias `--fail-on-partial`; Action input
+  `fail-on-parse-error`) turns it into a failing exit code. A file on which an analyzer hits
+  its 300 s timeout is treated the same way.
 - **Ceph needs Linux.** Its sources include Linux-only headers (`linux/version.h`, ...) and
   Linux-only Boost.Asio features, so e.g. `src/rgw/radosgw-admin/radosgw-admin.cc` cannot be
   parsed on macOS even with the SDK sysroot and Homebrew Boost. Analyse Ceph on Linux, with the

@@ -43,6 +43,9 @@ Only clients that call the MCP tools by name need updating.
 
 ### Fixed
 
+- An analyzer timeout (300 s per file and tool) makes the tool status `partial` and adds a
+  warning, like a compile error; it used to appear only under `notes`. `--fail-on-parse-error`
+  (new alias `--fail-on-partial`) and the Action input `fail-on-parse-error` fail on it.
 - Error messages reach mcp 2.x clients (they were replaced by "Error executing tool ...").
 - `pip install` from a wheel or git URL ships `data/` and `profiles/`; previously every tool
   failed unless `CERT_REVIEW_HOME` was set.

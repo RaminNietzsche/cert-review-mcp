@@ -36,7 +36,7 @@ inputs:
     description: 'Fail the job when a finding at or above this severity exists: error, warning, note or never.'
     default: never
   fail-on-parse-error:
-    description: 'Fail the job when any file had compile errors and was only partly analysed.'
+    description: 'Fail the job when the analysis was partial: a file had compile errors or an analyzer timed out on it.'
     default: 'false'
   sarif-file:
     description: Where to write the SARIF 2.1.0 report (relative to the workspace).
