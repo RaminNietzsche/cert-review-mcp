@@ -1,0 +1,162 @@
+"""cert-review command line: check | diff | explain | coverage | packet | rules | validate."""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+
+from . import api, formatters
+
+
+def _emit(findings: list[dict], fmt: str, root: str | None, out: str | None) -> None:
+    if fmt == "json":
+        text = json.dumps(findings, indent=2)
+    else:
+        text = formatters.dumps(formatters.format_review(findings, fmt, root))
+    if out:
+        with open(out, "w", encoding="utf-8") as fh:
+            fh.write(text + "\n")
+    else:
+        print(text)
+
+
+def _common(p: argparse.ArgumentParser) -> None:
+    p.add_argument("--profile", default="default", help="profile name or YAML path (default, ceph)")
+    p.add_argument("--compdb", help="directory containing compile_commands.json")
+    p.add_argument("--tools", default="clang-tidy,clangsa,cppcheck")
+    p.add_argument("--format", default="markdown",
+                   choices=["markdown", "json", "sarif", "github", "gitlab"])
+    p.add_argument("--output", "-o")
+    p.add_argument("--min-confidence", type=float, default=0.0)
+    p.add_argument("--fail-on", choices=["error", "warning", "note", "never"], default="never",
+                   help="exit 1 if a finding at or above this severity exists")
+    p.add_argument("--include-suppressed", action="store_true")
+
+
+def _exit_code(findings: list[dict], fail_on: str) -> int:
+    order = {"note": 1, "warning": 2, "error": 3}
+    if fail_on == "never":
+        return 0
+    return 1 if any(order[f["severity"]] >= order[fail_on] for f in findings) else 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(prog="cert-review", description=__doc__)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    c = sub.add_parser("check", help="analyse files or directories")
+    c.add_argument("paths", nargs="+")
+    c.add_argument("--lang", choices=["c", "cpp"])
+    c.add_argument("--root", help="project root (adds include dirs, relativises paths)")
+    c.add_argument("-j", "--jobs", type=int, default=4)
+    _common(c)
+
+    d = sub.add_parser("diff", help="analyse only changed lines")
+    d.add_argument("--repo", default=".")
+    d.add_argument("--base", help="git base ref")
+    d.add_argument("--head", help="git head ref (default: working tree)")
+    d.add_argument("--diff-file", help="unified diff file, or - for stdin")
+    d.add_argument("-j", "--jobs", type=int, default=4)
+    _common(d)
+
+    e = sub.add_parser("explain", help="show a rule")
+    e.add_argument("rule_id")
+    e.add_argument("--profile", default="default")
+    e.add_argument("--json", action="store_true")
+
+    cv = sub.add_parser("coverage", help="deterministic / partial / llm-only counts")
+    cv.add_argument("--lang", choices=["c", "cpp"])
+    cv.add_argument("--kind", choices=["rule", "recommendation"])
+    cv.add_argument("--ids", action="store_true")
+
+    r = sub.add_parser("rules", help="list or search rules")
+    r.add_argument("--lang", choices=["c", "cpp"])
+    r.add_argument("--category")
+    r.add_argument("--kind", choices=["rule", "recommendation"])
+    r.add_argument("--level")
+    r.add_argument("--coverage", choices=["deterministic", "partial", "llm-only"])
+    r.add_argument("--search")
+
+    pk = sub.add_parser("packet", help="build the LLM review packet")
+    pk.add_argument("paths", nargs="*")
+    pk.add_argument("--repo")
+    pk.add_argument("--base")
+    pk.add_argument("--head")
+    pk.add_argument("--profile", default="default")
+    pk.add_argument("--no-static", action="store_true")
+    pk.add_argument("--compdb")
+    pk.add_argument("-o", "--output")
+
+    v = sub.add_parser("validate", help="validate LLM findings (JSON file or -) against the rules")
+    v.add_argument("findings")
+    v.add_argument("--packet")
+    v.add_argument("--profile", default="default")
+
+    a = ap.parse_args(argv)
+
+    if a.cmd == "check":
+        res = api.check_file(a.paths, a.profile, a.lang, a.compdb, a.root,
+                             a.tools.split(","), a.min_confidence, a.include_suppressed, a.jobs)
+        _emit(res["findings"], a.format, a.root, a.output)
+        _status(res)
+        return _exit_code(res["findings"], a.fail_on)
+    if a.cmd == "diff":
+        text = None
+        if a.diff_file:
+            text = sys.stdin.read() if a.diff_file == "-" else open(a.diff_file, encoding="utf-8").read()
+        res = api.check_diff(a.repo, a.base, a.head, text, a.profile, a.compdb, a.tools.split(","),
+                             a.min_confidence, a.include_suppressed, a.jobs)
+        _emit(res["findings"], a.format, res["root"], a.output)
+        _status(res)
+        return _exit_code(res["findings"], a.fail_on)
+    if a.cmd == "explain":
+        res = api.explain_rule(a.rule_id, a.profile)
+        if a.json or "error" in res:
+            print(json.dumps(res, indent=2))
+            return 1 if "error" in res else 0
+        from . import rules as R
+        print(R.rule_text(R.get(a.rule_id)))
+        print(f"\nURL: {res['url']}\nCoverage: {res['coverage']['tier']} "
+              f"(runnable: {res['coverage']['tier_runnable']}); checkers: "
+              + ", ".join(f"{c['tool']}:{c['checker']}" for c in res["coverage"]["checkers"]))
+        if res["profile"]["override"]:
+            print(f"Profile {a.profile}: {res['profile']['override']}")
+        return 0
+    if a.cmd == "coverage":
+        print(json.dumps(api.rule_coverage(a.lang, a.kind, a.ids), indent=2))
+        return 0
+    if a.cmd == "rules":
+        if a.search:
+            print(json.dumps(api.search_rules(a.search, 15, a.lang), indent=2))
+        else:
+            for s in api.list_rules(a.lang, a.category, a.kind, a.level, None, a.coverage)["rules"]:
+                print(f"{s['id']:<11} {s['level'] or '':<3} {str(s['priority'] or ''):<4} "
+                      f"{s['coverage_runnable']:<13} {s['title']}")
+        return 0
+    if a.cmd == "packet":
+        res = api.review_packet(a.paths or None, a.repo, a.base, a.head, None, a.profile,
+                                not a.no_static, a.compdb)
+        text = json.dumps(res, indent=2)
+        if a.output:
+            open(a.output, "w", encoding="utf-8").write(text + "\n")
+        else:
+            print(text)
+        return 0
+    if a.cmd == "validate":
+        raw = sys.stdin.read() if a.findings == "-" else open(a.findings, encoding="utf-8").read()
+        pk_ = json.load(open(a.packet, encoding="utf-8")) if a.packet else None
+        res = api.validate_findings(raw, pk_, a.profile)
+        print(json.dumps(res, indent=2))
+        return 1 if res["rejected"] else 0
+    return 2
+
+
+def _status(res: dict) -> None:
+    s = res.get("summary", {})
+    tools = ", ".join(f"{t['tool']}={'ok' if t['available'] else 'missing'}" for t in res["tools"])
+    print(f"# {s.get('total', 0)} finding(s) in {len(res['files'])} file(s); tools: {tools}; "
+          f"suppressed: {res['suppressed_count']}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
