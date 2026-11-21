@@ -248,7 +248,8 @@ def run_codeql(files: list[str], profile: Profile, compdb: Path | None, root: Pa
             script = t / "build.sh"
             lines = ["#!/bin/sh"]
             for e in entries:
-                args = e.get("arguments") or _split(e["command"])
+                raw_args = e.get("arguments") or _split(e["command"])
+                args = _sanitize_compile_args(raw_args)
                 lines.append(f"cd {_q(e['directory'])} && " + " ".join(_q(a) for a in _drop_output(args))
                              + " -fsyntax-only || true")
             script.write_text("\n".join(lines) + "\n")
@@ -325,6 +326,38 @@ def _q(s: str) -> str:
 def _split(cmd: str) -> list[str]:
     import shlex
     return shlex.split(cmd)
+
+
+def _sanitize_compile_args(args: list[str]) -> list[str]:
+    """Drop high-risk flags from compile_commands entries before execution."""
+    out: list[str] = []
+    skip_next = False
+    deny_exact_with_value = {
+        "-Xclang", "-load", "-plugin", "-specs", "--specs", "-B", "-fplugin-arg",
+        "-fplugin", "-wrapper", "--config", "-T", "-Wl,-plugin-opt"
+    }
+    deny_exact = {
+        "-fintegrated-cc1", "-fplugin=", "-fplugin", "-Wl,-plugin"
+    }
+    deny_prefix = (
+        "@",                # response files
+        "-fplugin=",        # GCC plugin loading
+        "-Xclang=",         # clang driver passthrough
+        "-Wl,@",            # linker response files
+    )
+    for a in args:
+        if skip_next:
+            skip_next = False
+            continue
+        if a in deny_exact_with_value:
+            skip_next = True
+            continue
+        if a in deny_exact:
+            continue
+        if any(a.startswith(p) for p in deny_prefix):
+            continue
+        out.append(a)
+    return out
 
 
 def _drop_output(args: list[str]) -> list[str]:
