@@ -17,6 +17,7 @@ import urllib.request
 from pathlib import Path
 
 from . import api, diffutil, formatters
+from . import toolrun as T
 
 SEV = {"note": 1, "warning": 2, "error": 3}
 
@@ -109,10 +110,11 @@ def summary_md(res: dict, findings: list[dict], root: str, mode: str, profile: s
             out.append(f"\n_{n - 100} more in the SARIF file._")
     else:
         out.append("No findings.")
-    parse_err = sum(len(t.get("files_with_errors", [])) for t in res.get("tools", []))
-    if parse_err:
-        out += ["", f"_{parse_err} file(s) had compile errors and were only partly analysed; "
-                    "pass `compile-commands` for accurate results._"]
+    warns = res.get("warnings") or T.parse_warnings(res.get("tools", []))
+    if warns:
+        out = ([out[0], "", "> **Warning: partial analysis.** A clean result is not proof here."]
+               + [f"> - {w}" for w in warns] + out[1:])
+        out += ["", "_Pass `compile-commands` built with the project's dependencies for accurate results._"]
     return "\n".join(out) + "\n"
 
 
@@ -176,7 +178,7 @@ def main() -> int:
     findings = filter_paths(res["findings"], root, include, exclude)
     failing = threshold != "never" and any(SEV[f["severity"]] >= SEV[threshold] for f in findings)
 
-    Path(sarif_path).write_text(json.dumps(formatters.to_sarif(findings, root)), encoding="utf-8")
+    Path(sarif_path).write_text(json.dumps(formatters.to_sarif(findings, root, warnings=res.get("warnings"))), encoding="utf-8")
     md = summary_md(res, findings, root, mode, profile, failing, threshold)
     summ = os.environ.get("GITHUB_STEP_SUMMARY")
     if summ:
@@ -189,6 +191,11 @@ def main() -> int:
         if os.environ.get("GITHUB_ACTIONS"):
             print(f"::{lvl} file={os.path.relpath(f['file'], root)},line={f['line']},"
                   f"title=CERT {f['rule_id']}::{f['message'].strip()[:200]}")
+    warns = res.get("warnings") or T.parse_warnings(res.get("tools", []))
+    if os.environ.get("GITHUB_ACTIONS"):
+        for w in warns:
+            print(f"::warning title=cert-review partial analysis::{w[:500]}")
+    set_output("partial", "true" if warns else "false")
     set_output("sarif-file", sarif_path)
     set_output("findings", str(len(findings)))
     set_output("errors", str(sum(1 for f in findings if f["severity"] == "error")))
@@ -208,7 +215,7 @@ def main() -> int:
             payload = formatters.to_github_review(
                 top, root, f"SEI CERT review: {len(findings)} finding(s)"
                 + (f", showing the {limit} most important" if len(findings) > limit else "")
-                + ". Posted by the cert-review action.")
+                + ". Posted by the cert-review action.", warnings=warns)
             try:
                 post_review(payload, repo, int(pr), token,
                             os.environ.get("GITHUB_API_URL", "https://api.github.com"))
@@ -217,6 +224,8 @@ def main() -> int:
                 log("warning", f"could not post the review: HTTP {e.code} {e.read()[:200]!r}")
             except Exception as e:
                 log("warning", f"could not post the review: {e}")
+    if warns and truthy(inp("fail-on-parse-error", "false")):
+        return 1
     return 1 if failing else 0
 
 

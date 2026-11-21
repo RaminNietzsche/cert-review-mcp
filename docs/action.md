@@ -33,6 +33,7 @@ on the runner (it is on `ubuntu-latest`).
 | `tools` | `clang-tidy,cppcheck` | Add `clangsa` for the standalone analyzer (needs flags that parse) |
 | `min-confidence` | `0.5` | Hide findings below this confidence |
 | `fail-on` | `never` | Fail the job at `error`, `warning` or `note` |
+| `fail-on-parse-error` | `false` | Fail the job when any file had compile errors and was only partly analysed |
 | `sarif-file` | `cert-review.sarif` | SARIF 2.1.0 output path |
 | `upload-sarif` | `false` | Upload to code scanning (`github/codeql-action/upload-sarif@v3`); needs `security-events: write` |
 | `sarif-category` | `cert-review` | Code scanning category |
@@ -42,7 +43,7 @@ on the runner (it is on `ubuntu-latest`).
 | `working-directory` | `.` | Project directory inside the workspace |
 | `image` | none | Prebuilt image instead of building the Dockerfile |
 
-Outputs: `sarif-file`, `findings`, `errors`.
+Outputs: `sarif-file`, `findings`, `errors`, `partial` (`true` when some files did not parse).
 
 ### What it writes
 

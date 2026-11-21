@@ -68,10 +68,18 @@ def _rel(path: str, root: str | None) -> str:
     return path
 
 
-def to_markdown(findings: list[dict], root: str | None = None) -> str:
+def _warning_block(warnings: list[str] | None) -> str:
+    if not warnings:
+        return ""
+    return "> **Warning: partial analysis.**\n" + "".join(f"> - {w}\n" for w in warnings) + "\n"
+
+
+def to_markdown(findings: list[dict], root: str | None = None, warnings: list[str] | None = None) -> str:
+    wb = _warning_block(warnings)
     if not findings:
-        return "No SEI CERT findings.\n"
-    out = [f"# SEI CERT review: {len(findings)} finding(s)\n"]
+        return wb + ("No SEI CERT findings in the files that could be analysed.\n" if warnings
+                     else "No SEI CERT findings.\n")
+    out = [wb + f"# SEI CERT review: {len(findings)} finding(s)\n"]
     by_file: dict[str, list[dict]] = {}
     for f in findings:
         by_file.setdefault(_rel(f["file"], root), []).append(f)
@@ -83,12 +91,15 @@ def to_markdown(findings: list[dict], root: str | None = None) -> str:
     return "\n".join(out) + "\n"
 
 
-def to_github_review(findings: list[dict], root: str | None = None, summary: str | None = None) -> dict:
+def to_github_review(findings: list[dict], root: str | None = None, summary: str | None = None,
+                     warnings: list[str] | None = None) -> dict:
     """Body for `POST /repos/{o}/{r}/pulls/{n}/reviews` (event COMMENT). Not sent."""
     comments = [{"path": _rel(f["file"], root), "line": f["line"], "side": "RIGHT",
                  "body": comment_body(f)} for f in findings]
     body = summary or (f"SEI CERT review: {len(findings)} finding(s). "
                        "Drafted for human review; nothing is posted automatically.")
+    if warnings:
+        body += "\n\n" + _warning_block(warnings).rstrip()
     return {"event": "COMMENT", "body": body, "comments": comments}
 
 
@@ -108,7 +119,8 @@ def to_gitlab_discussions(findings: list[dict], root: str | None = None) -> list
     return out
 
 
-def to_sarif(findings: list[dict], root: str | None = None, tool_name: str = "cert-review") -> dict:
+def to_sarif(findings: list[dict], root: str | None = None, tool_name: str = "cert-review",
+             warnings: list[str] | None = None) -> dict:
     rule_ids = sorted({f["rule_id"] for f in findings})
     rules_out = []
     for rid in rule_ids:
@@ -155,6 +167,10 @@ def to_sarif(findings: list[dict], root: str | None = None, tool_name: str = "ce
             "informationUri": "https://cmu-sei.github.io/secure-coding-standards/",
             "rules": rules_out}},
             "results": results,
+            "invocations": [{
+                "executionSuccessful": not warnings,
+                "toolExecutionNotifications": [
+                    {"level": "warning", "message": {"text": w}} for w in (warnings or [])]}],
             "properties": {"ruleDatabaseCommit": R.source_info()["commit"]}}],
     }
 
@@ -211,16 +227,17 @@ def to_gitlab_sast(findings: list[dict], root: str | None = None) -> dict:
             "vulnerabilities": vulns}
 
 
-def format_review(findings: list[dict], style: str = "markdown", root: str | None = None) -> Any:
+def format_review(findings: list[dict], style: str = "markdown", root: str | None = None,
+                  warnings: list[str] | None = None) -> Any:
     style = style.lower()
     if style == "markdown":
-        return to_markdown(findings, root)
+        return to_markdown(findings, root, warnings)
     if style == "github":
-        return to_github_review(findings, root)
+        return to_github_review(findings, root, warnings=warnings)
     if style == "gitlab":
         return to_gitlab_discussions(findings, root)
     if style == "sarif":
-        return to_sarif(findings, root)
+        return to_sarif(findings, root, warnings=warnings)
     if style == "codequality":
         return to_codequality(findings, root)
     if style == "gitlab-sast":

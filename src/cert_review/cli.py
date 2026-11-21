@@ -8,11 +8,12 @@ import sys
 from . import api, formatters
 
 
-def _emit(findings: list[dict], fmt: str, root: str | None, out: str | None) -> None:
+def _emit(findings: list[dict], fmt: str, root: str | None, out: str | None,
+          warnings: list[str] | None = None) -> None:
     if fmt == "json":
         text = json.dumps(findings, indent=2)
     else:
-        text = formatters.dumps(formatters.format_review(findings, fmt, root))
+        text = formatters.dumps(formatters.format_review(findings, fmt, root, warnings))
     if out:
         with open(out, "w", encoding="utf-8") as fh:
             fh.write(text + "\n")
@@ -31,12 +32,16 @@ def _common(p: argparse.ArgumentParser) -> None:
     p.add_argument("--min-confidence", type=float, default=0.0)
     p.add_argument("--fail-on", choices=["error", "warning", "note", "never"], default="never",
                    help="exit 1 if a finding at or above this severity exists")
+    p.add_argument("--fail-on-parse-error", action="store_true",
+                   help="exit 1 if any file had compile errors and was only partly analysed")
     p.add_argument("--include-suppressed", action="store_true")
     p.add_argument("--max-rules-per-location", type=int, default=2,
                    help="many CERT rules map to one checker; keep the best N per line")
 
 
-def _exit_code(findings: list[dict], fail_on: str) -> int:
+def _exit_code(findings: list[dict], fail_on: str, parse_failed: bool = False) -> int:
+    if parse_failed:
+        return 1
     order = {"note": 1, "warning": 2, "error": 3}
     if fail_on == "never":
         return 0
@@ -101,10 +106,10 @@ def main(argv: list[str] | None = None) -> int:
         res = api.check_file(a.paths, a.profile, a.lang, a.compdb, a.root,
                              a.tools.split(","), a.min_confidence, a.include_suppressed, a.jobs,
                              a.max_rules_per_location)
-        _emit(res["findings"], a.format, a.root, a.output)
+        _emit(res["findings"], a.format, a.root, a.output, res.get("warnings"))
         _write_report(res, a.report)
         _status(res)
-        return _exit_code(res["findings"], a.fail_on)
+        return _exit_code(res["findings"], a.fail_on, a.fail_on_parse_error and bool(res.get("warnings")))
     if a.cmd == "diff":
         text = None
         if a.diff_file:
@@ -112,10 +117,10 @@ def main(argv: list[str] | None = None) -> int:
         res = api.check_diff(a.repo, a.base, a.head, text, a.profile, a.compdb, a.tools.split(","),
                              a.min_confidence, a.include_suppressed, a.jobs,
                              a.max_rules_per_location)
-        _emit(res["findings"], a.format, res["root"], a.output)
+        _emit(res["findings"], a.format, res["root"], a.output, res.get("warnings"))
         _write_report(res, a.report)
         _status(res)
-        return _exit_code(res["findings"], a.fail_on)
+        return _exit_code(res["findings"], a.fail_on, a.fail_on_parse_error and bool(res.get("warnings")))
     if a.cmd == "explain":
         res = api.explain_rule(a.rule_id, a.profile)
         if a.json or "error" in res:
@@ -166,9 +171,11 @@ def _write_report(res: dict, path: str | None) -> None:
 
 def _status(res: dict) -> None:
     s = res.get("summary", {})
-    tools = ", ".join(f"{t['tool']}={'ok' if t['available'] else 'missing'}" for t in res["tools"])
+    tools = ", ".join(f"{t['tool']}={t.get('status') or ('ok' if t['available'] else 'missing')}" for t in res["tools"])
     print(f"# {s.get('total', 0)} finding(s) in {len(res['files'])} file(s); tools: {tools}; "
           f"suppressed: {res['suppressed_count']}", file=sys.stderr)
+    for w in res.get("warnings") or []:
+        print(f"# WARNING: {w}", file=sys.stderr)
 
 
 if __name__ == "__main__":

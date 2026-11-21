@@ -35,6 +35,9 @@ inputs:
   fail-on:
     description: 'Fail the job when a finding at or above this severity exists: error, warning, note or never.'
     default: never
+  fail-on-parse-error:
+    description: 'Fail the job when any file had compile errors and was only partly analysed.'
+    default: 'false'
   sarif-file:
     description: Where to write the SARIF 2.1.0 report (relative to the workspace).
     default: cert-review.sarif
@@ -60,6 +63,9 @@ inputs:
     description: Optional prebuilt image (for example ghcr.io/<owner>/cert-review:v1) used instead of building the Dockerfile.
     required: false
 outputs:
+  partial:
+    description: "'true' when some files had compile errors and were only partly analysed."
+    value: ${{ steps.run.outputs.partial }}
   sarif-file:
     description: Path of the SARIF report.
     value: ${{ steps.run.outputs.sarif-file }}
@@ -94,6 +100,7 @@ runs:
       INPUT_TOOLS: ${{ inputs.tools }}
       INPUT_MIN_CONFIDENCE: ${{ inputs.min-confidence }}
       INPUT_FAIL_ON: ${{ inputs.fail-on }}
+      INPUT_FAIL_ON_PARSE_ERROR: ${{ inputs.fail-on-parse-error }}
       INPUT_SARIF_FILE: ${{ inputs.sarif-file }}
       INPUT_REVIEW_COMMENTS: ${{ inputs.review-comments }}
       INPUT_MAX_COMMENTS: ${{ inputs.max-comments }}
@@ -119,6 +126,7 @@ runs:
         -e INPUT_TOOLS \
         -e INPUT_MIN_CONFIDENCE \
         -e INPUT_FAIL_ON \
+        -e INPUT_FAIL_ON_PARSE_ERROR \
         -e INPUT_SARIF_FILE \
         -e INPUT_REVIEW_COMMENTS \
         -e INPUT_MAX_COMMENTS \

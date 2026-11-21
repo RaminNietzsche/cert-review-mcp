@@ -29,7 +29,8 @@ class Result:
     def to_dict(self, include_suppressed: bool = False) -> dict:
         d = {"profile": self.profile, "files": self.files,
              "findings": [f.to_dict() for f in self.findings],
-             "tools": [vars(t) for t in self.tools], "notes": self.notes,
+             "tools": [{**vars(t), "status": t.status} for t in self.tools], "notes": self.notes,
+             "warnings": T.parse_warnings(self.tools),
              "suppressed_count": len(self.suppressed)}
         if include_suppressed:
             d["suppressed"] = [f.to_dict() for f in self.suppressed]

@@ -42,6 +42,28 @@ class ToolStatus:
     files_with_errors: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
+    @property
+    def status(self) -> str:
+        """missing | partial (some files did not parse) | ok."""
+        if not self.available:
+            return "missing"
+        return "partial" if self.parse_errors or self.files_with_errors else "ok"
+
+
+def parse_warnings(tools) -> list[str]:
+    """One human-readable line per tool that could not fully parse its input.
+    `tools` is a list of ToolStatus or their dict form."""
+    out = []
+    for t in tools or []:
+        g = (lambda k, d=None: t.get(k, d)) if isinstance(t, dict) else (lambda k, d=None: getattr(t, k, d))
+        files = list(g("files_with_errors") or [])
+        if files or g("parse_errors"):
+            shown = ", ".join(files[:5]) + (f" (+{len(files) - 5} more)" if len(files) > 5 else "")
+            out.append(f"{g('tool')}: {len(files) or g('parse_errors')} file(s) had compile errors and were "
+                       f"only partly analysed, so a clean result is not proof: {shown}. "
+                       "Pass a real compile_commands.json (--compdb) built with the project's dependencies.")
+    return out
+
 
 def lang_of(path: str) -> str:
     return "c" if Path(path).suffix.lower() in C_EXT else "cpp"

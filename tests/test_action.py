@@ -30,7 +30,7 @@ def test_action_yml_structure():
 
 def test_outputs_declared():
     a = yaml.safe_load((ROOT / "action.yml").read_text())
-    assert set(a["outputs"]) == {"sarif-file", "findings", "errors"}
+    assert set(a["outputs"]) == {"sarif-file", "findings", "errors", "partial"}
 
 
 def test_dockerfile_pins_the_measured_toolchain():
