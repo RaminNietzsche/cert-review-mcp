@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.1 (2026-11-21)
+
+### Fixed
+
+- `check_diff` and `build_review_packet` with `diff_text` now materialize missing files from the
+  patch instead of returning empty results when the MCP host cannot see the local checkout (e.g.
+  remote/Glama servers with a placeholder `repo` path).
+- MCP `check_diff` no longer requires `repo` to exist on disk when `diff_text` is provided.
+
 ## 1.1.0 (2026-11-21)
 
 ### Breaking changes for MCP clients

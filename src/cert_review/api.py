@@ -90,10 +90,10 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
                max_rules_per_location: int = 2) -> dict:
     text = _diff_text(repo, base, head, diff_text)
     changed = diffutil.parse_unified_diff(text)
-    root = str(Path(repo).resolve()) if repo else str(Path.cwd())
-    abs_changed = {str(Path(root) / k): v for k, v in changed.items()}
+    root_p, abs_changed = diffutil.prepare_diff_workspace(repo, text)
+    root = str(root_p)
     prof = P.load(profile)
-    files = engine.select_files([p for p in abs_changed if Path(p).exists()], prof, None, Path(root))
+    files = engine.select_files(list(abs_changed), prof, None, root_p)
     res = engine.check(files, prof, None, compdb, root,
                        tuple(tools) if tools else engine.DEFAULT_TOOLS,
                        abs_changed, jobs, max_rules_per_location, min_confidence, include_suppressed)
@@ -112,8 +112,9 @@ def review_packet(path: str | list[str] | None = None, repo: str | None = None,
     existing: list[dict] = []
     if diff_text or (repo and base):
         text = _diff_text(repo, base, head, diff_text)
-        root = Path(repo).resolve() if repo else Path.cwd()
-        ranges = {str(root / k): v for k, v in diffutil.hunks_with_context(text, context_lines).items()}
+        root, abs_changed = diffutil.prepare_diff_workspace(repo, text)
+        hunk_ctx = diffutil.hunks_with_context(text, context_lines)
+        ranges = {str(root / k): v for k, v in hunk_ctx.items()}
         ranges = {k: v for k, v in ranges.items() if Path(k).exists()}
         files = engine.select_files(list(ranges), prof, None, root)
         ranges = {k: v for k, v in ranges.items() if k in set(files)}

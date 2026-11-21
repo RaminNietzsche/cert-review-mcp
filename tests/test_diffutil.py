@@ -31,6 +31,22 @@ def test_hunks_with_context_merge():
     assert r["src/a.cc"][0] == (1, 8) and r["src/a.cc"][-1] == (19, 25)
 
 
+def test_reconstruct_and_materialize():
+    files = diffutil.reconstruct_file_contents(DIFF)
+    assert "src/a.cc" in files
+    assert "new1" in files["src/a.cc"]
+    assert "gone.cc" not in files
+
+
+def test_prepare_diff_workspace_missing_files(tmp_path):
+    repo = tmp_path / "proj"
+    root, abs_changed = diffutil.prepare_diff_workspace(str(repo), DIFF)
+    assert root == repo.resolve()
+    p = repo / "src/a.cc"
+    assert p.exists()
+    assert str(p.resolve()) in abs_changed
+
+
 def test_git_diff_roundtrip(tmp_path):
     def git(*a):
         subprocess.run(["git", "-C", str(tmp_path), "-c", "user.name=t", "-c", "user.email=t@t", *a],

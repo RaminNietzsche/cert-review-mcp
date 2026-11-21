@@ -134,6 +134,12 @@ Every tool is read-only: it reads local files and bundled data and runs local an
 Nothing is written, uploaded or posted. All tools declare MCP annotations, a title and,
 except `format_findings`, an output schema.
 
+For `check_diff` and `build_review_packet` with pasted `diff_text`, files that are missing on
+the MCP host are reconstructed from the patch under `repo` (the directory is created when needed).
+On remote servers that cannot see your checkout, pass the unified diff and a logical root path
+(for example `/workspace/ceph`); omit `repo` to use a disposable tree under the system temp
+directory.
+
 | Tool | Purpose |
 |---|---|
 | `list_rules(lang, category, kind, level, detectable, coverage, limit)` | Filter the rule database; summaries with coverage tier |

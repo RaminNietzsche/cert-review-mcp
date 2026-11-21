@@ -232,6 +232,14 @@ def _exists(path: str) -> str:
     return str(p)
 
 
+def _repo_for_diff(repo: str, diff_text: str | None) -> str:
+    """Repo root for diff mode: may not exist on disk when diff_text will materialize files."""
+    p = Path(repo).expanduser()
+    if diff_text:
+        return str(p)
+    return _exists(repo)
+
+
 RO = dict(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 
 
@@ -377,9 +385,10 @@ def build_server() -> Any:
             "`base` against the working tree when head is omitted, or a pasted unified diff "
             "(`diff_text`, paths relative to repo). Use for pull-request or pre-commit review; for "
             "whole files use check_files. Runs `git diff` and the analyzers locally; writes "
-            "nothing. Files are read from disk, so the working tree must be at `head` or line "
-            "numbers will not match. Check tools[].status and `warnings` before trusting an empty "
-            "result."))
+            "nothing. For git refs, files must exist at `head` or line numbers will not match. "
+            "With `diff_text`, missing files are reconstructed under `repo` (or a temp tree when "
+            "`repo` is omitted) so remote MCP hosts can review without your checkout. Check "
+            "tools[].status and `warnings` before trusting an empty result."))
     @_guard
     def check_diff(
         repo: Annotated[str, Field(description="Absolute path of the git checkout; diff paths are resolved against it.", examples=["/home/me/ceph"])],
@@ -394,8 +403,8 @@ def build_server() -> Any:
     ) -> DiffCheckResult:
         if not (diff_text or base):
             raise ToolError("provide base (git ref) or diff_text")
-        return api.check_diff(_exists(repo), base, head, diff_text, profile, compdb, list(tools),
-                              min_confidence, include_suppressed)
+        return api.check_diff(_repo_for_diff(repo, diff_text), base, head, diff_text, profile, compdb,
+                              list(tools), min_confidence, include_suppressed)
 
     # ------------------------------------------------------------ manual review layer
     @mcp.tool(
@@ -426,7 +435,7 @@ def build_server() -> Any:
     ) -> Packet:
         if not (path or (repo and base) or diff_text):
             raise ToolError("provide path, or repo with base or diff_text")
-        if repo:
+        if repo and not diff_text:
             _exists(repo)
         elif path:
             path = _exists(path)
