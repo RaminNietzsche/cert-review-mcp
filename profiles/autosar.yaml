@@ -1,0 +1,31 @@
+# AUTOSAR profile: AUTOSAR C++14 Coding Guidelines (AP Release 19-03) on C++ files.
+# Add `cert` or `misra-c-2012` to `standards` to cover SEI CERT or C files as well.
+#
+# The AUTOSAR guideline texts are copyrighted and are not bundled. To see the official
+# headlines, point `rule_texts` at your own copy (or set CERT_REVIEW_AUTOSAR_TEXTS).
+# See docs/misra-autosar.md.
+name: autosar
+description: AUTOSAR C++14 review (cppcheck and clang-tidy mappings).
+standards: [autosar-cpp14]
+languages:
+  c_standard: 11
+  cpp_standard: 14
+file_extensions:
+  c: [".c"]
+  cpp: [".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"]
+severity_from_cert: {High: error, Medium: warning, Low: note}
+severity_from_classification: {mandatory: error, required: warning, advisory: note, document: note}
+min_level: L3
+include_recommendations: false
+exclude_paths: ["build/*", "third_party/*", "vendor/*", "*/node_modules/*"]
+clang_tidy:
+  checks_extra: []
+  extra_args: []
+# rule_texts:
+#   autosar-cpp14: /path/to/your/autosar_cpp14_rule_texts.txt
+rule_overrides: {}
+suppress: []
+idioms: []
+llm_review:
+  max_rules_per_hunk: 6
+  max_hunk_lines: 60

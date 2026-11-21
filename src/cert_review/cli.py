@@ -36,8 +36,14 @@ def _common(p: argparse.ArgumentParser) -> None:
                    action="store_true",
                    help="exit 1 if the analysis was partial: a file had compile errors or timed out")
     p.add_argument("--include-suppressed", action="store_true")
+    p.add_argument("--standards", help="comma-separated standards to map findings to, overriding the "
+                   "profile: cert, misra, autosar, misra-c-2012, misra-cpp-2023, autosar-cpp14, all")
     p.add_argument("--max-rules-per-location", type=int, default=2,
                    help="many CERT rules map to one checker; keep the best N per line")
+
+
+def _stds(a: argparse.Namespace) -> list[str] | None:
+    return [x for x in a.standards.split(",") if x.strip()] if getattr(a, "standards", None) else None
 
 
 def _exit_code(findings: list[dict], fail_on: str, parse_failed: bool = False) -> int:
@@ -73,15 +79,19 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--profile", default="default")
     e.add_argument("--json", action="store_true")
 
+    std_help = "cert (default), misra, autosar, misra-c-2012, misra-cpp-2023, autosar-cpp14 or all"
     cv = sub.add_parser("coverage", help="deterministic / partial / llm-only counts")
+    cv.add_argument("--standard", default="cert", help=std_help)
     cv.add_argument("--lang", choices=["c", "cpp"])
-    cv.add_argument("--kind", choices=["rule", "recommendation"])
+    cv.add_argument("--kind", choices=["rule", "recommendation", "directive"])
     cv.add_argument("--ids", action="store_true")
 
     r = sub.add_parser("rules", help="list or search rules")
+    r.add_argument("--standard", default="cert", help=std_help)
+    r.add_argument("--classification", choices=["mandatory", "required", "advisory", "document"])
     r.add_argument("--lang", choices=["c", "cpp"])
     r.add_argument("--category")
-    r.add_argument("--kind", choices=["rule", "recommendation"])
+    r.add_argument("--kind", choices=["rule", "recommendation", "directive"])
     r.add_argument("--level")
     r.add_argument("--coverage", choices=["deterministic", "partial", "llm-only"])
     r.add_argument("--search")
@@ -106,7 +116,7 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "check":
         res = api.check_file(a.paths, a.profile, a.lang, a.compdb, a.root,
                              a.tools.split(","), a.min_confidence, a.include_suppressed, a.jobs,
-                             a.max_rules_per_location)
+                             a.max_rules_per_location, _stds(a))
         _emit(res["findings"], a.format, a.root, a.output, res.get("warnings"))
         _write_report(res, a.report)
         _status(res)
@@ -117,7 +127,7 @@ def main(argv: list[str] | None = None) -> int:
             text = sys.stdin.read() if a.diff_file == "-" else open(a.diff_file, encoding="utf-8").read()
         res = api.check_diff(a.repo, a.base, a.head, text, a.profile, a.compdb, a.tools.split(","),
                              a.min_confidence, a.include_suppressed, a.jobs,
-                             a.max_rules_per_location)
+                             a.max_rules_per_location, _stds(a))
         _emit(res["findings"], a.format, res["root"], a.output, res.get("warnings"))
         _write_report(res, a.report)
         _status(res)
@@ -129,6 +139,9 @@ def main(argv: list[str] | None = None) -> int:
             return 1 if "error" in res else 0
         from . import rules as R
         print(R.rule_text(R.get(a.rule_id)))
+        if res.get("cross_references"):
+            print("\nRelated MISRA/AUTOSAR: " + ", ".join(
+                f"{x['name']} ({x['relation']})" for x in res["cross_references"]))
         print(f"\nURL: {res['url']}\nCoverage: {res['coverage']['tier']} "
               f"(runnable: {res['coverage']['tier_runnable']}); checkers: "
               + ", ".join(f"{c['tool']}:{c['checker']}" for c in res["coverage"]["checkers"]))
@@ -136,13 +149,18 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Profile {a.profile}: {res['profile']['override']}")
         return 0
     if a.cmd == "coverage":
-        print(json.dumps(api.rule_coverage(a.lang, a.kind, a.ids), indent=2))
+        print(json.dumps(api.rule_coverage(a.lang, a.kind, a.ids, a.standard), indent=2))
         return 0
     if a.cmd == "rules":
         if a.search:
-            print(json.dumps(api.search_rules(a.search, 15, a.lang), indent=2))
+            print(json.dumps(api.search_rules(a.search, 15, a.lang, a.standard), indent=2))
         else:
-            for s in api.list_rules(a.lang, a.category, a.kind, a.level, None, a.coverage)["rules"]:
+            for s in api.list_rules(a.lang, a.category, a.kind, a.level, None, a.coverage,
+                                    100000, a.standard, a.classification)["rules"]:
+                if s.get("classification"):
+                    print(f"{s['id']:<24} {s['classification']:<10} "
+                          f"{s['coverage_runnable']:<13} {s['title']}")
+                    continue
                 print(f"{s['id']:<11} {s['level'] or '':<3} {str(s['priority'] or ''):<4} "
                       f"{s['coverage_runnable']:<13} {s['title']}")
         return 0

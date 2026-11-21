@@ -1,5 +1,44 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- MISRA C:2012 (Amendments 1-4, 221 guidelines), MISRA C++:2023 (178) and AUTOSAR C++14
+  (397) next to SEI CERT, in `data/guidelines.json` (built by `tools/build_guidelines.py`
+  from cppcheck 2.17.1's guideline lists and the public AUTOSAR document, plus
+  `data/guideline_overlay.yaml`). No MISRA or AUTOSAR guideline text is bundled: only IDs,
+  classification, AUTOSAR enforcement/target, checker mappings, SEI CERT cross-references and
+  one-line summaries written for this project. See [docs/misra-autosar.md](docs/misra-autosar.md)
+  and [NOTICE](NOTICE).
+- `standard` parameter on `list_rules`, `search_rules` and `get_rule_coverage` (`cert` default,
+  `cert-c`, `cert-cpp`, `misra`, `misra-c-2012`, `misra-cpp-2023`, `autosar`, `autosar-cpp14`,
+  `all`); `classification` filter and `directive` kind on `list_rules`; `get_rule` accepts
+  MISRA/AUTOSAR IDs and short forms and lists CERT cross-references both ways.
+- `standards` parameter on `check_files` and `check_diff` (CLI `--standards`). With
+  `misra-c-2012`, cppcheck runs its MISRA addon on C files; cppcheck, clang-tidy and Clang
+  Static Analyzer findings map to MISRA/AUTOSAR IDs. Findings carry a `standard` field.
+- Profiles: `standards:`, `severity_from_classification:` and `rule_texts:`; new
+  `profiles/misra.yaml` and `profiles/autosar.yaml`.
+- Licensed rule texts: `CERT_REVIEW_MISRA_C_TEXTS`, `CERT_REVIEW_MISRA_CPP_TEXTS`,
+  `CERT_REVIEW_AUTOSAR_TEXTS` or the profile's `rule_texts` load a local copy (cppcheck addon
+  format or one guideline per line), used by `get_rule`, finding messages and
+  `validate_findings`.
+- `tools/measure_guidelines.py` for the coverage table.
+
+### Changed
+
+- `validate_findings`: for MISRA/AUTOSAR without a licensed text file, `quote` is optional and
+  accepted findings are marked `grounding: "rule-id-only"`; SEI CERT still requires a verbatim
+  quote. All accepted findings now carry `grounding`.
+- Formatter headings name the selected standards; SARIF tags use `external/cert/`, `external/misra/` or `external/autosar/` plus the ID.
+
+### Fixed
+
+- cppcheck output lines whose ID contains `-` or `.` were dropped by the parser.
+
+Default behaviour (CERT only) is unchanged for existing calls, profiles and CI jobs.
+
 ## 1.1.2 (2026-11-21)
 
 ### Added

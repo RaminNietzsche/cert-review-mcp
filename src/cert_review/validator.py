@@ -3,7 +3,10 @@
 A finding is accepted only when
   * it has a rule_id that exists in the database (and fits the file language),
   * it quotes the rule: the quote is at least 20 characters and appears,
-    after whitespace/markdown normalization, in the rule's own text,
+    after whitespace/markdown normalization, in the rule's own text
+    (SEI CERT always; MISRA/AUTOSAR only when the user supplied a licensed
+    rule-texts file, because their texts are not bundled: otherwise the quote is
+    optional, unchecked, and the finding is marked grounding="rule-id-only"),
   * it names a file and a positive line (inside a packet hunk when a packet
     is supplied),
   * its message is non-empty,
@@ -39,9 +42,31 @@ def quote_supported(rule_id: str, quote: str) -> bool:
         return False
     q = _norm(quote).strip(" .\u2026")
     q = re.sub(r"^\.\.\.|\.\.\.$", "", q).strip()
-    if len(q) < MIN_QUOTE:
+    if R.is_cert(r):
+        return len(q) >= MIN_QUOTE and q in rule_corpus(r)
+    from . import ruletexts
+    lic = ruletexts.text_for(r["id"])
+    if not lic:
         return False
-    return q in rule_corpus(r)
+    corpus = _norm(lic).strip(" .")
+    # headlines are short: accept 20+ characters, or the whole headline
+    return (len(q) >= MIN_QUOTE or q == corpus) and q in corpus
+
+
+def quote_required(rule_id: str) -> bool:
+    """SEI CERT: always. MISRA/AUTOSAR: only when a licensed text for the rule is loaded."""
+    r = R.get(rule_id)
+    if not r:
+        return True
+    if R.is_cert(r):
+        return True
+    from . import ruletexts
+    return bool(ruletexts.text_for(r["id"]))
+
+
+_C_ONLY = ("misra-c-2012",)
+_CPP_ONLY = ("cert-cpp", "misra-cpp-2023", "autosar-cpp14")
+_CPP_EXT = (".cc", ".cpp", ".cxx", ".hpp", ".hh", ".hxx")
 
 
 def validate(findings: list[dict[str, Any]], packet: dict | None = None,
@@ -53,6 +78,8 @@ def validate(findings: list[dict[str, Any]], packet: dict | None = None,
         why = []
         rid = str(raw.get("rule_id", "")).strip().upper()
         rule = R.get(rid) if rid else None
+        if rule is not None:
+            rid = rule["id"]
         if not rid:
             why.append("missing rule_id")
         elif rule is None:
@@ -65,9 +92,13 @@ def validate(findings: list[dict[str, Any]], packet: dict | None = None,
             why.append("missing or invalid line")
         if not str(raw.get("message", "")).strip():
             why.append("missing message")
-        quote = str(raw.get("quote", ""))
+        quote = str(raw.get("quote") or "")
+        grounding = "quote"
         if rule is not None:
-            if not quote.strip():
+            needs_quote = quote_required(rid)
+            if not needs_quote:
+                grounding = "rule-id-only"
+            elif not quote.strip():
                 why.append("missing quote")
             elif not quote_supported(rid, quote):
                 why.append("quote not found in the text of " + rid
@@ -76,9 +107,11 @@ def validate(findings: list[dict[str, Any]], packet: dict | None = None,
             reason = prof.disabled(rid)
             if reason:
                 why.append(f"rule disabled by profile: {reason}")
-            if file and rule["lang"] == "c" and str(file).lower().endswith((".cc", ".cpp", ".hpp")):
-                pass  # C rules may apply to C++ files; no rejection
-            if file and rule["lang"] == "cpp" and str(file).lower().endswith(".c"):
+            std = R.standard_of(rule)
+            if file and std in _C_ONLY and str(file).lower().endswith(_CPP_EXT):
+                why.append(f"{rid} is a MISRA C rule but {file} is a C++ file")
+            # SEI CERT C rules may apply to C++ files; no rejection
+            if file and std in _CPP_ONLY and str(file).lower().endswith(".c"):
                 why.append(f"{rid} is a C++ rule but {file} is a C file")
         if hunks and file and isinstance(line, int):
             inside = any(h["file"] == file and h["start_line"] <= line <= h["end_line"] for h in hunks)
@@ -87,7 +120,11 @@ def validate(findings: list[dict[str, Any]], packet: dict | None = None,
             elif rule is not None:
                 cand = {c["rule_id"] for h in hunks if h["file"] == file
                         and h["start_line"] <= line <= h["end_line"] for c in h["candidate_rules"]}
-                if rid not in cand:
+                # packets list candidates per standard; only enforce when the packet has
+                # candidates from this rule's standard (SEI CERT packets for MISRA findings
+                # are checked for hunk bounds only)
+                cand_stds = {R.standard_of(R.get(c)) for c in cand if R.get(c)}
+                if rid not in cand and (R.is_cert(rule) or R.standard_of(rule) in cand_stds):
                     why.append(f"{rid} was not a candidate rule for that hunk")
         if why:
             rejected.append({"finding": raw, "reasons": why})
@@ -99,6 +136,7 @@ def validate(findings: list[dict[str, Any]], packet: dict | None = None,
         d = f.to_dict()
         d["quote"] = quote.strip()
         d["fix"] = raw.get("fix")
+        d["grounding"] = grounding
         accepted.append(d)
     return {"accepted": accepted, "rejected": rejected,
             "summary": {"accepted": len(accepted), "rejected": len(rejected)}}

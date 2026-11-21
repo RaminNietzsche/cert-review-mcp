@@ -1,4 +1,4 @@
-"""MCP server (stdio) exposing the SEI CERT rule database and review engine.
+"""MCP server (stdio) exposing the SEI CERT, MISRA and AUTOSAR rule databases and review engine.
 
 Nothing here writes files, uses the network, or posts to GitHub or GitLab:
 review comments are only formatted.
@@ -42,17 +42,39 @@ Review flow:
 4. format_findings to draft markdown, GitHub or GitLab review payloads, SARIF or GitLab reports.
 Use absolute paths and profile "ceph" for Ceph trees. A tool status "partial" or non-empty
 warnings means some files did not compile or timed out, so a clean result is not proof.
+MISRA C:2012, MISRA C++:2023 and AUTOSAR C++14: pass `standard` to the lookup tools or
+`standards` (or profile "misra" / "autosar") to check_files and check_diff. Their official
+texts are copyrighted and not bundled (IDs, classification, mappings and short summaries only),
+so validate_findings needs no quote for them unless the user loaded a licensed rule-texts file.
 Never post review comments without the user approving the exact text."""
 
 # ---------------------------------------------------------------- shared types
 Profile = Annotated[str, Field(
     description="Review profile: 'default' (plain SEI CERT), 'ceph' (Ceph severities, "
-                "suppressions and idioms) or an absolute path to a profile .yaml file.",
-    examples=["default", "ceph"])]
+                "suppressions and idioms), 'misra' (MISRA C:2012 + MISRA C++:2023), 'autosar' "
+                "(AUTOSAR C++14) or an absolute path to a profile .yaml file.",
+    examples=["default", "ceph", "misra"])]
+_CI = lambda w: "".join(f"[{c.upper()}{c.lower()}]" if c.isalpha() else c for c in w)  # noqa: E731
+RULE_ID_PATTERN = (
+    r"^(?:[A-Za-z]{3}\d{2}-(?:[Cc]|[Cc][Pp][Pp])"
+    rf"|{_CI('MISRA-C-2012-')}(?:{_CI('DIR-')})?\d+\.\d+"
+    rf"|{_CI('MISRA-CPP-2023-')}(?:{_CI('DIR-')})?\d+\.\d+\.\d+"
+    rf"|{_CI('AUTOSAR-')}[AaMm]\d+-\d+-\d+)$")
 RuleId = Annotated[str, Field(
-    description="SEI CERT rule ID: three-letter category, two digits, then -C or -CPP; "
-                "case-insensitive.",
-    pattern=r"^[A-Za-z]{3}\d{2}-(?:[Cc]|[Cc][Pp][Pp])$", examples=["EXP34-C", "MEM50-CPP"])]
+    description="Rule ID, case-insensitive. SEI CERT: category, two digits, -C or -CPP "
+                "(EXP34-C). MISRA C:2012: MISRA-C-2012-<n.n> or MISRA-C-2012-DIR-<n.n>. MISRA "
+                "C++:2023: MISRA-CPP-2023-<n.n.n> (DIR- for directives). AUTOSAR C++14: "
+                "AUTOSAR-<A|M>n-n-n.",
+    pattern=RULE_ID_PATTERN,
+    examples=["EXP34-C", "MEM50-CPP", "MISRA-C-2012-10.4", "MISRA-CPP-2023-8.2.2", "AUTOSAR-A5-2-2"])]
+StandardName = Literal["cert-c", "cert-cpp", "misra-c-2012", "misra-cpp-2023", "autosar-cpp14"]
+StandardFilter = Literal["cert", "cert-c", "cert-cpp", "misra", "misra-c-2012", "misra-cpp-2023",
+                         "autosar", "autosar-cpp14", "all"]
+STANDARD_DOC = ("Rule set: cert = SEI CERT C and C++ (default; the only standard with full rule "
+                "text); misra = MISRA C:2012 (with Amendments 1-4, i.e. the MISRA C:2023 set) and "
+                "MISRA C++:2023; autosar = AUTOSAR C++14; or one standard by name; all = every "
+                "standard.")
+Classification = Literal["any", "mandatory", "required", "advisory", "document"]
 Tool = Literal["clang-tidy", "clangsa", "cppcheck"]
 ALL_TOOLS: list[str] = ["clang-tidy", "clangsa", "cppcheck"]
 Tools = Annotated[list[Tool], Field(
@@ -73,6 +95,11 @@ Compdb = Annotated[str | None, Field(
                 "to parse. Omitted: auto-detected in root, root/build or root/build-clang.",
     examples=["/home/me/ceph/build"])]
 LANGS = Literal["any", "c", "cpp"]
+Standards = Annotated[list[StandardFilter] | None, Field(
+    description="Standards to map findings to, overriding the profile's `standards` (default "
+                "profile: cert). misra-c-2012 applies to .c files (adds the cppcheck MISRA addon); "
+                "misra-cpp-2023 and autosar-cpp14 to C++ files. Example: [\"cert\", \"misra\"].",
+    examples=[["cert"], ["misra-c-2012"], ["cert", "autosar"]])]
 CATEGORY = Literal["any", "API", "ARR", "CON", "CTR", "DCL", "ENV", "ERR", "EXP", "FIO", "FLP",
                    "INT", "MEM", "MSC", "OOP", "POS", "PRE", "SIG", "STR", "WIN"]
 
@@ -90,9 +117,11 @@ class RuleList(_Out):
     count: int = Field(description="Number of rules matching the filters, before `limit`.")
     truncated: bool = Field(description="True when count > limit and `rules` was cut.")
     rules: list[dict[str, Any]] = Field(description=(
-        "Rule summaries: id, title, lang (c|cpp), kind (rule|recommendation), category, "
-        "severity, likelihood, priority (P1-P27), level (L1-L3), detectable, url, coverage "
-        "(tier over all mappings), coverage_runnable (tier with the pinned toolchain)."))
+        "Rule summaries: id, standard, title, lang (c|cpp), kind (rule|recommendation|directive), "
+        "category, severity, likelihood, priority (P1-P27), level (L1-L3), detectable, url, "
+        "coverage (tier over all mappings), coverage_runnable (tier with the pinned toolchain). "
+        "MISRA/AUTOSAR entries add classification, category_name, decidability, enforcement and "
+        "cert (related SEI CERT IDs); their title is our paraphrase, not the official headline."))
 
 
 class SearchResult(_Out):
@@ -102,25 +131,27 @@ class SearchResult(_Out):
 
 
 class RuleRecord(_Out):
-    id: str = Field(description="Canonical rule ID, e.g. EXP34-C.")
+    id: str = Field(description="Canonical rule ID, e.g. EXP34-C or MISRA-C-2012-10.4.")
     title: str
     lang: str = Field(description="c or cpp.")
-    kind: str = Field(description="rule or recommendation.")
-    category: str = Field(description="Three-letter category code.")
-    url: str = Field(description="Rule page on the SEI CERT site.")
+    kind: str = Field(description="rule, recommendation (CERT) or directive (MISRA).")
+    category: str = Field(description="CERT three-letter category, or the MISRA/AUTOSAR section number.")
+    url: str | None = Field(description="Rule page on the SEI CERT site, or the MISRA/AUTOSAR publication page.")
+    standard: str = Field(description="cert-c, cert-cpp, misra-c-2012, misra-cpp-2023 or autosar-cpp14.")
     cwe: list[str] = Field(description="Related CWE IDs.")
     risk: dict[str, Any] | None = Field(description=(
         "CERT risk assessment: severity, likelihood, remediation, priority, level, "
         "detectable, repairable."))
     text: str = Field(description="Rule text as markdown; examples included unless include_examples=false. "
-                                  "Copy `quote` values for validate_findings from here.")
+                                  "Copy `quote` values for validate_findings from here. MISRA/AUTOSAR: "
+                                  "facts and our summary only, plus your licensed text when loaded.")
     examples: list[dict[str, Any]] = Field(description="Noncompliant/compliant example pairs; [] when include_examples=false.")
     coverage: dict[str, Any] = Field(description="tier, tier_runnable and checkers[] {tool, checker, specific, available}.")
     profile: dict[str, Any] = Field(description="name, override (severity/priority/note), disabled reason or null, idioms[].")
 
 
 class Finding(_Out):
-    rule_id: str = Field(description="SEI CERT rule ID.")
+    rule_id: str = Field(description="Rule ID (SEI CERT, or MISRA/AUTOSAR when those standards are selected).")
     file: str = Field(description="Absolute path of the file.")
     line: int = Field(description="1-based line.")
     severity: Literal["error", "warning", "note"]
@@ -168,7 +199,7 @@ class Validation(_Out):
 
 
 class Coverage(_Out):
-    total: int = Field(description="Rules counted after the lang/kind filters.")
+    total: int = Field(description="Rules counted after the standard/lang/kind filters.")
     all_mappings: dict[str, int] = Field(description="Counts per tier using every upstream checker mapping.")
     runnable_toolchain: dict[str, int] = Field(description="Counts per tier using only checkers available in the pinned toolchain.")
     toolchain: dict[str, str] = Field(description="Pinned analyzer versions the tiers were computed for.")
@@ -184,7 +215,10 @@ class FindingIn(BaseModel):
     file: str = Field(description="Path exactly as in the hunk's `file` field.")
     line: int = Field(ge=1, description="Line inside that hunk's start_line..end_line.")
     message: str = Field(description="What is wrong in this code and why it violates the rule.")
-    quote: str = Field(description="Verbatim passage (>= 20 characters) copied from that rule's text or examples.")
+    quote: str | None = Field(None, description=(
+        "Verbatim passage (>= 20 characters) copied from that rule's text or examples. Required for "
+        "SEI CERT rules. For MISRA/AUTOSAR it is required only when a licensed rule-texts file is "
+        "loaded (get_rule shows quote_required); otherwise omit it."))
     severity: Literal["error", "warning", "note"] | None = Field(None, description="Overrides the rule's default severity.")
     fix: str | None = Field(None, description="Compliant replacement code.")
     confidence: float | None = Field(None, ge=0, le=1, description="Defaults to 0.5.")
@@ -252,22 +286,26 @@ def build_server() -> Any:
 
     # ------------------------------------------------------------ rule lookup
     @mcp.tool(
-        title="List SEI CERT rules by filter",
-        annotations=ToolAnnotations(title="List SEI CERT rules by filter", **RO),
+        title="List coding-standard rules by filter",
+        annotations=ToolAnnotations(title="List coding-standard rules by filter", **RO),
         structured_output=True,
         description=(
-            "List SEI CERT C/C++ rules and recommendations from the bundled database (388 "
-            "entries), filtered by language, category, kind, risk level, CERT detectability or "
-            "checker coverage. Use to enumerate rules by structured criteria, e.g. all L1 C++ "
-            "rules no checker detects. Do not use for free-text lookup (use search_rules) or for "
-            "one rule's text and examples (use get_rule). Reads bundled data only; fast, no "
-            "analyzers run. Returns summaries without rule text; `count` is the total before "
-            "`limit`, so raise limit or narrow filters when `truncated` is true."))
+            "List rules from the bundled databases, filtered by standard, language, category, "
+            "kind, risk level, CERT detectability, MISRA/AUTOSAR classification or checker "
+            "coverage. Default standard is SEI CERT C/C++ (388 rules and recommendations); "
+            "standard='misra' or 'autosar' lists MISRA C:2012 (221), MISRA C++:2023 (178) or "
+            "AUTOSAR C++14 (397) guidelines. Use to enumerate rules by structured criteria, e.g. "
+            "all L1 C++ rules no checker detects or all mandatory MISRA C rules. Do not use for "
+            "free-text lookup (use search_rules) or one rule's details (use get_rule). Reads "
+            "bundled data only; fast. Returns summaries; `count` is the total before `limit`, so "
+            "raise limit or narrow filters when `truncated` is true."))
     @_guard
     def list_rules(
-        lang: Annotated[LANGS, Field(description="c = SEI CERT C, cpp = SEI CERT C++.")] = "any",
-        category: Annotated[CATEGORY, Field(description="Three-letter category, e.g. EXP expressions, MEM memory, INT integers, STR strings, CON concurrency.")] = "any",
-        kind: Annotated[Literal["any", "rule", "recommendation"], Field(description="rule = normative rule; recommendation = advisory (C only).")] = "any",
+        standard: Annotated[StandardFilter, Field(description=STANDARD_DOC)] = "cert",
+        lang: Annotated[LANGS, Field(description="c = C rules (SEI CERT C, MISRA C), cpp = C++ rules (SEI CERT C++, MISRA C++, AUTOSAR).")] = "any",
+        category: Annotated[CATEGORY, Field(description="SEI CERT three-letter category, e.g. EXP expressions, MEM memory, INT integers, STR strings, CON concurrency. Ignored for other standards' sections.")] = "any",
+        kind: Annotated[Literal["any", "rule", "recommendation", "directive"], Field(description="rule = normative rule; recommendation = CERT advisory (C only); directive = MISRA directive.")] = "any",
+        classification: Annotated[Classification, Field(description="MISRA/AUTOSAR classification; SEI CERT rules have none and are excluded when this is set.")] = "any",
         level: Annotated[Literal["any", "L1", "L2", "L3"], Field(description="CERT priority level; L1 is the most urgent.")] = "any",
         detectable: Annotated[bool | None, Field(description="CERT's own 'Detectable' flag (true = automatable in principle). Omit for both.")] = None,
         coverage: Annotated[Literal["any", "deterministic", "partial", "llm-only"], Field(description=(
@@ -277,40 +315,46 @@ def build_server() -> Any:
         limit: Annotated[int, Field(ge=1, le=400, description="Maximum summaries returned (each ~400 bytes).")] = 50,
     ) -> RuleList:
         return api.list_rules(_opt(lang), _opt(category), _opt(kind), _opt(level), detectable,
-                              _opt(coverage), limit)
+                              _opt(coverage), limit, standard, _opt(classification))
 
     @mcp.tool(
-        title="Search SEI CERT rules by keyword",
-        annotations=ToolAnnotations(title="Search SEI CERT rules by keyword", **RO),
+        title="Search coding-standard rules by keyword",
+        annotations=ToolAnnotations(title="Search coding-standard rules by keyword", **RO),
         structured_output=True,
         description=(
-            "Rank SEI CERT C/C++ rules by keyword relevance to a free-text query: API names "
-            "(strcpy, malloc, pthread_mutex_lock), concepts (integer overflow) or a rule ID. Use "
-            "when you know what the code does but not which rule applies. Do not use for "
-            "structured filters (use list_rules) or to read a rule (use get_rule). Matching is "
-            "case-insensitive term counting over titles, rule text and examples, not semantic "
-            "search; 1-character tokens are ignored and a query with no usable token returns an "
-            "empty list. Reads bundled data only; fast."))
+            "Rank rules by keyword relevance to a free-text query: API names (strcpy, malloc, "
+            "pthread_mutex_lock), concepts (integer overflow) or a rule ID in any accepted form "
+            "(EXP34-C, misra-c2012-10.4, A5-2-2). Searches SEI CERT C/C++ by default; set "
+            "`standard` for MISRA or AUTOSAR, where only our one-line summaries, section names "
+            "and facts are searchable (plus licensed texts when loaded). Use when you know what "
+            "the code does but not which rule applies. Do not use for structured filters (use "
+            "list_rules) or to read a rule (use get_rule). Case-insensitive term counting, not "
+            "semantic search; 1-character tokens are ignored and a query with no usable token "
+            "returns an empty list. Reads bundled data only; fast."))
     @_guard
     def search_rules(
         query: Annotated[str, Field(min_length=2, description="Keywords separated by spaces; title hits weigh 8x body hits.", examples=["strcpy buffer", "signal handler", "EXP34-C"])],
         limit: Annotated[int, Field(ge=1, le=50, description="Maximum results.")] = 10,
-        lang: Annotated[LANGS, Field(description="Restrict to SEI CERT C (c) or C++ (cpp).")] = "any",
+        lang: Annotated[LANGS, Field(description="Restrict to C (c) or C++ (cpp) rules.")] = "any",
+        standard: Annotated[StandardFilter, Field(description=STANDARD_DOC)] = "cert",
     ) -> SearchResult:
-        return api.search_rules(query, limit, _opt(lang))
+        return api.search_rules(query, limit, _opt(lang), standard)
 
     @mcp.tool(
-        title="Get one SEI CERT rule",
-        annotations=ToolAnnotations(title="Get one SEI CERT rule", **RO),
+        title="Get one coding-standard rule",
+        annotations=ToolAnnotations(title="Get one coding-standard rule", **RO),
         structured_output=True,
         description=(
-            "Return the full record of one SEI CERT rule: text, noncompliant and compliant code "
-            "examples, exceptions, CERT risk assessment, CWE IDs, the checkers that detect it, and "
-            "how the chosen profile adjusts or disables it. Use before judging or explaining a "
-            "finding, or to copy the verbatim `quote` that validate_findings requires. Do not use "
-            "to discover rules (use search_rules or list_rules). Reads bundled data only. Records "
-            "are large (median ~10 KB, up to ~80 KB); set include_examples=false for text and risk "
-            "only. An unknown ID returns an error listing close matches."))
+            "Return the full record of one rule. SEI CERT: text, noncompliant and compliant code "
+            "examples, exceptions, risk assessment, CWE IDs, related MISRA/AUTOSAR guidelines "
+            "(cross_references), the checkers that detect it, and how the profile adjusts or "
+            "disables it. MISRA/AUTOSAR: classification, section, enforcement, related CERT rules, "
+            "checkers and our one-line summary; the official text appears only when the user "
+            "loaded a licensed rule-texts file (text_source, quote_required). Use before judging "
+            "or explaining a finding, or to copy the verbatim `quote` validate_findings requires. "
+            "Do not use to discover rules (use search_rules or list_rules). Reads bundled data "
+            "only. CERT records are large (median ~10 KB, up to ~80 KB); set include_examples=false "
+            "for text and risk only. An unknown ID returns an error listing close matches."))
     @_guard
     def get_rule(
         rule_id: RuleId,
@@ -326,34 +370,38 @@ def build_server() -> Any:
         return d
 
     @mcp.tool(
-        title="Summarize SEI CERT checker coverage",
-        annotations=ToolAnnotations(title="Summarize SEI CERT checker coverage", **RO),
+        title="Summarize checker coverage per standard",
+        annotations=ToolAnnotations(title="Summarize checker coverage per standard", **RO),
         structured_output=True,
         description=(
-            "Count SEI CERT rules per detection tier: deterministic (a rule-specific checker "
-            "exists), partial (only general checkers map) and llm-only (no checker; manual review "
-            "needed), both for all upstream checker mappings and for the pinned reference "
-            "toolchain (clang-tidy and Clang Static Analyzer 19.1.7, cppcheck 2.17.1). Use to "
-            "judge how much of a review static analysis can carry. Computed from bundled data; it "
-            "does not probe the analyzers installed here (check_files reports those in tools[]). "
-            "For one rule use get_rule; to list a tier's rules with titles use list_rules with "
-            "`coverage`."))
+            "Count rules per detection tier: deterministic (a rule-specific checker exists, e.g. "
+            "a clang-tidy cert-* alias or the cppcheck MISRA addon), partial (only general "
+            "checkers map) and llm-only (no checker; manual review needed), both for all checker "
+            "mappings and for the pinned reference toolchain (clang-tidy and Clang Static "
+            "Analyzer 19.1.7, cppcheck 2.17.1). SEI CERT by default; set `standard` for MISRA or "
+            "AUTOSAR (adds by_standard and licensed_texts). Use to judge how much of a review "
+            "static analysis can carry. Computed from bundled data; it does not probe the "
+            "analyzers installed here (check_files reports those in tools[]). For one rule use "
+            "get_rule; to list a tier's rules use list_rules with `coverage`."))
     @_guard
     def get_rule_coverage(
-        lang: Annotated[LANGS, Field(description="Count only SEI CERT C (c) or C++ (cpp) rules.")] = "any",
-        kind: Annotated[Literal["any", "rule", "recommendation"], Field(description="Count only rules or only recommendations.")] = "any",
+        standard: Annotated[StandardFilter, Field(description=STANDARD_DOC)] = "cert",
+        lang: Annotated[LANGS, Field(description="Count only C (c) or C++ (cpp) rules.")] = "any",
+        kind: Annotated[Literal["any", "rule", "recommendation", "directive"], Field(description="Count only rules, CERT recommendations or MISRA directives.")] = "any",
         include_ids: Annotated[bool, Field(description="Add rules_all_mappings and rules_runnable: rule ID lists per tier (~10 KB).")] = False,
     ) -> Coverage:
-        return api.rule_coverage(_opt(lang), _opt(kind), include_ids)
+        return api.rule_coverage(_opt(lang), _opt(kind), include_ids, standard)
 
     # ------------------------------------------------------------ analysis
     @mcp.tool(
-        title="Check C/C++ files for SEI CERT violations",
-        annotations=ToolAnnotations(title="Check C/C++ files for SEI CERT violations", **RO),
+        title="Check C/C++ files for coding-standard violations",
+        annotations=ToolAnnotations(title="Check C/C++ files for coding-standard violations", **RO),
         structured_output=True,
         description=(
             "Run clang-tidy, the Clang Static Analyzer and cppcheck on a C/C++ file or a "
-            "directory (recursive) and return every finding mapped to SEI CERT rule IDs. Use for "
+            "directory (recursive) and return every finding mapped to SEI CERT rule IDs, or to "
+            "MISRA C:2012 / MISRA C++:2023 / AUTOSAR C++14 IDs when `standards` (or the profile) "
+            "selects them; MISRA C adds the cppcheck MISRA addon on .c files. Use for "
             "whole-file or whole-tree audits; for a change set use check_diff, which keeps only "
             "changed lines. Runs the analyzers as local subprocesses (4 in parallel, 300 s "
             "timeout per file and tool) and writes no files. Takes under a second per small file "
@@ -371,17 +419,19 @@ def build_server() -> Any:
         tools: Tools = ALL_TOOLS,
         min_confidence: MinConfidence = 0.0,
         include_suppressed: IncludeSuppressed = False,
+        standards: Standards = None,
     ) -> CheckResult:
         return api.check_file(_exists(path), profile, _opt(lang), compdb, root, list(tools),
-                              min_confidence, include_suppressed)
+                              min_confidence, include_suppressed, standards=standards)
 
     @mcp.tool(
-        title="Check changed C/C++ lines for SEI CERT violations",
-        annotations=ToolAnnotations(title="Check changed C/C++ lines for SEI CERT violations", **RO),
+        title="Check changed C/C++ lines for coding-standard violations",
+        annotations=ToolAnnotations(title="Check changed C/C++ lines for coding-standard violations", **RO),
         structured_output=True,
         description=(
             "Run the check_files analyzers on the C/C++ files of a change and keep only findings "
-            "on added or modified lines. The change is `base`..`head` in the git repo at `repo`, "
+            "on added or modified lines, mapped to the same standards (`standards` or the "
+            "profile; SEI CERT by default). The change is `base`..`head` in the git repo at `repo`, "
             "`base` against the working tree when head is omitted, or a pasted unified diff "
             "(`diff_text`, paths relative to repo). Use for pull-request or pre-commit review; for "
             "whole files use check_files. Runs `git diff` and the analyzers locally; writes "
@@ -400,11 +450,12 @@ def build_server() -> Any:
         tools: Tools = ALL_TOOLS,
         min_confidence: MinConfidence = 0.0,
         include_suppressed: IncludeSuppressed = False,
+        standards: Standards = None,
     ) -> DiffCheckResult:
         if not (diff_text or base):
             raise ToolError("provide base (git ref) or diff_text")
         return api.check_diff(_repo_for_diff(repo, diff_text), base, head, diff_text, profile, compdb,
-                              list(tools), min_confidence, include_suppressed)
+                              list(tools), min_confidence, include_suppressed, standards=standards)
 
     # ------------------------------------------------------------ manual review layer
     @mcp.tool(
@@ -448,9 +499,11 @@ def build_server() -> Any:
         structured_output=True,
         description=(
             "Accept or reject findings written from a build_review_packet review, with reasons. "
-            "A finding passes only if its rule_id exists (C++ rules are rejected on .c files), "
-            "its quote is a passage of 20+ characters found in that rule's text or examples "
-            "(case, whitespace, curly quotes and markdown are normalised), it has a file, a line "
+            "A finding passes only if its rule_id exists (C++ rules are rejected on .c files, "
+            "MISRA C rules on C++ files), its quote is a passage of 20+ characters found in that "
+            "rule's text or examples (case, whitespace, curly quotes and markdown are normalised; "
+            "MISRA/AUTOSAR need a quote only when a licensed rule-texts file is loaded, otherwise "
+            "accepted findings carry grounding='rule-id-only'), it has a file, a line "
             ">= 1 and a message, and the profile does not disable the rule. With `packet`, the "
             "line must also fall inside a hunk whose candidate_rules include the rule. Use on "
             "every manual finding before format_findings; check_files and check_diff output needs "
