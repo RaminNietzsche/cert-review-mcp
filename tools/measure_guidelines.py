@@ -41,7 +41,7 @@ def measured(cppcheck: Path) -> dict:
     text = src.read_text(encoding="utf-8", errors="replace")
     expected: dict[int, set[str]] = {}
     for n, line in enumerate(text.splitlines(), 1):
-        m = re.search(r"//\s*((?:\d+\.\d+\s*)+)(?:$|[^\d.])", line)
+        m = re.search(r"//\s*(\d+\.\d+(?:\s+\d+\.\d+)*)(?:$|[^\d.])", line)
         if m:
             expected[n] = {f"MISRA-C-2012-{x}" for x in m.group(1).split()}
     with tempfile.TemporaryDirectory() as d:
