@@ -54,3 +54,39 @@ Derived from (facts only: checker names and rule IDs):
   * LLVM clang-tidy cert-* aliases (Apache-2.0 with LLVM exceptions),
     https://github.com/llvm/llvm-project
 The exact commits are recorded in the file itself.
+
+MISRA and AUTOSAR data in data/guidelines.json
+----------------------------------------------
+NO MISRA OR AUTOSAR GUIDELINE TEXT IS INCLUDED. The MISRA C:2012, MISRA C++:2023
+and AUTOSAR C++14 documents are copyrighted (MISRA: The MISRA Consortium Limited;
+AUTOSAR: AUTOSAR partnership). This repository records only facts about them:
+guideline identifiers, classification (mandatory / required / advisory),
+AUTOSAR allocated target and enforcement category, section numbers with topic
+names, mappings to analyzer checks, and cross-references to SEI CERT rules. The
+one-line `summary` values in data/guideline_overlay.yaml (and copied into
+data/guidelines.json) were written for this project in our own words; they are
+not the official headlines and must not be presented as such.
+
+Users who hold a licence can load their own copy of the guideline texts at run
+time (docs/misra-autosar.md); those texts are read locally and never copied into
+this repository or its outputs other than the user's own reports.
+
+Sources of the facts:
+  * Cppcheck (GPL-3.0-or-later), https://github.com/danmar/cppcheck, tag 2.17.1:
+    lib/checkers.cpp (guideline IDs and classifications for MISRA C:2012 with
+    Amendments 1-4 and MISRA C++:2023), lib/checkersidmapping.cpp (Cppcheck
+    warning IDs mapped to guidelines) and addons/misra.py (MISRA C rules its
+    open-source addon reports). Only identifiers and classifications are used;
+    no Cppcheck code is included.
+  * AUTOSAR C++14 Coding Guidelines, AP Release 19-03 (publicly downloadable),
+    https://www.autosar.org/fileadmin/standards/R22-11/AP/AUTOSAR_RS_CPP14Guidelines.pdf:
+    rule identifiers, classification, allocated target, enforcement category,
+    and the relation types of its Appendix B.4 traceability table to SEI CERT C++.
+  * SEI CERT C Coding Standard (CC BY 4.0, see above): the MISRA C identifiers
+    cited in its "Related Guidelines" tables.
+  * clang-tidy and Clang Static Analyzer check names (Apache-2.0 with LLVM
+    exceptions) for the mappings curated in data/guideline_overlay.yaml.
+
+MISRA, MISRA C and MISRA C++ are registered trademarks of The MISRA Consortium
+Limited. AUTOSAR is a registered trademark of the AUTOSAR partnership. This
+project is not affiliated with or endorsed by either organisation.

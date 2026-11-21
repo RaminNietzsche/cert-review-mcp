@@ -1,0 +1,33 @@
+# MISRA profile: MISRA C:2012 (Amendments 1-4, the MISRA C:2023 set) on .c files and
+# MISRA C++:2023 on C++ files. Add `cert` to `standards` to report SEI CERT IDs as well.
+#
+# The MISRA guideline texts are copyrighted and are not bundled. To see the official
+# headlines in findings and in get_rule, point `rule_texts` at your licensed copy (or set
+# CERT_REVIEW_MISRA_C_TEXTS / CERT_REVIEW_MISRA_CPP_TEXTS). See docs/misra-autosar.md.
+name: misra
+description: MISRA C:2012 and MISRA C++:2023 review (cppcheck MISRA addon, cppcheck and clang-tidy mappings).
+standards: [misra-c-2012, misra-cpp-2023]
+languages:
+  c_standard: 11
+  cpp_standard: 17
+file_extensions:
+  c: [".c"]
+  cpp: [".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"]
+severity_from_cert: {High: error, Medium: warning, Low: note}
+# MISRA has no risk table: severity comes from the guideline's classification.
+severity_from_classification: {mandatory: error, required: warning, advisory: note, document: note}
+min_level: L3            # mandatory = L1, required = L2, advisory = L3
+include_recommendations: false
+exclude_paths: ["build/*", "third_party/*", "vendor/*", "*/node_modules/*"]
+clang_tidy:
+  checks_extra: []
+  extra_args: []
+# rule_texts:
+#   misra-c-2012: /path/to/your/licensed/misra_c_2012_rule_texts.txt
+#   misra-cpp-2023: /path/to/your/licensed/misra_cpp_2023_rule_texts.txt
+rule_overrides: {}
+suppress: []
+idioms: []
+llm_review:
+  max_rules_per_hunk: 6
+  max_hunk_lines: 60

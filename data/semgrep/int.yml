@@ -1,0 +1,191 @@
+# SEI CERT INT rules. Each rule names the CERT rule(s) it maps to in
+# metadata.cert; metadata.confidence (high | medium | low) sets the finding's
+# confidence. These are pattern checks, not proofs: they look for an operation
+# whose operands are not range-checked earlier in the same function.
+rules:
+  - id: int30-c-unchecked-alloc-size-multiplication
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      Allocation size `$N * ...` is computed without a preceding overflow check on `$N`;
+      an unsigned wrap allocates a smaller buffer than intended (INT30-C).
+    metadata:
+      cert: [INT30-C]
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern: $ALLOC(<... $N * sizeof(...) ...>)
+          - pattern: $ALLOC(<... sizeof(...) * $N ...>)
+          - pattern: realloc($P, <... $N * sizeof(...) ...>)
+          - pattern: realloc($P, <... sizeof(...) * $N ...>)
+      - metavariable-regex:
+          metavariable: $ALLOC
+          regex: ^(std::)?(malloc|alloca|aligned_alloc)$
+      - metavariable-pattern:
+          metavariable: $N
+          patterns:
+            - pattern-not: sizeof(...)
+            - pattern-not-regex: ^\s*\(?\s*[0-9]
+            - pattern-not-regex: ^\s*[A-Z][A-Z0-9_]*\s*$
+            - pattern-not-regex: \b(strlen|wcslen|strnlen)\s*\(
+      - pattern-not-inside: |
+          if (<... $N ...>) $S;
+          ...
+      - pattern-not-inside: |
+          if (<... $N ...>) $S; else $E;
+          ...
+      - pattern-not-inside: |
+          if (<... $N ...>) $S; else $E;
+      - pattern-not-inside: |
+          if (<... $N ...>) $S;
+
+  - id: int33-c-divisor-not-checked-for-zero
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      `$B` is a parameter used as a divisor without a check against zero earlier in the
+      function (INT33-C).
+    metadata:
+      cert: [INT33-C]
+      confidence: medium
+    patterns:
+      - pattern-inside: |
+          $R $F(..., $T $B, ...) { ... }
+      - pattern-either:
+          - pattern: $A / $B
+          - pattern: $A % $B
+          - pattern: $A /= $B
+          - pattern: $A %= $B
+      - metavariable-regex:
+          metavariable: $T
+          regex: ^(?!.*\b(float|double)\b).*$
+      - pattern-not-inside: |
+          if (<... $B == 0 ...>) $S; else $E;
+      - pattern-not-inside: |
+          if (<... 0 == $B ...>) $S; else $E;
+      - pattern-not-inside: |
+          if (<... $B != 0 ...>) $S;
+      - pattern-not-inside: |
+          if (<... 0 != $B ...>) $S;
+      - pattern-not-inside: |
+          if (<... $B > 0 ...>) $S;
+      - pattern-not-inside: |
+          if (<... $B == 0 ...>) $S;
+          ...
+      - pattern-not-inside: |
+          if (<... 0 == $B ...>) $S;
+          ...
+      - pattern-not-inside: |
+          if (<... !$B ...>) $S;
+          ...
+      - pattern-not-inside: |
+          if (<... $B <= 0 ...>) $S;
+          ...
+      - pattern-not-inside: |
+          if (<... $B < 1 ...>) $S;
+          ...
+      - pattern-not-inside: |
+          assert(<... $B ...>);
+          ...
+      - pattern-not-inside: |
+          "$B == 0 ? $X : $Y"
+      - pattern-not-inside: |
+          $B != 0 ? $X : $Y
+      - pattern-not-inside: |
+          $B ? $X : $Y
+
+  - id: int34-c-shift-amount-not-range-checked
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      Shift by `$B`, a parameter that is not compared against the operand width earlier in
+      the function; a negative or too large count is undefined behavior (INT34-C).
+    metadata:
+      cert: [INT34-C]
+      confidence: medium
+    patterns:
+      - pattern-inside: |
+          $R $F(..., $T $B, ...) { ... }
+      - pattern-either:
+          - pattern: $A << $B
+          - pattern: $A >> $B
+          - pattern: $A <<= $B
+          - pattern: $A >>= $B
+      - metavariable-regex:
+          metavariable: $T
+          regex: ^(const\s+)?((un)?signed|int|long|short|char|size_t|ssize_t|u?int(8|16|32|64)_t|uint\w*|u\d+|__[su]\d+)\b
+      # Not a stream insertion (the left operand looks like an output stream).
+      - metavariable-regex:
+          metavariable: $A
+          regex: ^(?![*(\s]*[\w:.>-]*?(os|out|stream|ss|cerr|cout|clog|log|f|buf|str|tbl|table|msg)\b)
+      - pattern-not-inside: return $X << $Y;
+      - pattern-not-inside: std::cout << ...
+      - pattern-not-inside: $OS << $X << ...
+      - pattern-not-inside: |
+          if (<... $B >= $W ...>) $S; else $E;
+      - pattern-not-inside: |
+          if (<... $B > $W ...>) $S; else $E;
+      - pattern-not-inside: |
+          if (<... $B < $W ...>) $S;
+      - pattern-not-inside: |
+          if (<... $B <= $W ...>) $S;
+      - pattern-not-inside: |
+          if (<... $W > $B ...>) $S;
+      - pattern-not-inside: |
+          if (<... $W >= $B ...>) $S;
+      - pattern-not-inside: |
+          if (<... $B >= $W ...>) $S;
+          ...
+      - pattern-not-inside: |
+          if (<... $B > $W ...>) $S;
+          ...
+      - pattern-not-inside: |
+          if (<... $W <= $B ...>) $S;
+          ...
+      - pattern-not-inside: |
+          if (<... $W < $B ...>) $S;
+          ...
+      - pattern-not-inside: |
+          assert(<... $B ...>);
+          ...
+
+  - id: int36-c-pointer-truncated-to-narrow-integer
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      Pointer `$P` is converted to `$T`, which is narrower than a pointer on LP64 and LLP64
+      platforms; use uintptr_t or intptr_t (INT36-C).
+    metadata:
+      cert: [INT36-C]
+      confidence: high
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              $PT *$P;
+              ...
+          - pattern-inside: |
+              $PT *$P = $INIT;
+              ...
+          - pattern-inside: |
+              $R $F(..., $PT *$P, ...) { ... }
+      - pattern: ($T) $P
+      - metavariable-regex:
+          metavariable: $T
+          regex: ^(int|unsigned|unsigned int|signed int|short|unsigned short|uint32_t|int32_t|uint16_t|int16_t)$
+
+  - id: int36-c-integer-literal-to-pointer
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      Integer constant `$L` is converted to a pointer; the result is implementation-defined
+      and may be misaligned or a trap representation (INT36-C).
+    metadata:
+      cert: [INT36-C]
+      confidence: medium
+    patterns:
+      - pattern-either:
+          - pattern: ($T *) $L
+          - pattern: reinterpret_cast<$T *>($L)
+      - metavariable-regex:
+          metavariable: $L
+          regex: ^0[xX][0-9a-fA-F]*[1-9a-fA-F][0-9a-fA-F]*[uUlL]*$

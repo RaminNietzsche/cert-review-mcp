@@ -1,5 +1,8 @@
 # MCP server image: the same pinned-major toolchain as ./Dockerfile (which stays
 # the GitHub Action image), with `cert-review-mcp` (stdio) as the entrypoint.
+# Semgrep (with the bundled CERT rules) is included for amd64 and arm64. Infer
+# (about 1.2 GB unpacked, no Linux arm64 release) and CodeQL (separate licence)
+# are not; docs/analyzers.md shows how to add them in a derived image.
 #
 #   docker build -f Dockerfile.mcp -t cert-review-mcp .
 #   docker run -i --rm -v "$PWD:$PWD" cert-review-mcp                 # MCP over stdio
@@ -22,12 +25,13 @@ COPY pyproject.toml README.md LICENSE NOTICE /opt/cert-review/
 COPY src /opt/cert-review/src
 COPY data /opt/cert-review/data
 COPY profiles /opt/cert-review/profiles
-RUN python3 -m venv /opt/venv && /opt/venv/bin/pip install --no-cache-dir /opt/cert-review \
+RUN python3 -m venv /opt/venv \
+ && /opt/venv/bin/pip install --no-cache-dir /opt/cert-review semgrep==1.186.0 \
  && git config --system --add safe.directory '*'
 
 ENV CERT_REVIEW_HOME=/opt/cert-review PATH=/opt/venv/bin:$PATH PYTHONUNBUFFERED=1
 LABEL org.opencontainers.image.title="cert-review-mcp" \
-      org.opencontainers.image.description="SEI CERT C/C++ review MCP server (stdio) and CLI with clang-tidy, Clang Static Analyzer and cppcheck" \
+      org.opencontainers.image.description="SEI CERT C/C++ review MCP server (stdio) and CLI with clang-tidy, Clang Static Analyzer, cppcheck and Semgrep" \
       org.opencontainers.image.source="https://github.com/RaminNietzsche/cert-review-mcp" \
       org.opencontainers.image.licenses="Apache-2.0" \
       io.modelcontextprotocol.server.name="io.github.RaminNietzsche/cert-review-mcp"
