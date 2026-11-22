@@ -150,6 +150,27 @@ def _diff_text(repo: str | None, base: str | None, head: str | None, diff_text: 
     return diffutil.git_diff(repo, base, head)
 
 
+def _remap_workspace_paths(paths: list[str], workspace: Path, repo: str | None) -> list[str]:
+    """Point analysis paths at the checkout, not the private diff worktree (for SARIF and filters)."""
+    if not repo:
+        return paths
+    repo_p = Path(repo).expanduser().resolve()
+    ws = workspace.resolve()
+
+    def one(path: str) -> str:
+        try:
+            return str((repo_p / Path(path).resolve().relative_to(ws)).resolve())
+        except ValueError:
+            return path
+
+    return [one(p) for p in paths]
+
+
+def _remap_finding_files(findings: list[dict], workspace: Path, repo: str | None) -> None:
+    for f in findings:
+        f["file"] = _remap_workspace_paths([f["file"]], workspace, repo)[0]
+
+
 def _diff_content_ref(repo: str | None, head: str | None, diff_text: str | None) -> str | None:
     """Git revision whose file contents match the diff's post-image (+ side)."""
     if diff_text or not repo:
@@ -179,11 +200,17 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
                            ws.abs_changed(), jobs, max_rules_per_location, min_confidence,
                            include_suppressed, standards, diff_context=diff_context)
         d = res.to_dict(include_suppressed)
+        if repo:
+            d["files"] = _remap_workspace_paths(d.get("files") or [], root_p, repo)
+            _remap_finding_files(d["findings"], root_p, repo)
+            if include_suppressed:
+                _remap_finding_files(d.get("suppressed") or [], root_p, repo)
         if baseline:
             BL.apply(d, baseline, scope="diff")
         d["summary"] = summarize(d["findings"])
         d["changed_files"] = sorted(changed)
-        d["root"] = root
+        d["root"] = str(Path(repo).expanduser().resolve()) if repo else root
+        d["workspace"] = root
         return d
     finally:
         ws.cleanup()
