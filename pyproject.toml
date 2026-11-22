@@ -28,3 +28,5 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Global pytest plugins (e.g. MCP harnesses) may register a conflicting --connection option.
+addopts = "-p no:cacheprovider"

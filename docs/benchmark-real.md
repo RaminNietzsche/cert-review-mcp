@@ -9,7 +9,12 @@ How the deterministic layer does on real security bugs, not on the CERT rule exa
 - Profile: `default` with every level and the C recommendations enabled, no suppressions, `max_rules_per_location` 99, no confidence cut-off (the same settings as [accuracy.md](accuracy.md)).
 - A finding is *in the region* when it is within 3 lines of a line the fix removes or rewrites (for a pure insertion, of the insertion point). *Detected* means a finding in the region whose CERT rule is one of the case's `cert` rules or shares a CWE with the case. *Wrong rule* means findings in the region, none matching. *Miss* means nothing in the region.
 - *Fix-sensitive*: detected on the vulnerable side and no matching finding in the corresponding region of the fixed revision.
-- No project was built. Ceph gets the generated compile database of `tools/ceph_compdb.py`; the C projects get include paths and a small generated config header. A case is *partial* when clang-tidy reported compile errors in a touched file or an analysis timed out.
+- No project was built for the checked-in numbers. Ceph gets the generated compile database of
+  `tools/ceph_compdb.py`; the C projects get include paths and a small generated config header.
+  For firmer Ceph numbers, build the vulnerable revision in a test environment and point
+  `--compdb` at that tree's `compile_commands.json` (cppcheck then uses `--project=` as well). A
+  case is *partial* when clang-tidy reported compile errors in a touched file or an analysis
+  timed out.
 - Run on 2026-11-22, 7404s of analysis.
 
 ## Headline

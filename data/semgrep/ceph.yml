@@ -1,0 +1,43 @@
+# Ceph-oriented CERT patterns (C++); tuned on real-code benchmark dev cases, not the CERT corpus.
+rules:
+  - id: int04-c-ntohl-fed-allocation
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      Value from ntohl/ntohs used as an allocation or copy size without a visible local bound
+      (INT04-C / ARR30-C).
+    metadata:
+      cert: [INT04-C, ARR30-C]
+      confidence: low
+    patterns:
+      - pattern-inside: |
+          $LEN = $NTOH($X);
+          ...
+      - metavariable-regex:
+          metavariable: $NTOH
+          regex: ^(ntohl|ntohs|le16toh|le32toh|be16toh|be32toh)$
+      - pattern-either:
+          - pattern: malloc($LEN)
+          - pattern: calloc(..., $LEN)
+          - pattern: ::operator new($LEN)
+          - pattern: std::make_unique<...>($LEN)
+          - pattern: memcpy(..., $LEN)
+          - pattern: std::memcpy(..., $LEN)
+
+  - id: exp34-c-map-find-dereference
+    languages: [c, cpp]
+    severity: WARNING
+    message: >-
+      Iterator from container find() dereferenced without an explicit end() comparison (EXP34-C).
+    metadata:
+      cert: [EXP34-C]
+      confidence: low
+    patterns:
+      - pattern-inside: |
+          $IT = $C.find(...);
+          ...
+      - pattern: $IT->$METHOD(...)
+      - pattern-not-inside: |
+          if (<... $IT != $C.end() ...>) ...
+      - pattern-not-inside: |
+          if (<... $C.end() != $IT ...>) ...

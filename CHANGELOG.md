@@ -4,6 +4,33 @@
 
 ### Added
 
+- `cert-review version` and clearer install path for the editable package.
+- `diff_context` on diff mode (CLI `--diff-context`, MCP `check_diff`): findings within N
+  lines of a change are kept with confidence scaled by 0.85.
+- `data/confidence_calibration.json` and `tools/calibrate_confidence.py` for data-driven checker
+  confidence on the dev corpus half.
+- Semgrep rules `int04-c-ntohl-fed-allocation` and `exp34-c-map-find-dereference` in
+  `data/semgrep/ceph.yml` for Ceph-style decode and lookup patterns.
+- CI matrix over clang 18/19/20 and a job that runs `pytest` inside the MCP Docker image.
+
+### Fixed
+
+- Diff mode no longer creates or writes files under the user's `repo`; files are materialised in a
+  private temporary tree, optionally from `git show head:path`, and the tree is removed after the
+  run.
+- `git diff` for review uses the three-dot merge-base form (`base...head`).
+- `build_review_packet` reuses one workspace for static findings and hunks (paths line up).
+- `engine.check` drops findings outside the requested files except project headers allowed by the
+  profile's `header_filter`.
+- clang-tidy notes and partial status when a source file is missing from `compile_commands.json`.
+- cppcheck uses `--project=compile_commands.json` when available and treats syntax/preprocessor
+  errors as partial analysis.
+
+### Changed
+
+- Taint integration tests skip when the installed clang does not report `fgets` → `printf` taint
+  (e.g. Apple clang 21).
+
 - Clang Static Analyzer taint and bounds checkers mapped to CERT rules:
   `alpha.security.taint.GenericTaint` (FIO30-C, ENV33-C, STR02-C, ARR38-C, INT04-C),
   `optin.taint.TaintedAlloc` (INT04-C, MEM35-C), `alpha.security.ArrayBoundV2` with a tainted

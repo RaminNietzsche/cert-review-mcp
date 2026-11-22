@@ -150,56 +150,87 @@ def _diff_text(repo: str | None, base: str | None, head: str | None, diff_text: 
     return diffutil.git_diff(repo, base, head)
 
 
+def _diff_content_ref(repo: str | None, head: str | None, diff_text: str | None) -> str | None:
+    """Git revision whose file contents match the diff's post-image (+ side)."""
+    if diff_text or not repo:
+        return None
+    hint = Path(repo).expanduser()
+    if not hint.is_dir() or not diffutil._is_git_repo(hint.resolve()):
+        return None
+    return head or "HEAD"
+
+
 def check_diff(repo: str | None = None, base: str | None = None, head: str | None = None,
                diff_text: str | None = None, profile: str = "default",
                compdb: str | None = None, tools: list[str] | None = None,
                min_confidence: float = 0.0, include_suppressed: bool = False, jobs: int = 4,
                max_rules_per_location: int = 2, standards: Any = None,
-               baseline: str | None = None) -> dict:
+               baseline: str | None = None, diff_context: int = 0) -> dict:
     text = _diff_text(repo, base, head, diff_text)
     changed = diffutil.parse_unified_diff(text)
-    root_p, abs_changed = diffutil.prepare_diff_workspace(repo, text)
-    root = str(root_p)
-    prof = P.load(profile)
-    files = engine.select_files(list(abs_changed), prof, None, root_p)
-    res = engine.check(files, prof, None, compdb, root,
-                       tuple(tools) if tools else None,
-                       abs_changed, jobs, max_rules_per_location, min_confidence, include_suppressed,
-                       standards)
-    d = res.to_dict(include_suppressed)
-    if baseline:
-        BL.apply(d, baseline, scope="diff")
-    d["summary"] = summarize(d["findings"])
-    d["changed_files"] = sorted(changed)
-    d["root"] = root
-    return d
+    ws = diffutil.prepare_diff_workspace(repo, text, content_ref=_diff_content_ref(repo, head, diff_text))
+    try:
+        root_p = ws.root
+        root = str(root_p)
+        prof = P.load(profile)
+        files = engine.select_files(list(ws.abs_changed()), prof, None, root_p)
+        res = engine.check(files, prof, None, compdb, root,
+                           tuple(tools) if tools else None,
+                           ws.abs_changed(), jobs, max_rules_per_location, min_confidence,
+                           include_suppressed, standards, diff_context=diff_context)
+        d = res.to_dict(include_suppressed)
+        if baseline:
+            BL.apply(d, baseline, scope="diff")
+        d["summary"] = summarize(d["findings"])
+        d["changed_files"] = sorted(changed)
+        d["root"] = root
+        return d
+    finally:
+        ws.cleanup()
 
 
 def review_packet(path: str | list[str] | None = None, repo: str | None = None,
                   base: str | None = None, head: str | None = None, diff_text: str | None = None,
                   profile: str = "default", run_static: bool = True, compdb: str | None = None,
-                  max_rules_per_hunk: int | None = None, context_lines: int = 3) -> dict:
+                  max_rules_per_hunk: int | None = None, context_lines: int = 3,
+                  standards: Any = None, tools: list[str] | None = None,
+                  min_confidence: float = 0.0, diff_context: int = 0) -> dict:
     prof = P.load(profile)
     existing: list[dict] = []
+    max_hunk = (prof.raw.get("llm_review") or {}).get("max_hunk_lines", 60)
     if diff_text or (repo and base):
         text = _diff_text(repo, base, head, diff_text)
-        root, abs_changed = diffutil.prepare_diff_workspace(repo, text)
-        hunk_ctx = diffutil.hunks_with_context(text, context_lines)
-        ranges = {str(root / k): v for k, v in hunk_ctx.items()}
-        ranges = {k: v for k, v in ranges.items() if Path(k).exists()}
-        files = engine.select_files(list(ranges), prof, None, root)
-        ranges = {k: v for k, v in ranges.items() if k in set(files)}
-        if run_static and files:
-            st = check_diff(repo, base, head, diff_text, profile, compdb)
-            existing = st["findings"]
-    elif path:
+        ws = diffutil.prepare_diff_workspace(repo, text,
+                                             content_ref=_diff_content_ref(repo, head, diff_text))
+        try:
+            root = ws.root
+            hunk_ctx = diffutil.hunks_with_context(text, context_lines)
+            ranges = {str((root / k).resolve()): v for k, v in hunk_ctx.items()}
+            ranges = {k: v for k, v in ranges.items() if Path(k).exists()}
+            files = engine.select_files(list(ranges), prof, None, root)
+            ranges = {k: v for k, v in ranges.items() if k in set(files)}
+            if run_static and files:
+                abs_changed = ws.abs_changed()
+                sel = engine.select_files(list(abs_changed), prof, None, root)
+                res = engine.check(sel, prof, None, compdb, str(root),
+                                   tuple(tools) if tools else None,
+                                   abs_changed, 4, 2, min_confidence, False,
+                                   standards, diff_context=diff_context)
+                existing = res.to_dict()["findings"]
+            hunks = PK.build_hunks(ranges, max_hunk)
+            pk = PK.build(hunks, prof, existing, max_rules_per_hunk)
+            pk["static_findings"] = existing
+            return pk
+        finally:
+            ws.cleanup()
+    if path:
         files = engine.select_files(_collect([path] if isinstance(path, str) else list(path)), prof)
         ranges = PK.whole_file_ranges(files)
         if run_static and files:
-            existing = check_file(files, profile, compdb=compdb)["findings"]
+            existing = check_file(files, profile, compdb=compdb, standards=standards)["findings"]
     else:
         raise ValueError("provide path, or diff_text, or repo and base")
-    hunks = PK.build_hunks(ranges, (prof.raw.get("llm_review") or {}).get("max_hunk_lines", 60))
+    hunks = PK.build_hunks(ranges, max_hunk)
     pk = PK.build(hunks, prof, existing, max_rules_per_hunk)
     pk["static_findings"] = existing
     return pk

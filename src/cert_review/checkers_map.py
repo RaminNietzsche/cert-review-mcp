@@ -67,6 +67,18 @@ def tier_for_tools(rule_id: str, tools) -> str:
 
 
 @functools.lru_cache(maxsize=1)
+def calibrated_confidence() -> dict[str, float]:
+    """Per-checker precision on the dev corpus (data/confidence_calibration.json)."""
+    p = data_dir() / "confidence_calibration.json"
+    if not p.is_file():
+        return {}
+    try:
+        return json.loads(p.read_text(encoding="utf-8")).get("scores") or {}
+    except (OSError, ValueError, AttributeError):
+        return {}
+
+
+@functools.lru_cache(maxsize=1)
 def reverse_index() -> dict[tuple[str, str], list[dict]]:
     """(tool, checker) -> [{rule_id, specific, confidence?}] for SEI CERT."""
     idx: dict[tuple[str, str], list[dict]] = {}

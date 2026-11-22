@@ -38,13 +38,17 @@ def test_reconstruct_and_materialize():
     assert "gone.cc" not in files
 
 
-def test_prepare_diff_workspace_missing_files(tmp_path):
+def test_prepare_diff_workspace_materializes_in_temp(tmp_path):
     repo = tmp_path / "proj"
-    root, abs_changed = diffutil.prepare_diff_workspace(str(repo), DIFF)
-    assert root == repo.resolve()
-    p = repo / "src/a.cc"
-    assert p.exists()
-    assert str(p.resolve()) in abs_changed
+    repo.mkdir()
+    ws = diffutil.prepare_diff_workspace(str(repo), DIFF)
+    try:
+        p = ws.root / "src/a.cc"
+        assert p.is_file()
+        assert not (repo / "src").exists()
+        assert str(p.resolve()) in ws.abs_changed()
+    finally:
+        ws.cleanup()
 
 
 def test_git_diff_roundtrip(tmp_path):

@@ -109,6 +109,24 @@ def fallback_flags(path: str, lang: str, profile: Profile, root: Path | None) ->
     return flags
 
 
+@functools.lru_cache(maxsize=8)
+def _compdb_index(compdb: str) -> dict[str, dict] | None:
+    """Resolved source path -> compile_commands entry."""
+    j = Path(compdb) / "compile_commands.json"
+    if not j.is_file():
+        return None
+    try:
+        entries = json.loads(j.read_text())
+    except (OSError, ValueError):
+        return None
+    out: dict[str, dict] = {}
+    for e in entries:
+        f = Path(e.get("file", ""))
+        f = f if f.is_absolute() else Path(e.get("directory", ".")) / f
+        out[str(f.resolve())] = e
+    return out or None
+
+
 def _checks_for_clang_tidy(profile: Profile, standards=None) -> tuple[list[str], list[str]]:
     """(clang-tidy checks, clang-analyzer checks) that map to the selected standards' rules."""
     ct = {c.split("@", 1)[0] for c in CM.checkers_for_tool("clang-tidy", standards=standards)}
@@ -130,15 +148,19 @@ def run_clang_tidy(files: list[str], profile: Profile, compdb: Path | None,
     mapped_ct = set(CM.checkers_for_tool("clang-tidy", standards=standards))
     raw: list[RawFinding] = []
     hf = profile.header_filter
+    idx = _compdb_index(str(compdb)) if compdb else None
 
     def one(path: str):
         cmd = [exe, "--quiet", f"--checks={checks_arg}"]
         if hf:
             cmd.append(f"--header-filter={hf}")
-        if compdb:
+        in_db = idx is not None and str(Path(path).resolve()) in idx
+        if compdb and in_db:
             cmd += ["-p", str(compdb)]
             cmd.append(path)
         else:
+            if compdb and idx is not None:
+                st.notes.append(f"not in compile_commands.json, guessed flags: {path}")
             cmd.append(path)
             cmd.append("--")
             cmd += fallback_flags(path, lang_of(path), profile, root)
@@ -254,17 +276,10 @@ def csa_compile_args(path: str, profile: Profile, compdb: Path | None,
     compilation database when there is one (compiler, -c, -o and the file itself removed),
     otherwise the guessed flags."""
     lang = lang_of(path)
-    if compdb and (compdb / "compile_commands.json").exists():
-        rp = str(Path(path).resolve())
-        try:
-            entries = json.loads((compdb / "compile_commands.json").read_text())
-        except (OSError, ValueError):
-            entries = []
-        for e in entries:
-            f = Path(e.get("file", ""))
-            f = f if f.is_absolute() else Path(e.get("directory", ".")) / f
-            if str(f.resolve()) != rp:
-                continue
+    rp = str(Path(path).resolve())
+    if compdb:
+        e = (_compdb_index(str(compdb)) or {}).get(rp)
+        if e:
             import shlex
             args = list(e.get("arguments") or shlex.split(e.get("command", "")))[1:]
             out, skip = [], False
@@ -352,6 +367,9 @@ def run_clang_sa(files: list[str], profile: Profile, compdb: Path | None, root: 
 
 
 MISRA_ADDON_PREFIX = "misra-c2012-"
+CPPCHECK_PARSE_IDS = frozenset(
+    {"syntaxError", "preprocessorErrorDirective", "internalAstError", "unknownMacro"}
+)
 
 
 def _misra_addon_arg(tmpdir: str) -> str:
@@ -368,7 +386,7 @@ def _misra_addon_arg(tmpdir: str) -> str:
 
 
 def run_cppcheck(files: list[str], profile: Profile, root: Path | None, jobs: int = 4,
-                 timeout: int = 300, standards=None) -> tuple[list[RawFinding], ToolStatus]:
+                 timeout: int = 300, standards=None, compdb: Path | None = None) -> tuple[list[RawFinding], ToolStatus]:
     exe = which("cppcheck")
     st = ToolStatus("cppcheck", bool(exe), version("cppcheck") if exe else "")
     if not exe:
@@ -382,6 +400,8 @@ def run_cppcheck(files: list[str], profile: Profile, root: Path | None, jobs: in
     if misra_c:
         st.notes.append("MISRA C:2012 addon enabled for .c files"
                         + (" with your rule-texts file" if addon != "misra" else ""))
+    cdb = compdb or (find_compdb(root) if root else None)
+    project = (cdb / "compile_commands.json") if cdb and (cdb / "compile_commands.json").is_file() else None
 
     def one(path: str):
         lang = lang_of(path)
@@ -390,13 +410,14 @@ def run_cppcheck(files: list[str], profile: Profile, root: Path | None, jobs: in
                "--template={file}:{line}:{column}:{severity}:{id}:{message}",
                f"--std={'c' + str(std.get('c_standard', 11)) if lang == 'c' else 'c++' + str(min(std.get('cpp_standard', 20), 20))}",
                "--language=" + ("c" if lang == "c" else "c++")]
+        if project is not None:
+            cmd.append(f"--project={project}")
         if addon and lang == "c":
             cmd.append(f"--addon={addon}")
             if tmp:
-                # keep the addon's .dump files out of the source tree (it may be read-only)
                 cmd.append(f"--cppcheck-build-dir={tempfile.mkdtemp(dir=tmp.name)}")
-        if root:
-            for sub in ("src", "src/include"):
+        elif not project and root:
+            for sub in ("src", "src/include", "include"):
                 if (root / sub).is_dir():
                     cmd.append("-I" + str(root / sub))
         cmd.append(path)
@@ -416,7 +437,14 @@ def run_cppcheck(files: list[str], profile: Profile, root: Path | None, jobs: in
                     continue
                 for line in out.splitlines():
                     m = CPPCHECK_LINE.match(line)
-                    if m and m["id"] in wanted:
+                    if not m:
+                        continue
+                    if m["id"] in CPPCHECK_PARSE_IDS:
+                        st.parse_errors += 1
+                        if path not in st.files_with_errors:
+                            st.files_with_errors.append(path)
+                        continue
+                    if m["id"] in wanted:
                         raw.append(RawFinding("cppcheck", m["id"], m["file"], int(m["line"]),
                                               int(m["col"]), m["msg"]))
     finally:

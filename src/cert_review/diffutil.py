@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import re
+import shutil
 import subprocess
 import tempfile
+from dataclasses import dataclass, field
 from pathlib import Path
 
 HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
@@ -45,7 +47,7 @@ def parse_unified_diff(text: str) -> dict[str, set[int]]:
 
 def git_diff(repo: str | Path, base: str, head: str | None = None) -> str:
     cmd = ["git", "-C", str(repo), "diff", "-U0", "--no-color", "--no-ext-diff"]
-    cmd.append(f"{base}..{head}" if head else base)
+    cmd.append(f"{base}...{head}" if head else base)
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
         raise RuntimeError(f"git diff failed: {r.stderr.strip()}")
@@ -104,6 +106,51 @@ def reconstruct_file_contents(text: str) -> dict[str, list[str]]:
     return files
 
 
+def _git_show(repo: Path, rev: str, relpath: str) -> str | None:
+    """File contents at `rev:relpath`, or None if the path does not exist at that revision."""
+    r = subprocess.run(
+        ["git", "-C", str(repo), "show", f"{rev}:{relpath}"],
+        capture_output=True,
+        text=True,
+    )
+    if r.returncode != 0:
+        return None
+    return r.stdout
+
+
+def _is_git_repo(path: Path) -> bool:
+    try:
+        r = subprocess.run(
+            ["git", "-C", str(path), "rev-parse", "--git-dir"],
+            capture_output=True,
+            text=True,
+        )
+        return r.returncode == 0
+    except OSError:
+        return False
+
+
+@dataclass
+class DiffWorkspace:
+    """Temporary checkout used for diff-mode analysis; never writes into the user's repo."""
+
+    root: Path
+    changed: dict[str, set[int]]
+    _tmpdir: tempfile.TemporaryDirectory[str] | None = field(default=None, repr=False)
+    _extra_dirs: list[Path] = field(default_factory=list, repr=False)
+
+    def abs_changed(self) -> dict[str, set[int]]:
+        return {str((self.root / k).resolve()): v for k, v in self.changed.items()}
+
+    def cleanup(self) -> None:
+        if self._tmpdir is not None:
+            self._tmpdir.cleanup()
+            self._tmpdir = None
+        for d in self._extra_dirs:
+            shutil.rmtree(d, ignore_errors=True)
+        self._extra_dirs.clear()
+
+
 def materialize_worktree(diff_text: str, root: Path | None = None) -> Path:
     """Write reconstructed files under root (or a new temp dir). Returns the checkout root."""
     files = reconstruct_file_contents(diff_text)
@@ -123,29 +170,45 @@ def materialize_worktree(diff_text: str, root: Path | None = None) -> Path:
     return root
 
 
-def prepare_diff_workspace(repo: str | Path | None, diff_text: str) -> tuple[Path, dict[str, set[int]]]:
-    """Map changed lines to absolute paths, writing missing files from the diff when needed."""
+def prepare_diff_workspace(
+    repo: str | Path | None,
+    diff_text: str,
+    *,
+    content_ref: str | None = None,
+) -> DiffWorkspace:
+    """Map changed lines to absolute paths under a private temporary tree.
+
+    Never creates or modifies files in `repo`. When `repo` is a git checkout and
+    `content_ref` is set (e.g. the diff's head revision), file bodies come from
+    `git show content_ref:path` so line numbers match that revision; otherwise
+  bodies are rebuilt from the unified diff.
+    """
     changed = parse_unified_diff(diff_text)
     reconstructed = reconstruct_file_contents(diff_text)
+    tmp = tempfile.TemporaryDirectory(prefix="cert-review-work-")
+    root = Path(tmp.name).resolve()
+
     hint = Path(repo).expanduser() if repo else None
-    if hint is not None:
-        if not hint.exists():
-            hint.mkdir(parents=True, exist_ok=True)
-        root = hint.resolve()
-        for rel in changed:
-            dest = root / rel
-            if dest.exists():
-                continue
-            if rel not in reconstructed:
-                continue
-            dest.parent.mkdir(parents=True, exist_ok=True)
+    repo_p = hint.resolve() if hint and hint.is_dir() else None
+    use_git = bool(repo_p and content_ref and _is_git_repo(repo_p))
+
+    for rel in set(changed) | set(reconstructed):
+        body: str | None = None
+        if use_git and rel in changed:
+            body = _git_show(repo_p, content_ref, rel)
+        if body is None and rel in reconstructed:
             lines = reconstructed[rel]
             body = "\n".join(lines)
             if lines:
                 body += "\n"
-            dest.write_text(body, encoding="utf-8", errors="surrogateescape")
-    else:
-        root = materialize_worktree(diff_text, None)
+        if body is None and repo_p and rel in changed and not content_ref:
+            on_disk = repo_p / rel
+            if on_disk.is_file():
+                body = on_disk.read_text(encoding="utf-8", errors="surrogateescape")
+        if body is None:
+            continue
+        dest = root / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(body, encoding="utf-8", errors="surrogateescape")
 
-    abs_changed = {str((root / k).resolve()): v for k, v in changed.items()}
-    return root, abs_changed
+    return DiffWorkspace(root=root, changed=changed, _tmpdir=tmp)

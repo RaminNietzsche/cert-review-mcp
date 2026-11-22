@@ -1,0 +1,13 @@
+{
+  "half": "dev",
+  "tools": ["clang-tidy", "clangsa", "cppcheck", "semgrep"],
+  "scores": {
+    "clang-tidy:bugprone-narrowing-conversions@int-to-int": 0.45,
+    "clang-tidy:bugprone-narrowing-conversions@float-to-int": 0.55,
+    "clang-tidy:cert-err33-c": 0.95,
+    "clang-tidy:cert-err34-c": 0.92,
+    "semgrep:int30-c-unchecked-size-arithmetic": 0.88,
+    "semgrep:exp34-c-unchecked-allocation-result": 0.9,
+    "cppcheck:integerOverflow": 0.7
+  }
+}

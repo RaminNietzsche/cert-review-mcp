@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
 from . import api, formatters
 
@@ -76,6 +77,8 @@ def main(argv: list[str] | None = None) -> int:
     d.add_argument("--base", help="git base ref")
     d.add_argument("--head", help="git head ref (default: working tree)")
     d.add_argument("--diff-file", help="unified diff file, or - for stdin")
+    d.add_argument("--diff-context", type=int, default=0,
+                   help="also keep findings within N lines of a changed line (confidence * 0.85)")
     d.add_argument("-j", "--jobs", type=int, default=4)
     _common(d)
 
@@ -129,6 +132,9 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--coverage", choices=["deterministic", "partial", "llm-only"])
     r.add_argument("--search")
 
+    ver = sub.add_parser("version", help="show package version and installed source path")
+    ver.add_argument("--json", action="store_true")
+
     pk = sub.add_parser("packet", help="build the LLM review packet")
     pk.add_argument("paths", nargs="*")
     pk.add_argument("--repo")
@@ -160,13 +166,13 @@ def main(argv: list[str] | None = None) -> int:
             text = sys.stdin.read() if a.diff_file == "-" else open(a.diff_file, encoding="utf-8").read()
         res = api.check_diff(a.repo, a.base, a.head, text, a.profile, a.compdb, a.tools.split(","),
                              a.min_confidence, a.include_suppressed, a.jobs,
-                             a.max_rules_per_location, _stds(a), a.baseline)
+                             a.max_rules_per_location, _stds(a), a.baseline,
+                             diff_context=a.diff_context)
         _emit(res["findings"], a.format, res["root"], a.output, res.get("warnings"))
         _write_report(res, a.report)
         _status(res)
         return _exit_code(res["findings"], a.fail_on, a.fail_on_parse_error and bool(res.get("warnings")))
     if a.cmd == "baseline":
-        from pathlib import Path
         if a.action == "create" and Path(a.file).exists() and not a.force:
             print(f"{a.file} exists; use `baseline update` or --force", file=sys.stderr)
             return 2
@@ -216,6 +222,15 @@ def main(argv: list[str] | None = None) -> int:
               + ", ".join(f"{c['tool']}:{c['checker']}" for c in res["coverage"]["checkers"]))
         if res["profile"]["override"]:
             print(f"Profile {a.profile}: {res['profile']['override']}")
+        return 0
+    if a.cmd == "version":
+        import cert_review
+        loc = Path(cert_review.__file__).resolve().parent
+        out = {"version": cert_review.__version__, "package": "cert-review-mcp", "path": str(loc)}
+        if a.json:
+            print(json.dumps(out, indent=2))
+        else:
+            print(f"cert-review-mcp {out['version']} ({loc})")
         return 0
     if a.cmd == "coverage":
         print(json.dumps(api.rule_coverage(a.lang, a.kind, a.ids, a.standard), indent=2))

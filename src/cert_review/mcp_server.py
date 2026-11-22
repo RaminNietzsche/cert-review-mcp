@@ -17,6 +17,7 @@ from mcp.types import ToolAnnotations
 from . import api
 from . import profiles as P
 from . import rules as R
+from .mcp_schemas import INSTRUCTIONS, SERVER_NAME, WEBSITE
 
 try:                                   # mcp >= 2
     from mcp.server.mcpserver import MCPServer as _Server
@@ -24,31 +25,6 @@ try:                                   # mcp >= 2
 except ImportError:                    # mcp 1.x (>= 1.10 for title/annotations/structured output)
     from mcp.server.fastmcp import FastMCP as _Server
     from mcp.server.fastmcp.exceptions import ToolError
-
-SERVER_NAME = "cert-review"
-WEBSITE = "https://github.com/RaminNietzsche/cert-review-mcp"
-
-INSTRUCTIONS = """\
-SEI CERT C/C++ secure-coding review for local source trees. Every tool only reads local
-files and bundled data and runs local analyzers (clang-tidy, clang, cppcheck, and Semgrep,
-Infer or CodeQL when installed); nothing is written to the project, uploaded or posted.
-Rule lookup: list_rules (structured filters), search_rules (keywords), get_rule (one rule's
-full text), get_rule_coverage (what checkers can detect).
-Review flow:
-1. check_diff for a change, or check_files for whole files or directories; pass baseline_path
-   to hide findings already recorded in a .cert-review-baseline.json.
-   explain_finding turns one finding into a rule summary, the closest CERT example and a fix.
-2. build_review_packet for rules no checker decides; judge each hunk and write findings
-   that cite a candidate rule_id and quote that rule's text verbatim.
-3. validate_findings to drop ungrounded findings.
-4. format_findings to draft markdown, GitHub or GitLab review payloads, SARIF or GitLab reports.
-Use absolute paths and profile "ceph" for Ceph trees. A tool status "partial" or non-empty
-warnings means some files did not compile or timed out, so a clean result is not proof.
-MISRA C:2012, MISRA C++:2023 and AUTOSAR C++14: pass `standard` to the lookup tools or
-`standards` (or profile "misra" / "autosar") to check_files and check_diff. Their official
-texts are copyrighted and not bundled (IDs, classification, mappings and short summaries only),
-so validate_findings needs no quote for them unless the user loaded a licensed rule-texts file.
-Never post review comments without the user approving the exact text."""
 
 # ---------------------------------------------------------------- shared types
 Profile = Annotated[str, Field(
@@ -484,8 +460,8 @@ def build_server() -> Any:
             "(`diff_text`, paths relative to repo). Use for pull-request or pre-commit review; for "
             "whole files use check_files. Runs `git diff` and the analyzers locally; writes "
             "nothing. For git refs, files must exist at `head` or line numbers will not match. "
-            "With `diff_text`, missing files are reconstructed under `repo` (or a temp tree when "
-            "`repo` is omitted) so remote MCP hosts can review without your checkout. Check "
+            "With `diff_text`, files are reconstructed in a private temporary tree (the repo on disk "
+            "is never modified). Check "
             "tools[].status and `warnings` before trusting an empty result. `baseline_path` hides "
             "findings recorded in a baseline file (fixed is not computed in diff scope)."))
     @_guard
@@ -501,12 +477,17 @@ def build_server() -> Any:
         include_suppressed: IncludeSuppressed = False,
         standards: Standards = None,
         baseline_path: BaselinePath = None,
+        diff_context: Annotated[int, Field(ge=0, le=50,
+                                           description="Also report findings within this many lines "
+                                           "of a changed line (confidence scaled by 0.85).")] = 0,
     ) -> DiffCheckResult:
         if not (diff_text or base):
             raise ToolError("provide base (git ref) or diff_text")
         return api.check_diff(_repo_for_diff(repo, diff_text), base, head, diff_text, profile, compdb,
-                              list(tools) if tools else None, min_confidence, include_suppressed, standards=standards,
-                              baseline=_exists(baseline_path) if baseline_path else None)
+                              list(tools) if tools else None, min_confidence, include_suppressed,
+                              standards=standards,
+                              baseline=_exists(baseline_path) if baseline_path else None,
+                              diff_context=diff_context)
 
     @mcp.tool(
         title="Explain a SEI CERT finding and suggest a fix",
@@ -563,6 +544,12 @@ def build_server() -> Any:
         run_static: Annotated[bool, Field(description="Also run the analyzers and list their findings per hunk so they are not repeated. Set false if you already ran check_diff/check_files.")] = True,
         compdb: Compdb = None,
         max_rules_per_hunk: Annotated[int | None, Field(ge=1, le=20, description="Candidate rules per hunk. Omit to use the profile's value (6 in both bundled profiles).")] = None,
+        standards: Standards = None,
+        tools: Tools = None,
+        min_confidence: Annotated[float, Field(ge=0.0, le=1.0,
+                                               description="Minimum confidence for bundled static analysis when run_static is true.")] = 0.0,
+        diff_context: Annotated[int, Field(ge=0, le=50,
+                                           description="Lines around a change to include in static analysis (confidence * 0.85).")] = 0,
     ) -> Packet:
         if not (path or (repo and base) or diff_text):
             raise ToolError("provide path, or repo with base or diff_text")
@@ -571,7 +558,9 @@ def build_server() -> Any:
         elif path:
             path = _exists(path)
         return api.review_packet(path, repo, base, head, diff_text, profile, run_static, compdb,
-                                 max_rules_per_hunk)
+                                 max_rules_per_hunk, standards=standards,
+                                 tools=list(tools) if tools else None, min_confidence=min_confidence,
+                                 diff_context=diff_context)
 
     @mcp.tool(
         title="Validate manual SEI CERT findings",

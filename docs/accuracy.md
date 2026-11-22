@@ -8,6 +8,10 @@ Run time: core 277s, semgrep 16s, infer 91s, codeql 6680s.
 
 A noncompliant example is *detected* when the engine reports that example's own rule in the file; a compliant example is a *false positive* when it does. Precision = TP/(TP+FP), recall = TP/(TP+FN). *Scored rules* are the rules with at least one checker in the toolset; *corpus-wide* counts every example, including rules no checker covers, so it is the number to compare across toolsets. The examples are short fragments and many do not compile standalone, so absolute numbers understate what the tools achieve on real code, and precision is optimistic because compliant fragments are tiny.
 
+Partial-checker confidences can be tuned from the dev corpus half: regenerate
+`data/confidence_calibration.json` with `tools/calibrate_confidence.py` and compare with
+`tools/eval_accuracy.py --compare` so held-out rules stay honest.
+
 ## Summary
 
 | Toolset | Scored rules | TP | FN | FP | TN | Precision | Recall (scored) | Corpus-wide recall | Corpus-wide FP rate |

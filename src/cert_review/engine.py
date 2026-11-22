@@ -120,10 +120,14 @@ def _cert_rules_for(key_tool: str, key_checker: str, lang: str) -> list[tuple[st
     if not sel and want_cpp:        # e.g. cert-err33-c has only a C rule
         sel = [e for e in entries if not e["rule_id"].endswith("-CPP")]
         penalty = 0.85
+    cal = CM.calibrated_confidence()
     out = []
     n = max(1, len(sel))
     for e in sel:
-        if e.get("confidence") is not None:     # per-checker value, e.g. bundled Semgrep rules
+        key = f"{key_tool}:{key_checker}"
+        if key in cal and not e["specific"]:
+            conf = cal[key] if n == 1 else max(0.3, cal[key] - 0.06 * (n - 1))
+        elif e.get("confidence") is not None:     # per-checker value, e.g. bundled Semgrep rules
             conf = e["confidence"] if n == 1 else max(0.3, e["confidence"] - 0.06 * (n - 1))
         elif e["specific"]:
             conf = 0.9
@@ -205,6 +209,28 @@ def cap_per_location(findings: list[F.Finding], max_rules: int = 2) -> list[F.Fi
     return out
 
 
+_HEADER_EXT = {".h", ".hh", ".hpp", ".hxx", ".inl"}
+
+
+def _finding_in_scope(path: str, files_set: set[str], rootp: Path | None, prof: P.Profile) -> bool:
+    """Keep explicit inputs and project headers allowed by the profile header_filter."""
+    rp = str(Path(path).resolve())
+    if rp in files_set:
+        return True
+    if rootp is None:
+        return False
+    try:
+        rel = str(Path(path).resolve().relative_to(rootp.resolve()))
+    except ValueError:
+        return False
+    if Path(path).suffix.lower() not in _HEADER_EXT:
+        return False
+    hf = prof.header_filter
+    if not hf:
+        return False
+    return bool(re.search(hf, rel)) or bool(re.search(hf, path))
+
+
 def select_files(paths: list[str], profile: P.Profile, lang: str | None = None,
                  root: Path | None = None) -> list[str]:
     exts = profile.raw.get("file_extensions", {})
@@ -233,12 +259,14 @@ def check(paths: list[str], profile: P.Profile | str = "default", lang: str | No
           tools: tuple[str, ...] | None = DEFAULT_TOOLS, changed_lines: dict[str, set[int]] | None = None,
           jobs: int = 4, max_rules_per_location: int = 2, min_confidence: float = 0.0,
           include_suppressed: bool = True,
-          standards: tuple[str, ...] | list[str] | str | None = None) -> Result:
+          standards: tuple[str, ...] | list[str] | str | None = None,
+          diff_context: int = 0) -> Result:
     prof = P.load(profile) if isinstance(profile, str) else profile
     stds = R.expand_standards(standards) if standards else prof.standards
     rootp = Path(root).resolve() if root else None
     tools, _explicit = resolve_tools(tools)
     files = select_files(paths, prof, lang, rootp)
+    files_set = {str(Path(f).resolve()) for f in files}
     # Headers are analysed through the sources that include them; analysing a
     # bare header works for clang-tidy, so keep them when passed explicitly.
     res = Result(profile=prof.name, files=files, standards=list(stds))
@@ -257,7 +285,7 @@ def check(paths: list[str], profile: P.Profile | str = "default", lang: str | No
         raw += r
         res.tools.append(st)
     if "cppcheck" in tools:
-        r, st = T.run_cppcheck(files, prof, rootp, jobs=jobs, standards=stds)
+        r, st = T.run_cppcheck(files, prof, rootp, jobs=jobs, standards=stds, compdb=cdb)
         raw += r
         res.tools.append(st)
     if "semgrep" in tools:
@@ -276,16 +304,31 @@ def check(paths: list[str], profile: P.Profile | str = "default", lang: str | No
         absent = [t for t in EX.OPTIONAL_TOOLS if t not in tools and not EX.available(t)]
         if absent:
             res.notes.append("optional analyzers not installed: " + ", ".join(absent))
-    # restrict to the files requested (clang-tidy may report headers)
-    raw = [x for x in raw if not prof.excluded_path(relpath(x.file, rootp))]
+    raw = [x for x in raw if not prof.excluded_path(relpath(x.file, rootp))
+           and _finding_in_scope(x.file, files_set, rootp, prof)]
     kept, dropped = normalize(raw, prof, root=rootp, standards=stds)
     if changed_lines is not None:
         norm = {str(Path(k).resolve()): v for k, v in changed_lines.items()}
-        def in_diff(f: F.Finding) -> bool:
+
+        def _on_changed_line(f: F.Finding) -> bool:
             ls = norm.get(str(Path(f.file).resolve()))
             return bool(ls and f.line in ls)
+
+        def _near_changed_line(f: F.Finding) -> bool:
+            if diff_context <= 0:
+                return False
+            ls = norm.get(str(Path(f.file).resolve()))
+            return bool(ls and any(abs(f.line - ln) <= diff_context for ln in ls))
+
+        def in_diff(f: F.Finding) -> bool:
+            return _on_changed_line(f) or _near_changed_line(f)
+
         kept = [f for f in kept if in_diff(f)]
         dropped = [f for f in dropped if in_diff(f)]
+        if diff_context > 0:
+            for f in kept:
+                if not _on_changed_line(f):
+                    f.confidence = round(max(0.0, f.confidence * 0.85), 2)
     kept = cap_per_location(kept, max_rules_per_location)
     kept = [f for f in F.dedupe(kept) if f.confidence >= min_confidence]
     res.findings = F.sort_by_importance(kept)

@@ -309,6 +309,16 @@
      ],
      "specific": false,
      "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "int04-c-ntohl-fed-allocation",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.45
     }
    ],
    "cert_detectable": false
@@ -3899,6 +3909,16 @@
      "specific": false,
      "available": true,
      "confidence": 0.65
+    },
+    {
+     "tool": "semgrep",
+     "checker": "exp34-c-map-find-dereference",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.45
     }
    ],
    "cert_detectable": false
@@ -5946,6 +5966,16 @@
      ],
      "specific": false,
      "available": true
+    },
+    {
+     "tool": "semgrep",
+     "checker": "int04-c-ntohl-fed-allocation",
+     "origins": [
+      "cert-review-semgrep"
+     ],
+     "specific": false,
+     "available": true,
+     "confidence": 0.45
     }
    ],
    "cert_detectable": true

@@ -3,6 +3,16 @@
 # by the corpus evaluation (docs/accuracy.md) and must name a checker that
 # exists in the supported toolchain. Infer entries apply when the optional
 # Infer analyzer is installed (CodeChecker's Infer labels carry no CERT IDs).
+- tool: semgrep
+  checker: int04-c-ntohl-fed-allocation
+  rules: [INT04-C, ARR30-C]
+  confidence: 0.45
+  reason: "Ceph decode paths: network byte order converted to size without a visible bound."
+- tool: semgrep
+  checker: exp34-c-map-find-dereference
+  rules: [EXP34-C]
+  confidence: 0.45
+  reason: "find() iterator used without end() check (common in RGW metadata lookups)."
 - tool: cppcheck
   checker: doubleFree
   rules: [MEM30-C, MEM50-CPP]

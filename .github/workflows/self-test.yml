@@ -11,14 +11,36 @@ permissions:
 jobs:
   unit:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        clang_major: [18, 19, 20]
+    env:
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - name: Install analyzers
-        run: sudo apt-get update && sudo apt-get install -y clang clang-tidy cppcheck
+      - name: Install analyzers (clang ${{ matrix.clang_major }})
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-${{ matrix.clang_major }} clang-tidy-${{ matrix.clang_major }} cppcheck
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-${{ matrix.clang_major }} 100
+          sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-${{ matrix.clang_major }} 100
       - run: pip install -e '.[dev]' semgrep==1.186.0
       - run: pytest -q
+
+  docker-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build MCP image
+        run: docker build -f Dockerfile.mcp -t cert-review:mcp .
+      - name: Tests in image
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/workspace" -w /workspace \
+            --entrypoint bash cert-review:mcp -c \
+            "pip install -q -e '.[dev]' && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q"
 
   action:
     # Runs the action from this checkout on a few corpus examples.
