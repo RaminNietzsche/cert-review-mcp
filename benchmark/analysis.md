@@ -7,7 +7,7 @@ clang-tidy, Clang Static Analyzer, cppcheck and Semgrep).
 is release 1.2.0 run with the same four analyzers (adding Semgrep to the 1.2.0 core set changed
 nothing: 5 of 57 either way).
 
-| Measure | 1.2.0 | Now |
+| Measure | 1.2.0 | 1.3.0 |
 |---|---|---|
 | Detected (all findings) | 5 of 57 | 6 of 57 |
 | Detected and fix-sensitive | 2 | 3 |

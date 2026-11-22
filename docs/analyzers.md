@@ -17,6 +17,10 @@ the default selection a note names it; when it was asked for explicitly (`--tool
 `tools` argument, or the Action `tools` input), the report carries a `warnings` entry
 "`<tool>: requested but not run: ...`" with an install hint, and the tool status is `missing`.
 
+Since 1.3.0, cppcheck uses `--project=compile_commands.json` when a compilation database is
+available (auto-detected under `--compdb` or `root/build`), and syntax/preprocessor failures mark
+the run as partial.
+
 Select analyzers with `--tools` (CLI), `tools` (MCP `check_files`, `check_diff`,
 `build_review_packet`) or the Action input `tools`:
 

@@ -15,7 +15,7 @@ It does three things:
    automated-detection tables. It is built reproducibly from a pinned upstream commit and
    checked against the standards' own index pages.
 2. **Runs real analyzers and maps them to rule IDs.** clang-tidy (`cert-*` and mapped checks),
-   the Clang Static Analyzer, cppcheck and 40 bundled Semgrep rules for INT, EXP, MEM, CON and
+   the Clang Static Analyzer, cppcheck and 42 bundled Semgrep rules for INT, EXP, MEM, CON and
    other CERT rules; optionally Infer and the CodeQL CERT query packs
    ([docs/analyzers.md](docs/analyzers.md)). Findings are normalised to one schema,
    de-duplicated, filtered by a profile, and optionally limited to changed lines.
@@ -162,11 +162,11 @@ Every tool is read-only: it reads local files and bundled data and runs local an
 Nothing is written, uploaded or posted. All tools declare MCP annotations, a title and,
 except `format_findings`, an output schema.
 
-For `check_diff` and `build_review_packet` with pasted `diff_text`, files that are missing on
-the MCP host are reconstructed from the patch under `repo` (the directory is created when needed).
-On remote servers that cannot see your checkout, pass the unified diff and a logical root path
-(for example `/workspace/ceph`); omit `repo` to use a disposable tree under the system temp
-directory.
+For `check_diff` and `build_review_packet`, analysis runs in a **private temporary workspace**
+(the checkout is not modified). With git refs, file bodies come from `git show head:path`; with
+pasted `diff_text` they are reconstructed from the patch. Pass `repo` as the logical root for
+paths in the diff; findings and SARIF use repository paths, not the temp directory.
+Optional `diff_context` keeps findings within N lines of a change (lower confidence).
 
 | Tool | Purpose |
 |---|---|
@@ -175,7 +175,7 @@ directory.
 | `get_rule(rule_id, profile, include_examples)` | One rule or guideline: text or summary, examples, risk row or classification, CWE, checkers, cross-references, profile notes |
 | `get_rule_coverage(standard, lang, kind, include_ids)` | Rule counts per tier: deterministic / partial / llm-only |
 | `check_files(path, profile, standards, compdb, root, lang, tools, ...)` | Analyzer findings for a file or a directory tree |
-| `check_diff(repo, base, head \| diff_text, profile, standards, compdb, ...)` | Analyzer findings on changed lines only |
+| `check_diff(repo, base, head \| diff_text, profile, standards, compdb, diff_context, ...)` | Analyzer findings on changed lines (optional nearby context) |
 | `explain_finding(finding, profile, context_lines)` | One finding: rule summary, why it matches, closest noncompliant/compliant example pair, fix steps |
 | `build_review_packet(path \| repo + base \| diff_text, ...)` | Code hunks plus candidate rule texts for manual review |
 | `validate_findings(findings, packet, profile)` | Accept only grounded findings (rule ID + verbatim quote; MISRA/AUTOSAR quotes only when a licensed text is loaded) |
@@ -194,8 +194,9 @@ Resources: `rule://EXP34-C`, `profile://ceph`. Prompts: `cert_review`, `ceph_rev
 ## CLI
 
 ```bash
+cert-review version
 cert-review check src/common/Throttle.cc --profile ceph --compdb build --format markdown
-cert-review diff --repo ~/ceph --base origin/main --profile ceph --format sarif -o out.sarif
+cert-review diff --repo ~/ceph --base origin/main --profile ceph --diff-context 3 --format sarif -o out.sarif
 cert-review diff --diff-file change.patch --format github > review.json   # payload only
 cert-review explain EXP34-C
 cert-review explain-finding ERR34-C --file src/parse.c --line 42     # closest example + fix
