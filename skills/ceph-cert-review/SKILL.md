@@ -28,7 +28,8 @@ tracker.ceph.com or ceph/ceph PRs from this skill.
   Manual: `cert-review compdb --repo <root> --tracked` or `--git-diff base..HEAD`; legacy
   `tools/ceph_compdb.py --ceph <root> --tracked`.
   Auto-find still uses `repo/build`, not the temp diff workspace. See [docs/execution.md](../../docs/execution.md).
-- Review the diff, not the file: `check_diff` with `base` = the target branch. Profile `ceph`
+- Review the diff, not the file: MCP **`review_pr`** with `repo`, merge-base `base`, PR `head`, and
+  `profile: ceph` (or `check_diff` + `build_review_packet` + `format_pr_review`). Profile `ceph`
   defaults to `diff_context: 3` for nearby-line findings.
 
 ## Where to spend attention

@@ -1,4 +1,4 @@
-"""cert-review command line: check | diff | compdb | format-pr | baseline | explain | explain-finding | coverage | packet | rules | validate."""
+"""cert-review command line: check | diff | review-pr | compdb | format-pr | baseline | explain | coverage | packet | rules | validate."""
 from __future__ import annotations
 
 import argparse
@@ -135,6 +135,22 @@ def main(argv: list[str] | None = None) -> int:
     ver = sub.add_parser("version", help="show package version and installed source path")
     ver.add_argument("--json", action="store_true")
 
+    rp = sub.add_parser("review-pr", help="check_diff + packet + PR comment markdown")
+    rp.add_argument("--repo", required=True)
+    rp.add_argument("--base", required=True)
+    rp.add_argument("--head")
+    rp.add_argument("--title")
+    rp.add_argument("--scope")
+    rp.add_argument("--profile", default="ceph")
+    rp.add_argument("--compdb")
+    rp.add_argument("--tools", default="auto")
+    rp.add_argument("--min-confidence", type=float, default=0.5)
+    rp.add_argument("--standards")
+    rp.add_argument("--diff-context", type=int, default=None)
+    rp.add_argument("-o", "--output", help="write markdown comment")
+    rp.add_argument("--report", help="write full JSON (check_diff embedded)")
+    _common(rp)
+
     fp = sub.add_parser("format-pr", help="draft PR markdown: static + hints + style nits")
     fp.add_argument("--check-json", help="check_diff report JSON file, or - for stdin")
     fp.add_argument("--packet-json", help="build_review_packet JSON file")
@@ -241,6 +257,22 @@ def main(argv: list[str] | None = None) -> int:
         if res["profile"]["override"]:
             print(f"Profile {a.profile}: {res['profile']['override']}")
         return 0
+    if a.cmd == "review-pr":
+        tools = None if a.tools == "auto" else a.tools.split(",")
+        res = api.review_pr(
+            a.repo, a.base, a.head, profile=a.profile, title=a.title, scope=a.scope,
+            compdb=a.compdb, tools=tools, min_confidence=a.min_confidence,
+            standards=_stds(a), diff_context=a.diff_context,
+        )
+        if a.report:
+            _write_report(res, a.report)
+        text = res["markdown"]
+        if a.output:
+            open(a.output, "w", encoding="utf-8").write(text + "\n")
+        else:
+            print(text)
+        return _exit_code((res.get("check_diff") or {}).get("findings") or [], a.fail_on,
+                          a.fail_on_parse_error and bool(res.get("warnings")))
     if a.cmd == "format-pr":
         ck = {}
         pk = {}

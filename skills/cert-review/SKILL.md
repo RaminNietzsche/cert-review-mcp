@@ -16,7 +16,8 @@ post back afterwards. Drafting and formatting are free; posting is not.
 | Tool | Use |
 |---|---|
 | `check_diff` | Static findings on the changed lines of `base..head`, the working tree, or a pasted diff |
-| `format_pr_review` | One markdown PR comment: static summary + heuristic hints + style nits (after check_diff + build_review_packet) |
+| `review_pr` | **Preferred:** one markdown PR comment (static + hints + nits) from `repo` + `base` + `head` |
+| `format_pr_review` | Same markdown when you already have `check_diff` and `build_review_packet` JSON |
 | `check_files` | Static findings for a file or directory |
 | `explain_finding` | One finding: why it matches, the closest CERT example pair and a fix to put in `fix` |
 | `build_review_packet` | Code hunks plus the rule texts worth reading, for rules no checker covers |

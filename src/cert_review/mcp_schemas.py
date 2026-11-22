@@ -10,7 +10,8 @@ Infer or CodeQL when installed); nothing is written to the project, uploaded or 
 Rule lookup: list_rules (structured filters), search_rules (keywords), get_rule (one rule's
 full text), get_rule_coverage (what checkers can detect).
 Review flow:
-1. check_diff for a change, or check_files for whole files or directories; pass baseline_path
+1. review_pr for a git change (preferred), or check_diff for a change, or check_files for whole
+   files or directories; pass baseline_path
    to hide findings already recorded in a .cert-review-baseline.json.
    explain_finding turns one finding into a rule summary, the closest CERT example and a fix.
 2. build_review_packet for rules no checker decides; judge each hunk and write findings

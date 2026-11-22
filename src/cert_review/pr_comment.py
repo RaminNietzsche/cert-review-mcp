@@ -59,7 +59,20 @@ def style_nits_in_text(code: str, path: str) -> list[dict[str, Any]]:
     return out
 
 
+def _sanitize_warning(msg: str) -> str:
+    """Shorten temp diff-workspace paths to `src/...` in warning lines."""
+
+    def short(m: re.Match[str]) -> str:
+        return f"`{m.group(1)}`"
+
+    return re.sub(r"(?:/private)?/[^\s:]+/(src/\S+)", short, msg)
+
+
 def _rel(path: str, root: str | None) -> str:
+    normalized = path.replace("\\", "/")
+    m = re.search(r"(src/.+)$", normalized)
+    if m:
+        return m.group(1)
     if root:
         try:
             return os.path.relpath(path, root)
@@ -147,7 +160,7 @@ def pr_review_markdown(
     if warnings:
         lines.append("**Warnings:**")
         for w in warnings:
-            lines.append(f"- {w}")
+            lines.append(f"- {_sanitize_warning(w)}")
         lines.append("")
 
     k_rows = _summarize_hunks(packet or {})

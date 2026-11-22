@@ -117,6 +117,66 @@ def format_pr_review(
     return {"markdown": body, "profile": profile, "version": ver}
 
 
+def review_pr(
+    repo: str,
+    base: str,
+    head: str | None = None,
+    *,
+    profile: str = "ceph",
+    title: str | None = None,
+    scope: str | None = None,
+    compdb: str | None = None,
+    tools: list[str] | None = None,
+    min_confidence: float = 0.5,
+    standards: Any = None,
+    baseline: str | None = None,
+    diff_context: int | None = None,
+    functional_notes: list[str] | None = None,
+    include_packet: bool = True,
+    include_check: bool = True,
+) -> dict:
+    """One-shot PR review: check_diff + build_review_packet + format_pr_review."""
+    prof = P.load(profile)
+    ctx = prof.diff_context_default() if diff_context is None else diff_context
+    ck = check_diff(
+        repo, base, head, None, profile, compdb,
+        tools, min_confidence, False, 4, 2, standards, baseline, ctx,
+    )
+    pkt = review_packet(
+        None, repo, base, head, None, profile,
+        run_static=False, compdb=compdb, standards=standards,
+        tools=tools, min_confidence=min_confidence, diff_context=ctx,
+    ) if include_packet else None
+    if not scope:
+        head_s = head or "HEAD"
+        cf = ck.get("changed_files") or []
+        cppish = [f for f in cf if Path(f).suffix.lower() in {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp"}]
+        extra = f" — {len(cppish)} C/C++ file(s)" if cppish else f" — {len(cf)} file(s)"
+        scope = f"`{base}`..`{head_s}`{extra}"
+    fr = format_pr_review(
+        title=title, scope=scope, profile=profile,
+        check_result=ck, packet=pkt, functional_notes=functional_notes, root=repo,
+    )
+    out: dict[str, Any] = {
+        "markdown": fr["markdown"],
+        "profile": profile,
+        "version": fr["version"],
+        "scope": scope,
+        "cert_findings_on_diff": len(ck.get("findings") or []),
+        "summary": ck.get("summary"),
+        "warnings": ck.get("warnings"),
+        "notes": ck.get("notes"),
+    }
+    if include_check:
+        out["check_diff"] = ck
+    if include_packet and pkt:
+        out["review_packet"] = {
+            "hunks": len(pkt.get("hunks") or []),
+            "skipped_hunks": pkt.get("skipped_hunks"),
+        }
+    return out
+
+
 def refresh_ceph_compdb(repo: str, *, tracked: bool = True, force: bool = False,
                         git_ref: str = "HEAD") -> dict:
     """Build or refresh `.cert-review/compdb-cache` under a Ceph checkout."""

@@ -180,6 +180,8 @@ Optional `diff_context` keeps findings within N lines of a change (lower confide
 | `build_review_packet(path \| repo + base \| diff_text, ...)` | Code hunks plus candidate rule texts for manual review |
 | `validate_findings(findings, packet, profile)` | Accept only grounded findings (rule ID + verbatim quote; MISRA/AUTOSAR quotes only when a licensed text is loaded) |
 | `format_findings(findings, style, root, warnings)` | `markdown`, `github`, `gitlab`, `sarif`, `codequality` or `gitlab-sast`; formatting only |
+| `format_pr_review(check_result, packet, title, scope, …)` | One markdown PR comment: static summary, heuristic hints, style nits |
+| `review_pr(repo, base, head, profile, …)` | **Preferred for PRs:** runs `check_diff` + `build_review_packet` + `format_pr_review` |
 
 `check_files` and `check_diff` take an optional `baseline_path`: findings recorded in a
 baseline file are hidden and counted (new, baselined, fixed). See [docs/baseline.md](docs/baseline.md).

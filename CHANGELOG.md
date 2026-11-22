@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 1.4.0 (2026-11-22)
+
+### Added
+
+- MCP/CLI **`review_pr`**: one call runs `check_diff`, `build_review_packet`, and `format_pr_review`.
+- `cert-review review-pr` with `--report` for full JSON.
+
+### Improved
+
+- `format_pr_review`: warning lines shorten temp paths to `` `src/...` ``; hunk locations use `src/` paths.
+- MCP prompts and docs list `review_pr` as the preferred PR workflow.
+
 ## 1.3.3 (2026-11-22)
 
 ### Added

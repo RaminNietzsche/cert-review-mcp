@@ -613,6 +613,40 @@ def build_server() -> Any:
         )
 
     @mcp.tool(
+        title="Review a PR change (static + hints + draft comment)",
+        annotations=ToolAnnotations(title="Review a PR change (static + hints + draft comment)", **RO),
+        structured_output=True,
+        description=(
+            "Run check_diff on `base`..`head`, build_review_packet for heuristic hints, "
+            "and format_pr_review into one markdown comment (static table, candidate rules, "
+            "idioms, style nits, functional bullets). Does not post. Prefer this over three "
+            "separate calls. profile ceph auto-builds synthetic compdb when needed."))
+    @_guard
+    def review_pr(
+        repo: Annotated[str, Field(description="Absolute path of the git checkout.", examples=["/home/me/ceph"])],
+        base: Annotated[str, Field(description="Base git ref (merge-base or target branch SHA).", examples=["origin/main"])],
+        head: Annotated[str | None, Field(description="Head ref (PR branch). Default: working tree.")] = None,
+        profile: Profile = "ceph",
+        title: Annotated[str | None, Field(description="PR title for the comment heading.")] = None,
+        scope: Annotated[str | None, Field(description="Optional scope line; auto-generated when omitted.")] = None,
+        compdb: Compdb = None,
+        tools: Tools = None,
+        min_confidence: MinConfidence = 0.5,
+        standards: Standards = None,
+        baseline_path: BaselinePath = None,
+        diff_context: Annotated[int | None, Field(ge=0, le=50, description="Omit to use profile default (ceph: 3).")] = None,
+        functional_notes: Annotated[list[str] | None, Field(description="Extra functional bullets for the comment.")] = None,
+    ) -> dict[str, Any]:
+        return api.review_pr(
+            _exists(repo), base, head, profile=profile, title=title, scope=scope,
+            compdb=_exists(compdb) if compdb else None,
+            tools=list(tools) if tools else None,
+            min_confidence=min_confidence, standards=standards,
+            baseline=_exists(baseline_path) if baseline_path else None,
+            diff_context=diff_context, functional_notes=functional_notes,
+        )
+
+    @mcp.tool(
         title="Format SEI CERT findings as a report",
         annotations=ToolAnnotations(title="Format SEI CERT findings as a report", **RO),
         description=(
@@ -673,14 +707,11 @@ def _prompt(target: str, profile: str, ceph: bool) -> str:
              "resource for details.\n") if ceph else ""
     return (f"Review {target} against the SEI CERT C and C++ standards using the cert-review tools "
             f"(profile '{profile}').\n{extra}"
-            "1. Call check_diff (or check_files) and keep findings with confidence >= 0.5. If any tool "
-            "status is 'partial', say which files were not fully analysed.\n"
-            "2. Call build_review_packet with run_static=false. For each hunk, read the candidate rules "
-            "and decide whether the code really violates one. Prefer no finding over a speculative one.\n"
-            "3. Write findings as [{rule_id, file, line, message, quote, fix}], where quote is copied "
-            "verbatim from the rule text, then call validate_findings with the packet and drop rejected ones.\n"
-            "4. Draft comments with format_findings (style github, gitlab or markdown). Show the exact text "
-            "to the user and wait for approval; never post anything yourself.")
+            "1. Prefer review_pr (or check_diff + build_review_packet + format_pr_review) for changes. "
+            "Keep findings with confidence >= 0.5; mention partial tools in the summary.\n"
+            "2. Show the format_pr_review markdown to the user for PR comments; never post without approval.\n"
+            "3. For extra manual review: judge build_review_packet hunks; validate_findings on "
+            "any hand-written findings; format_findings for line-by-line CERT violations only.")
 
 
 def main() -> None:

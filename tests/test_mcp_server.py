@@ -9,7 +9,7 @@ from cert_review.mcp_server import build_server
 
 EXPECTED_TOOLS = {"list_rules", "get_rule", "search_rules", "check_files", "check_diff", "explain_finding",
                   "build_review_packet", "validate_findings", "get_rule_coverage", "format_findings",
-                  "format_pr_review"}
+                  "format_pr_review", "review_pr"}
 
 
 def _text(result):
@@ -29,6 +29,7 @@ def test_tools_resources_prompts_registered():
         return tools, templates, prompts
     tools, templates, prompts = asyncio.run(go())
     assert tools == EXPECTED_TOOLS
+    assert len(tools) >= 12
     assert {"rule://{rule_id}", "profile://{name}"} <= templates
     assert {"cert_review", "ceph_review"} <= prompts
 
@@ -93,6 +94,7 @@ def test_stdio_round_trip():
         pytest.skip(f"mcp client API unavailable: {type(e).__name__}: {e}") if "attribute" in str(e) else None
         raise
     assert tools == EXPECTED_TOOLS
+    assert len(tools) >= 12
     assert any(x["id"] == "EXP34-C" for x in search["results"])
     assert "EXP34-C" in str(rr)
 

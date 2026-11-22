@@ -51,7 +51,7 @@ jobs:
             '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'; sleep 5) | docker run -i --rm cert-review-mcp:test | tail -1)
           n=$(echo "$out" | jq '.result.tools | length')
           echo "tools/list returned $n tools"
-          test "$n" -ge 9
+          test "$n" -ge 12
 
       - name: Log in to Docker Hub
         if: env.CAN_PUSH == 'true'
