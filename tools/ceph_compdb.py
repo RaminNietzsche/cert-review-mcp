@@ -8,6 +8,9 @@ values into a side directory and writes one compile command per source file.
 
     python3 tools/ceph_compdb.py --ceph /path/to/ceph --out /tmp/ceph-compdb \
         src/common src/rgw
+
+    python3 tools/ceph_compdb.py --ceph /path/to/ceph --out /tmp/ceph-compdb \
+        --git-diff d4f5ce..HEAD
 """
 from __future__ import annotations
 
@@ -66,7 +69,9 @@ def main() -> int:
     ap.add_argument("--ceph", required=True, type=Path)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--std", default="c++23")
-    ap.add_argument("dirs", nargs="+", help="directories relative to the ceph root, e.g. src/common")
+    ap.add_argument("--git-diff", metavar="REV",
+                    help="only C/C++ files touched in this git diff (e.g. origin/main..HEAD)")
+    ap.add_argument("dirs", nargs="*", help="directories relative to the ceph root, e.g. src/common")
     a = ap.parse_args()
     src = a.ceph / "src"
     gen = a.out / "gen"
@@ -105,7 +110,7 @@ def main() -> int:
               "macOS. Run the analysis on Linux, the Docker image or the GitHub Action.", file=sys.stderr)
     incs = [src, src / "include", gen, gen / "include", src / "rapidjson/include",
             src / "dmclock/support/src", src / "dmclock/src", src / "s3select/include",
-            src / "xxHash", src / "BLAKE3/c"]
+            src / "xxHash", src / "BLAKE3/c", src / "rgw", src / "rgw/include"]
     flags = [f"-std={a.std}", "-DHAVE_CONFIG_H", "-D_FILE_OFFSET_BITS=64", "-D__linux__=1",
              "-DBOOST_ASIO_DISABLE_THREAD_KEYWORD_EXTENSION", "-Wno-everything", *sysroot]
     flags += [f"-I{p}" for p in incs if p.exists()]
@@ -125,11 +130,34 @@ def main() -> int:
             link.unlink()
         link.symlink_to((src / "fmt/include/fmt").resolve())
         flags.append(f"-I{side}")
+    exts = {".cc", ".cpp", ".cxx", ".c"}
+    targets: list[Path] = []
+    if a.git_diff:
+        r = subprocess.run(["git", "-C", str(a.ceph), "diff", "--name-only", "-z", a.git_diff],
+                           capture_output=True)
+        if r.returncode != 0:
+            print(r.stderr.decode(), file=sys.stderr)
+            return 1
+        names = [x.decode() for x in r.stdout.split(b"\0") if x]
+        for name in names:
+            p = a.ceph / name
+            if p.suffix.lower() in exts and p.is_file():
+                targets.append(p)
+    for d in a.dirs or []:
+        for f in sorted((a.ceph / d).rglob("*")):
+            if f.suffix.lower() in exts and f.is_file():
+                targets.append(f)
+    if not targets and not a.dirs and not a.git_diff:
+        print("provide dirs and/or --git-diff", file=sys.stderr)
+        return 2
+    seen = set()
     cmds = []
-    for d in a.dirs:
-        for f in sorted((a.ceph / d).rglob("*.cc")):
-            cmds.append({"directory": str(src), "file": str(f),
-                         "arguments": ["clang++", *flags, "-c", str(f)]})
+    for f in sorted(set(targets)):
+        if f in seen:
+            continue
+        seen.add(f)
+        cmds.append({"directory": str(src), "file": str(f),
+                     "arguments": ["clang++", *flags, "-c", str(f)]})
     (a.out / "compile_commands.json").write_text(json.dumps(cmds, indent=1))
     print(f"{len(cmds)} compile commands -> {a.out}/compile_commands.json")
     return 0

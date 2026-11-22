@@ -129,6 +129,9 @@ class Profile:
         m = self.raw.get("severity_from_cert", {"High": "error", "Medium": "warning", "Low": "note"})
         return m.get(cert_sev or "", "warning")
 
+    def diff_context_default(self) -> int:
+        return int((self.raw.get("diff_review") or {}).get("diff_context", 0))
+
 
 def _glob_tail(p: str, g: str) -> bool:
     # allow `src/tools/**/*.c`-style globs: treat ** as *

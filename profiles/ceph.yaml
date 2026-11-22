@@ -345,3 +345,7 @@ path_focus:
   - paths: ["src/rgw/*"]
     boost_categories: [STR, ERR, INT]
     reason: "HTTP/S3 request parsing and string handling."
+
+# Defaults for check_diff / build_review_packet (MCP and CLI).
+diff_review:
+  diff_context: 3

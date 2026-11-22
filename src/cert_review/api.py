@@ -186,7 +186,7 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
                compdb: str | None = None, tools: list[str] | None = None,
                min_confidence: float = 0.0, include_suppressed: bool = False, jobs: int = 4,
                max_rules_per_location: int = 2, standards: Any = None,
-               baseline: str | None = None, diff_context: int = 0) -> dict:
+               baseline: str | None = None, diff_context: int | None = None) -> dict:
     text = _diff_text(repo, base, head, diff_text)
     changed = diffutil.parse_unified_diff(text)
     ws = diffutil.prepare_diff_workspace(repo, text, content_ref=_diff_content_ref(repo, head, diff_text))
@@ -194,11 +194,14 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
         root_p = ws.root
         root = str(root_p)
         prof = P.load(profile)
+        ctx = prof.diff_context_default() if diff_context is None else diff_context
+        repo_p = str(Path(repo).expanduser().resolve()) if repo else None
         files = engine.select_files(list(ws.abs_changed()), prof, None, root_p)
         res = engine.check(files, prof, None, compdb, root,
                            tuple(tools) if tools else None,
                            ws.abs_changed(), jobs, max_rules_per_location, min_confidence,
-                           include_suppressed, standards, diff_context=diff_context)
+                           include_suppressed, standards, diff_context=ctx,
+                           compdb_search_root=repo_p)
         d = res.to_dict(include_suppressed)
         if repo:
             d["files"] = _remap_workspace_paths(d.get("files") or [], root_p, repo)
@@ -221,7 +224,7 @@ def review_packet(path: str | list[str] | None = None, repo: str | None = None,
                   profile: str = "default", run_static: bool = True, compdb: str | None = None,
                   max_rules_per_hunk: int | None = None, context_lines: int = 3,
                   standards: Any = None, tools: list[str] | None = None,
-                  min_confidence: float = 0.0, diff_context: int = 0) -> dict:
+                  min_confidence: float = 0.0, diff_context: int | None = None) -> dict:
     prof = P.load(profile)
     existing: list[dict] = []
     max_hunk = (prof.raw.get("llm_review") or {}).get("max_hunk_lines", 60)
@@ -239,10 +242,12 @@ def review_packet(path: str | list[str] | None = None, repo: str | None = None,
             if run_static and files:
                 abs_changed = ws.abs_changed()
                 sel = engine.select_files(list(abs_changed), prof, None, root)
+                ctx = prof.diff_context_default() if diff_context is None else diff_context
                 res = engine.check(sel, prof, None, compdb, str(root),
                                    tuple(tools) if tools else None,
                                    abs_changed, 4, 2, min_confidence, False,
-                                   standards, diff_context=diff_context)
+                                   standards, diff_context=ctx,
+                                   compdb_search_root=repo)
                 existing = res.to_dict()["findings"]
             hunks = PK.build_hunks(ranges, max_hunk)
             pk = PK.build(hunks, prof, existing, max_rules_per_hunk)

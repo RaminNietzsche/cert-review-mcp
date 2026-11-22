@@ -23,8 +23,11 @@ tracker.ceph.com or ceph/ceph PRs from this skill.
   extensions (`src/CMakeLists.txt`). There is no checked-in `.clang-tidy`; the engine
   passes checks explicitly.
 - Compile database: a real Ceph build with `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON`
-  is best. For a partial checkout, `python3 tools/ceph_compdb.py --ceph <root> --out <dir> src/common ...`.
-- Review the diff, not the file: `check_diff` with `base` = the target branch.
+  is best. For a partial checkout or a PR, `tools/ceph_compdb.py --ceph <root> --out <dir>`
+  with `src/...` dirs or `--git-diff base..HEAD`. Pass `compdb` to MCP `check_diff` (auto-find
+  uses `repo/build`, not the temp diff workspace). See [docs/execution.md](../../docs/execution.md).
+- Review the diff, not the file: `check_diff` with `base` = the target branch. Profile `ceph`
+  defaults to `diff_context: 3` for nearby-line findings.
 
 ## Where to spend attention
 

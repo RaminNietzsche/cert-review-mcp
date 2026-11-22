@@ -109,9 +109,19 @@ def fallback_flags(path: str, lang: str, profile: Profile, root: Path | None) ->
     return flags
 
 
+def _source_path_key(path: str | Path) -> str:
+    """Stable key for matching a checkout file to a compile_commands entry (from `src/`)."""
+    p = Path(path).as_posix()
+    if "/src/" in p:
+        return "src/" + p.split("/src/", 1)[1]
+    if p.startswith("src/"):
+        return p
+    return Path(p).name
+
+
 @functools.lru_cache(maxsize=8)
-def _compdb_index(compdb: str) -> dict[str, dict] | None:
-    """Resolved source path -> compile_commands entry."""
+def _compdb_indexes(compdb: str) -> tuple[dict[str, dict], dict[str, dict]] | None:
+    """(absolute path -> entry, src/... key -> entry)."""
     j = Path(compdb) / "compile_commands.json"
     if not j.is_file():
         return None
@@ -119,12 +129,57 @@ def _compdb_index(compdb: str) -> dict[str, dict] | None:
         entries = json.loads(j.read_text())
     except (OSError, ValueError):
         return None
-    out: dict[str, dict] = {}
+    by_abs: dict[str, dict] = {}
+    by_key: dict[str, dict] = {}
     for e in entries:
         f = Path(e.get("file", ""))
         f = f if f.is_absolute() else Path(e.get("directory", ".")) / f
-        out[str(f.resolve())] = e
-    return out or None
+        rp = str(f.resolve())
+        by_abs[rp] = e
+        k = _source_path_key(rp)
+        by_key.setdefault(k, e)
+    return (by_abs, by_key) if by_abs else None
+
+
+def _compdb_index(compdb: str) -> dict[str, dict] | None:
+    got = _compdb_indexes(compdb)
+    return got[0] if got else None
+
+
+def compdb_entry(path: str, compdb: Path | None) -> dict | None:
+    """Entry for `path`, including diff workspaces where only `src/...` matches the database."""
+    if not compdb:
+        return None
+    got = _compdb_indexes(str(compdb))
+    if not got:
+        return None
+    by_abs, by_key = got
+    rp = str(Path(path).resolve())
+    if rp in by_abs:
+        return by_abs[rp]
+    return by_key.get(_source_path_key(path))
+
+
+def compile_args_from_entry(entry: dict, analyze_path: str) -> tuple[list[str], str | None]:
+    """Compiler flags for analysing `analyze_path` using a compile_commands entry."""
+    import shlex
+    args = list(entry.get("arguments") or shlex.split(entry.get("command", "")))[1:]
+    rp = str(Path(analyze_path).resolve())
+    out, skip = [], False
+    for a in args:
+        if skip:
+            skip = False
+            continue
+        if a in ("-o", "-MF", "-MT", "-MQ"):
+            skip = True
+            continue
+        if a in ("-c", "-MD", "-MMD") or (a.startswith("-o") and len(a) > 2):
+            continue
+        ef = entry.get("file")
+        if ef and a in (ef, rp, str(Path(ef).resolve())):
+            continue
+        out.append(a)
+    return out + ["-Wno-everything", "-Qunused-arguments"], entry.get("directory")
 
 
 def _checks_for_clang_tidy(profile: Profile, standards=None) -> tuple[list[str], list[str]]:
@@ -148,18 +203,21 @@ def run_clang_tidy(files: list[str], profile: Profile, compdb: Path | None,
     mapped_ct = set(CM.checkers_for_tool("clang-tidy", standards=standards))
     raw: list[RawFinding] = []
     hf = profile.header_filter
-    idx = _compdb_index(str(compdb)) if compdb else None
-
     def one(path: str):
         cmd = [exe, "--quiet", f"--checks={checks_arg}"]
         if hf:
             cmd.append(f"--header-filter={hf}")
-        in_db = idx is not None and str(Path(path).resolve()) in idx
-        if compdb and in_db:
+        entry = compdb_entry(path, compdb)
+        abs_hit = entry and _compdb_index(str(compdb)) and str(Path(path).resolve()) in _compdb_index(str(compdb))
+        if compdb and entry and abs_hit:
             cmd += ["-p", str(compdb)]
             cmd.append(path)
+        elif entry:
+            cmd.append(path)
+            cmd.append("--")
+            cmd += compile_args_from_entry(entry, path)[0]
         else:
-            if compdb and idx is not None:
+            if compdb:
                 st.notes.append(f"not in compile_commands.json, guessed flags: {path}")
             cmd.append(path)
             cmd.append("--")
@@ -276,26 +334,10 @@ def csa_compile_args(path: str, profile: Profile, compdb: Path | None,
     compilation database when there is one (compiler, -c, -o and the file itself removed),
     otherwise the guessed flags."""
     lang = lang_of(path)
-    rp = str(Path(path).resolve())
     if compdb:
-        e = (_compdb_index(str(compdb)) or {}).get(rp)
+        e = compdb_entry(path, compdb)
         if e:
-            import shlex
-            args = list(e.get("arguments") or shlex.split(e.get("command", "")))[1:]
-            out, skip = [], False
-            for a in args:
-                if skip:
-                    skip = False
-                    continue
-                if a in ("-o", "-MF", "-MT", "-MQ"):
-                    skip = True
-                    continue
-                if a in ("-c", "-MD", "-MMD") or (a.startswith("-o") and len(a) > 2):
-                    continue
-                if a in (e.get("file"), rp):
-                    continue
-                out.append(a)
-            return out + ["-Wno-everything", "-Qunused-arguments"], e.get("directory")
+            return compile_args_from_entry(e, path)
     return fallback_flags(path, lang, profile, root), None
 
 
@@ -401,6 +443,7 @@ def run_cppcheck(files: list[str], profile: Profile, root: Path | None, jobs: in
         st.notes.append("MISRA C:2012 addon enabled for .c files"
                         + (" with your rule-texts file" if addon != "misra" else ""))
     cdb = compdb or (find_compdb(root) if root else None)
+    by_key = (_compdb_indexes(str(cdb)) or ({}, {}))[1] if cdb else {}
     project = (cdb / "compile_commands.json") if cdb and (cdb / "compile_commands.json").is_file() else None
 
     def one(path: str):
@@ -410,7 +453,8 @@ def run_cppcheck(files: list[str], profile: Profile, root: Path | None, jobs: in
                "--template={file}:{line}:{column}:{severity}:{id}:{message}",
                f"--std={'c' + str(std.get('c_standard', 11)) if lang == 'c' else 'c++' + str(min(std.get('cpp_standard', 20), 20))}",
                "--language=" + ("c" if lang == "c" else "c++")]
-        if project is not None:
+        use_project = project is not None and _source_path_key(path) in by_key
+        if use_project:
             cmd.append(f"--project={project}")
         if addon and lang == "c":
             cmd.append(f"--addon={addon}")

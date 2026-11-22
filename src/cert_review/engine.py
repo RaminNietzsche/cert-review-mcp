@@ -260,7 +260,7 @@ def check(paths: list[str], profile: P.Profile | str = "default", lang: str | No
           jobs: int = 4, max_rules_per_location: int = 2, min_confidence: float = 0.0,
           include_suppressed: bool = True,
           standards: tuple[str, ...] | list[str] | str | None = None,
-          diff_context: int = 0) -> Result:
+          diff_context: int = 0, compdb_search_root: str | Path | None = None) -> Result:
     prof = P.load(profile) if isinstance(profile, str) else profile
     stds = R.expand_standards(standards) if standards else prof.standards
     rootp = Path(root).resolve() if root else None
@@ -273,7 +273,11 @@ def check(paths: list[str], profile: P.Profile | str = "default", lang: str | No
     if not files:
         res.notes.append("no C/C++ files selected")
         return res
-    cdb = Path(compdb) if compdb else (T.find_compdb(rootp) if rootp else None)
+    cdb = Path(compdb) if compdb else None
+    if cdb is None:
+        for start in (Path(compdb_search_root).resolve() if compdb_search_root else None, rootp):
+            if start and (cdb := T.find_compdb(start)):
+                break
     raw: list[T.RawFinding] = []
     if "clang-tidy" in tools:
         r, st = T.run_clang_tidy(files, prof, cdb, rootp, jobs=jobs, with_csa="clangsa" in tools,
@@ -333,4 +337,10 @@ def check(paths: list[str], profile: P.Profile | str = "default", lang: str | No
     kept = [f for f in F.dedupe(kept) if f.confidence >= min_confidence]
     res.findings = F.sort_by_importance(kept)
     res.suppressed = dropped if include_suppressed else []
+    if prof.name == "ceph" and any(t.status == "partial" for t in res.tools):
+        res.notes.append(
+            "Ceph partial analysis: use a real build's compile_commands.json "
+            "(cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON), or tools/ceph_compdb.py for the "
+            "changed trees; analyse on Linux with the Docker image when possible. "
+            "See docs/execution.md.")
     return res

@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 1.3.1 (2026-11-22)
+
+### Added
+
+- [docs/execution.md](docs/execution.md): prerequisites for trustworthy runs (Ceph, compdb, diff).
+- `tools/ceph_compdb.py --git-diff` and extra RGW include paths.
+
+### Fixed
+
+- Diff mode: `compile_commands.json` entries match analysed files by `src/...` path, so a PR
+  worktree still gets real flags when `compdb` points at the Ceph checkout. `compdb` is also
+  discovered under `repo/build`, not only under the temp workspace.
+- cppcheck uses `--project` only for files present in the database.
+- Ceph profile: default `diff_context: 3`; partial runs link to [docs/execution.md](docs/execution.md).
+
 ## 1.3.0 (2026-11-22)
 
 ### Added
