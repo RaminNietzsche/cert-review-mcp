@@ -30,6 +30,8 @@ All tools are read-only and never write to the project.
 | `validate_findings` | Check findings against the rule catalog |
 | `get_rule_coverage` | Count rules by how they can be checked |
 | `format_findings` | Render findings as Markdown, GitHub or GitLab review comments, SARIF or Code Quality JSON |
+| `format_pr_review` | One markdown PR comment: static summary, heuristic hints, style nits |
+| `review_pr` | Preferred for PRs: `check_diff` + `build_review_packet` + `format_pr_review` in one call |
 
 ## Use it from an MCP client
 

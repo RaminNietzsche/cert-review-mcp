@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.4.1 (2026-11-22)
+
+### Fixed
+
+- CLI `review-pr`: remove duplicate `--profile` (and related flags) that broke argparse and
+  failed self-test on Python 3.12.
+
 ## 1.4.0 (2026-11-22)
 
 ### Added
