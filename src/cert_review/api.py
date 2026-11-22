@@ -78,6 +78,45 @@ def _resolve_compdb(
     ]
 
 
+def _remap_packet(packet: dict | None, check_result: dict | None, root: str | None) -> dict | None:
+    if not packet:
+        return packet
+    ws = (check_result or {}).get("workspace")
+    repo = (check_result or {}).get("root") or root
+    if not ws or not repo:
+        return packet
+    import copy
+    out = copy.deepcopy(packet)
+    ws_p = Path(ws)
+    for h in out.get("hunks") or []:
+        if h.get("file"):
+            h["file"] = _remap_workspace_paths([h["file"]], ws_p, repo)[0]
+    return out
+
+
+def format_pr_review(
+    *,
+    title: str | None = None,
+    scope: str | None = None,
+    profile: str = "ceph",
+    check_result: dict | None = None,
+    packet: dict | None = None,
+    functional_notes: list[str] | None = None,
+    root: str | None = None,
+) -> dict:
+    """Format a GitHub/GitLab-ready PR comment with static results, hints and style nits."""
+    from . import pr_comment as PC
+
+    pkt = _remap_packet(packet, check_result, root)
+    body = PC.pr_review_markdown(
+        title=title, scope=scope, profile=profile,
+        check_result=check_result, packet=pkt,
+        functional_notes=functional_notes, root=root or (check_result or {}).get("root"),
+    )
+    from . import __version__ as ver
+    return {"markdown": body, "profile": profile, "version": ver}
+
+
 def refresh_ceph_compdb(repo: str, *, tracked: bool = True, force: bool = False,
                         git_ref: str = "HEAD") -> dict:
     """Build or refresh `.cert-review/compdb-cache` under a Ceph checkout."""

@@ -8,11 +8,11 @@
     "source": "github"
   },
   "websiteUrl": "https://github.com/RaminNietzsche/cert-review-mcp",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "packages": [
     {
       "registryType": "oci",
-      "identifier": "docker.io/raminnietzsche/cert-review-mcp:1.3.2",
+      "identifier": "docker.io/raminnietzsche/cert-review-mcp:1.3.3",
       "runtimeHint": "docker",
       "transport": {
         "type": "stdio"

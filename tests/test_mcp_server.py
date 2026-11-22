@@ -8,7 +8,8 @@ import pytest
 from cert_review.mcp_server import build_server
 
 EXPECTED_TOOLS = {"list_rules", "get_rule", "search_rules", "check_files", "check_diff", "explain_finding",
-                  "build_review_packet", "validate_findings", "get_rule_coverage", "format_findings"}
+                  "build_review_packet", "validate_findings", "get_rule_coverage", "format_findings",
+                  "format_pr_review"}
 
 
 def _text(result):

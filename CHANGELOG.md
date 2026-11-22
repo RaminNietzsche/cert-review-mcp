@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.3.3 (2026-11-22)
+
+### Added
+
+- `format_pr_review` (MCP + `cert-review format-pr`): single markdown PR comment with static tool
+  summary, `build_review_packet` heuristic table, Ceph idiom hints, CodingStyle nits, and
+  auto-suggested functional bullets when the packet mentions sync/RGW paths.
+
 ## 1.3.2 (2026-11-22)
 
 ### Added

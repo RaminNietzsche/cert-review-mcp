@@ -17,6 +17,7 @@ Review flow:
    that cite a candidate rule_id and quote that rule's text verbatim.
 3. validate_findings to drop ungrounded findings.
 4. format_findings to draft markdown, GitHub or GitLab review payloads, SARIF or GitLab reports.
+   format_pr_review merges check_diff + build_review_packet into one PR comment with hints and style nits.
 Use absolute paths and profile "ceph" for Ceph trees. A tool status "partial" or non-empty
 warnings means some files did not compile or timed out, so a clean result is not proof.
 MISRA C:2012, MISRA C++:2023 and AUTOSAR C++14: pass `standard` to the lookup tools or

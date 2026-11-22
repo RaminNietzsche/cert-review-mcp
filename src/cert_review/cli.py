@@ -1,4 +1,4 @@
-"""cert-review command line: check | diff | compdb | baseline | explain | explain-finding | coverage | packet | rules | validate."""
+"""cert-review command line: check | diff | compdb | format-pr | baseline | explain | explain-finding | coverage | packet | rules | validate."""
 from __future__ import annotations
 
 import argparse
@@ -135,6 +135,14 @@ def main(argv: list[str] | None = None) -> int:
     ver = sub.add_parser("version", help="show package version and installed source path")
     ver.add_argument("--json", action="store_true")
 
+    fp = sub.add_parser("format-pr", help="draft PR markdown: static + hints + style nits")
+    fp.add_argument("--check-json", help="check_diff report JSON file, or - for stdin")
+    fp.add_argument("--packet-json", help="build_review_packet JSON file")
+    fp.add_argument("--title")
+    fp.add_argument("--scope")
+    fp.add_argument("--profile", default="ceph")
+    fp.add_argument("-o", "--output")
+
     db = sub.add_parser("compdb", help="build or refresh approximate Ceph compile_commands.json")
     db.add_argument("--repo", required=True, help="Ceph checkout root")
     db.add_argument("--tracked", action="store_true",
@@ -232,6 +240,22 @@ def main(argv: list[str] | None = None) -> int:
               + ", ".join(f"{c['tool']}:{c['checker']}" for c in res["coverage"]["checkers"]))
         if res["profile"]["override"]:
             print(f"Profile {a.profile}: {res['profile']['override']}")
+        return 0
+    if a.cmd == "format-pr":
+        ck = {}
+        pk = {}
+        if a.check_json:
+            raw = sys.stdin.read() if a.check_json == "-" else open(a.check_json, encoding="utf-8").read()
+            ck = json.loads(raw)
+        if a.packet_json:
+            pk = json.load(open(a.packet_json, encoding="utf-8"))
+        res = api.format_pr_review(
+            title=a.title, scope=a.scope, profile=a.profile, check_result=ck or None, packet=pk or None)
+        text = res["markdown"]
+        if a.output:
+            open(a.output, "w", encoding="utf-8").write(text + "\n")
+        else:
+            print(text)
         return 0
     if a.cmd == "compdb":
         from pathlib import Path as P

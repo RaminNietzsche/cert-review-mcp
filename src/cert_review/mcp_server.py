@@ -588,6 +588,31 @@ def build_server() -> Any:
         return api.validate_findings(items, pk, profile)
 
     @mcp.tool(
+        title="Draft PR comment with hints and style nits",
+        annotations=ToolAnnotations(title="Draft PR comment with hints and style nits", **RO),
+        structured_output=True,
+        description=(
+            "Build a single markdown PR comment from `check_diff` output and "
+            "`build_review_packet`: static tool summary, heuristic candidate-rule table, "
+            "Ceph idiom hints, CodingStyle nits, and optional functional bullets. "
+            "Does not post anywhere."))
+    @_guard
+    def format_pr_review(
+        check_result: Annotated[dict[str, Any] | None, Field(description="Full object returned by check_diff (tools, findings, warnings, summary).")] = None,
+        packet: Annotated[dict[str, Any] | None, Field(description="Result from build_review_packet (needs `hunks`).")] = None,
+        title: Annotated[str | None, Field(description="Heading for the comment, e.g. the PR title.")] = None,
+        scope: Annotated[str | None, Field(description="One line: merge-base..head and file list.")] = None,
+        profile: Profile = "ceph",
+        functional_notes: Annotated[list[str] | None, Field(description="Extra functional review bullets; omit to auto-suggest from packet code.")] = None,
+        root: Annotated[str | None, Field(description="Repo root for relative paths in the markdown.")] = None,
+    ) -> dict[str, Any]:
+        return api.format_pr_review(
+            title=title, scope=scope, profile=profile,
+            check_result=check_result, packet=packet,
+            functional_notes=functional_notes, root=root,
+        )
+
+    @mcp.tool(
         title="Format SEI CERT findings as a report",
         annotations=ToolAnnotations(title="Format SEI CERT findings as a report", **RO),
         description=(
