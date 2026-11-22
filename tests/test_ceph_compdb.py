@@ -1,9 +1,18 @@
 import json
+import subprocess
 from pathlib import Path
 
 from cert_review.api import _resolve_compdb
 from cert_review.ceph_compdb import build_compdb, is_ceph_tree
 from cert_review.profiles import load
+
+
+def _git_commit_all(repo: Path, message: str) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo, check=True)
+    subprocess.run(["git", "config", "user.name", "cert-review-test"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
+    subprocess.run(["git", "commit", "-q", "-m", message], cwd=repo, check=True)
 
 
 def test_is_ceph_tree(tmp_path: Path):
@@ -31,22 +40,17 @@ def test_build_compdb_minimal(tmp_path: Path):
 
 
 def test_build_compdb_git_show_when_missing_on_disk(tmp_path: Path):
-    import subprocess
     src = tmp_path / "src"
     (src / "include").mkdir(parents=True)
     (src / "include" / "config-h.in.cmake").write_text("#cmakedefine FOO\n")
     (src / "ceph_ver.h.in.cmake").write_text("0\n")
     (src / "ceph_release.h.in.cmake").write_text("0\n")
     (src / "common" / "options").mkdir(parents=True)
-    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
-    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
-    subprocess.run(["git", "commit", "-q", "-m", "init"], cwd=tmp_path, check=True)
+    _git_commit_all(tmp_path, "init")
     only_git = src / "rgw" / "only_in_git.cc"
-    subprocess.run(["git", "show", "HEAD:src/rgw/only_in_git.cc"], cwd=tmp_path, check=False)
     only_git.parent.mkdir(parents=True, exist_ok=True)
     only_git.write_text("int main() { return 0; }\n")
-    subprocess.run(["git", "add", "src/rgw/only_in_git.cc"], cwd=tmp_path, check=True)
-    subprocess.run(["git", "commit", "-q", "-m", "add rgw"], cwd=tmp_path, check=True)
+    _git_commit_all(tmp_path, "add rgw")
     only_git.unlink()
     out = build_compdb(tmp_path, tmp_path / "out", relpaths=["src/rgw/only_in_git.cc"], git_ref="HEAD")
     data = json.loads((out / "compile_commands.json").read_text())
