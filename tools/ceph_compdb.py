@@ -1,167 +1,50 @@
 #!/usr/bin/env python3
-"""Create a cheap compile_commands.json for a Ceph checkout without building it.
-
-A real build (cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON) is better. This helper
-exists so the engine can analyse a partial checkout: it renders the headers
-cmake would generate (acconfig.h, ceph_ver.h, ceph_release.h) with neutral
-values into a side directory and writes one compile command per source file.
-
-    python3 tools/ceph_compdb.py --ceph /path/to/ceph --out /tmp/ceph-compdb \
-        src/common src/rgw
-
-    python3 tools/ceph_compdb.py --ceph /path/to/ceph --out /tmp/ceph-compdb \
-        --git-diff d4f5ce..HEAD
-"""
+"""CLI wrapper for cert_review.ceph_compdb."""
 from __future__ import annotations
 
 import argparse
 import json
-import platform
-import re
-import subprocess
 import sys
 from pathlib import Path
 
-EXTRA_DEFS = """
-#define HAVE_SYS_TYPES_H 1
-#define HAVE_LINUX_TYPES_H 1
-#define USE_OPENSSL 1
-#define HAVE_STDINT_H 1
-#define HAVE_UNISTD_H 1
-#define HAVE_PTHREAD_H 1
-#define PROJECT_NAME "ceph"
-#define CEPH_LIBDIR "/usr/lib"
-#define CEPH_PKGLIBDIR "/usr/lib/ceph"
-#define CMAKE_INSTALL_LIBDIR "lib"
-#define CMAKE_INSTALL_SYSCONFDIR "/etc"
-#define CMAKE_INSTALL_PREFIX "/usr"
-#define CEPH_INSTALL_FULL_PKGLIBDIR "/usr/lib/ceph"
-#define CEPH_INSTALL_DATADIR "/usr/share/ceph"
-"""
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 
-
-COMPAT_INCLUDES = ["cstdint", "cstring", "memory", "string", "stdexcept", "limits", "algorithm",
-                   "functional"]
-
-
-OPTION_VARS = {"ms_bind_retry_count": "3", "ms_bind_retry_delay": "5"}
-
-
-def render_cmake_header(src: Path, subst: dict[str, str]) -> str:
-    if not src.exists():   # older trees lack some templates (e.g. ceph_release.h.in.cmake)
-        return f"/* {src.name} not present in this tree */\n"
-    out = []
-    for line in src.read_text().splitlines():
-        m = re.match(r"#cmakedefine01\s+(\w+)", line)
-        if m:
-            out.append(f"#define {m.group(1)} 0")
-            continue
-        m = re.match(r"#cmakedefine\s+(\w+)", line)
-        if m:
-            out.append(f"/* #undef {m.group(1)} */")
-            continue
-        out.append(re.sub(r"@(\w+)@", lambda k: subst.get(k.group(1), "0"), line))
-    return "\n".join(out) + "\n"
+from cert_review.ceph_compdb import build_compdb, ensure_cached_compdb, is_ceph_tree  # noqa: E402
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--ceph", required=True, type=Path)
-    ap.add_argument("--out", required=True, type=Path)
+    ap.add_argument("--out", type=Path,
+                    help="output dir for --git-diff; tracked mode uses .cert-review/compdb-cache")
     ap.add_argument("--std", default="c++23")
+    ap.add_argument("--force", action="store_true")
+    ap.add_argument("--tracked", action="store_true",
+                    help="all src/ C/C++ at HEAD minus vendor trees (cached under .cert-review)")
     ap.add_argument("--git-diff", metavar="REV",
                     help="only C/C++ files touched in this git diff (e.g. origin/main..HEAD)")
     ap.add_argument("dirs", nargs="*", help="directories relative to the ceph root, e.g. src/common")
     a = ap.parse_args()
-    src = a.ceph / "src"
-    gen = a.out / "gen"
-    (gen / "include").mkdir(parents=True, exist_ok=True)
-    acc = render_cmake_header(src / "include/config-h.in.cmake", {}) + EXTRA_DEFS
-    (gen / "acconfig.h").write_text(acc)
-    (gen / "include/acconfig.h").write_text(acc)
-    (gen / "ceph_ver.h").write_text(render_cmake_header(src / "ceph_ver.h.in.cmake", {
-        "CEPH_GIT_VER": "0", "CEPH_GIT_NICE_VER": "0", "CEPH_GIT_VER_FULL": "0",
-        "CEPH_GIT_VER_NICE": "0"}))
-    (gen / "ceph_release.h").write_text(render_cmake_header(src / "ceph_release.h.in.cmake", {
-        "CEPH_RELEASE": "20", "CEPH_RELEASE_NAME": "main", "CEPH_RELEASE_TYPE": "dev",
-        "CEPH_BUILD_TYPE": "RelWithDebInfo"}))
-    # <name>_legacy_options.h comes from common/options/*.yaml.in via y2c.py
-    opt = src / "common/options"
-    tmp = a.out / "options"
-    tmp.mkdir(exist_ok=True)
-    for yin in sorted(opt.glob("*.yaml.in")):
-        name = yin.name[: -len(".yaml.in")]
-        y = tmp / f"{name}.yaml"
-        y.write_text(re.sub(r"@(\w+)@", lambda m: OPTION_VARS.get(m.group(1), "x"), yin.read_text()))
-        subprocess.run([sys.executable, str(opt / "y2c.py"), "--input", str(y),
-                        "--output", str(tmp / f"{name}_options.cc"),
-                        "--legacy", str(gen / "include" / f"{name}_legacy_options.h"),
-                        "--name", name], check=False, capture_output=True)
-    sysroot = []
-    if platform.system() == "Darwin":
-        try:
-            sdk = subprocess.run(["xcrun", "--show-sdk-path"], capture_output=True, text=True,
-                                 check=True).stdout.strip()
-            sysroot = ["-isysroot", sdk]
-        except (OSError, subprocess.CalledProcessError):
-            print("warning: xcrun --show-sdk-path failed; system headers may be missing", file=sys.stderr)
-        print("note: Ceph needs Linux headers (linux/version.h, ...) and Linux-only Boost.Asio "
-              "features, so files such as src/rgw/radosgw-admin/radosgw-admin.cc cannot be parsed on "
-              "macOS. Run the analysis on Linux, the Docker image or the GitHub Action.", file=sys.stderr)
-    incs = [src, src / "include", gen, gen / "include", src / "rapidjson/include",
-            src / "dmclock/support/src", src / "dmclock/src", src / "s3select/include",
-            src / "xxHash", src / "BLAKE3/c", src / "rgw", src / "rgw/include"]
-    flags = [f"-std={a.std}", "-DHAVE_CONFIG_H", "-D_FILE_OFFSET_BITS=64", "-D__linux__=1",
-             "-DBOOST_ASIO_DISABLE_THREAD_KEYWORD_EXTENSION", "-Wno-everything", *sysroot]
-    flags += [f"-I{p}" for p in incs if p.exists()]
-    # Older trees used std::unique_ptr, std::runtime_error, uint64_t ... after headers that
-    # pulled these in through older libstdc++ versions; current libstdc++ includes less.
-    for h in COMPAT_INCLUDES:
-        flags += ["-include", h]
-    # The bundled fmt ships a file named `format` next to its fmt/ directory; with
-    # -Isrc/fmt/include it would replace the standard <format> that newer libstdc++ <chrono>
-    # includes. A side directory holding only a link to fmt/ keeps <fmt/...> on the bundled
-    # copy (ahead of any system fmt) without hiding <format>.
-    if (src / "fmt/include/fmt").is_dir():
-        side = a.out / "fmt-include"
-        side.mkdir(exist_ok=True)
-        link = side / "fmt"
-        if link.is_symlink() or link.exists():
-            link.unlink()
-        link.symlink_to((src / "fmt/include/fmt").resolve())
-        flags.append(f"-I{side}")
-    exts = {".cc", ".cpp", ".cxx", ".c"}
-    targets: list[Path] = []
-    if a.git_diff:
-        r = subprocess.run(["git", "-C", str(a.ceph), "diff", "--name-only", "-z", a.git_diff],
-                           capture_output=True)
-        if r.returncode != 0:
-            print(r.stderr.decode(), file=sys.stderr)
-            return 1
-        names = [x.decode() for x in r.stdout.split(b"\0") if x]
-        for name in names:
-            p = a.ceph / name
-            if p.suffix.lower() in exts and p.is_file():
-                targets.append(p)
-    for d in a.dirs or []:
-        for f in sorted((a.ceph / d).rglob("*")):
-            if f.suffix.lower() in exts and f.is_file():
-                targets.append(f)
-    if not targets and not a.dirs and not a.git_diff:
-        print("provide dirs and/or --git-diff", file=sys.stderr)
+    if not a.tracked and not a.git_diff and not a.dirs:
+        print("provide --tracked, --git-diff and/or dirs", file=sys.stderr)
         return 2
-    seen = set()
-    cmds = []
-    for f in sorted(set(targets)):
-        if f in seen:
-            continue
-        seen.add(f)
-        cmds.append({"directory": str(src), "file": str(f),
-                     "arguments": ["clang++", *flags, "-c", str(f)]})
-    (a.out / "compile_commands.json").write_text(json.dumps(cmds, indent=1))
-    print(f"{len(cmds)} compile commands -> {a.out}/compile_commands.json")
+    if a.tracked:
+        dest = ensure_cached_compdb(a.ceph, force=a.force)
+        if not dest:
+            return 1
+        out = dest
+    else:
+        if not a.out:
+            print("--out is required without --tracked", file=sys.stderr)
+            return 2
+        out = build_compdb(a.ceph, a.out, git_diff=a.git_diff, dirs=a.dirs or None, std=a.std)
+    n = len(json.loads((out / "compile_commands.json").read_text()))
+    print(f"{n} compile commands -> {out}/compile_commands.json")
+    if is_ceph_tree(a.ceph) and (a.ceph / ".cert-review/compdb-cache/current").exists():
+        print(f"current -> {(a.ceph / '.cert-review/compdb-cache/current').resolve()}")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

@@ -1,4 +1,4 @@
-"""cert-review command line: check | diff | baseline | explain | explain-finding | coverage | packet | rules | validate."""
+"""cert-review command line: check | diff | compdb | baseline | explain | explain-finding | coverage | packet | rules | validate."""
 from __future__ import annotations
 
 import argparse
@@ -135,6 +135,16 @@ def main(argv: list[str] | None = None) -> int:
     ver = sub.add_parser("version", help="show package version and installed source path")
     ver.add_argument("--json", action="store_true")
 
+    db = sub.add_parser("compdb", help="build or refresh approximate Ceph compile_commands.json")
+    db.add_argument("--repo", required=True, help="Ceph checkout root")
+    db.add_argument("--tracked", action="store_true",
+                    help="index all src/ C/C++ at HEAD (minus vendor trees); default without --git-diff")
+    db.add_argument("--git-diff", metavar="REV", help="only files in this git diff range")
+    db.add_argument("--out", type=Path, help="output directory (default: .cert-review/compdb-cache/<tree-id>)")
+    db.add_argument("--force", action="store_true", help="rebuild even when cache is current")
+    db.add_argument("--ref", default="HEAD", help="git ref for tracked mode (default HEAD)")
+    db.add_argument("--json", action="store_true")
+
     pk = sub.add_parser("packet", help="build the LLM review packet")
     pk.add_argument("paths", nargs="*")
     pk.add_argument("--repo")
@@ -222,6 +232,35 @@ def main(argv: list[str] | None = None) -> int:
               + ", ".join(f"{c['tool']}:{c['checker']}" for c in res["coverage"]["checkers"]))
         if res["profile"]["override"]:
             print(f"Profile {a.profile}: {res['profile']['override']}")
+        return 0
+    if a.cmd == "compdb":
+        from pathlib import Path as P
+        from .ceph_compdb import build_compdb, ensure_cached_compdb, is_ceph_tree
+
+        repo = P(a.repo).expanduser().resolve()
+        if not is_ceph_tree(repo):
+            print("not a Ceph tree", file=sys.stderr)
+            return 2
+        if a.git_diff:
+            out = a.out or P(".cert-review-compdb-out").resolve()
+            dest = build_compdb(repo, out, git_diff=a.git_diff, git_ref=a.ref)
+            n = len(json.load(open(dest / "compile_commands.json", encoding="utf-8")))
+            res = {"compdb": str(dest), "entries": n}
+        elif a.tracked or not a.out:
+            dest = ensure_cached_compdb(repo, git_ref=a.ref, force=a.force)
+            if not dest:
+                print("failed to build compdb", file=sys.stderr)
+                return 1
+            n = len(json.load(open(dest / "compile_commands.json", encoding="utf-8")))
+            res = api.refresh_ceph_compdb(str(repo), tracked=True, force=a.force, git_ref=a.ref)
+        else:
+            dest = build_compdb(repo, a.out, dirs=["src"])
+            n = len(json.load(open(dest / "compile_commands.json", encoding="utf-8")))
+            res = {"compdb": str(dest), "entries": n}
+        if a.json:
+            print(json.dumps(res, indent=2))
+        else:
+            print(f"{res.get('entries', n)} entries -> {res.get('compdb', dest)}")
         return 0
     if a.cmd == "version":
         import cert_review

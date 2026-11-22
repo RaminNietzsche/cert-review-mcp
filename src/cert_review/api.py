@@ -1,6 +1,9 @@
 """Shared API behind the CLI and the MCP server (all functions return plain data)."""
 from __future__ import annotations
 
+import json
+import shutil
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -12,7 +15,92 @@ from . import formatters
 from . import packet as PK
 from . import profiles as P
 from . import rules as R
+from . import toolrun as T
 from . import validator as V
+from .ceph_compdb import build_compdb, ensure_cached_compdb, is_ceph_tree, _git_run
+
+
+def _git_rev(ceph: Path, ref: str) -> str | None:
+    r = _git_run(ceph, "rev-parse", ref)
+    return r.stdout.decode().strip() if r.returncode == 0 else None
+
+
+def _resolve_compdb(
+    compdb: str | None,
+    prof: P.Profile,
+    repo: str | None,
+    *,
+    changed_relpaths: list[str] | None = None,
+    base: str | None = None,
+    head: str | None = None,
+    synthetic: bool | None = None,
+) -> tuple[str | None, Path | None, list[str]]:
+    """Pick compdb path; optionally build a temporary Ceph synthetic database."""
+    if compdb:
+        return compdb, None, []
+    if not repo:
+        return None, None, []
+    repo_p = Path(repo).expanduser().resolve()
+    if found := T.find_compdb(repo_p):
+        return str(found), None, []
+    want = prof.synthetic_compdb_default() if synthetic is None else synthetic
+    if not want or not is_ceph_tree(repo_p):
+        return None, None, []
+    excl = prof.synthetic_compdb_excludes()
+    git_ref = head or "HEAD"
+    head_sha = _git_rev(repo_p, git_ref)
+    checkout_sha = _git_rev(repo_p, "HEAD")
+    same_ref = head_sha and checkout_sha and head_sha == checkout_sha
+    if prof.synthetic_compdb_cache_default() and same_ref:
+        cached = ensure_cached_compdb(repo_p, git_ref=git_ref, exclude=excl)
+        if cached:
+            n = len(json.loads((cached / "compile_commands.json").read_text()))
+            return str(cached), None, [
+                f"cached synthetic Ceph compile database ({n} file(s) at {git_ref}); "
+                "refresh with `cert-review compdb --repo <ceph> --tracked`; "
+                "a cmake build is still more accurate",
+            ]
+    tmp = Path(tempfile.mkdtemp(prefix="cert-review-ceph-compdb-"))
+    git_diff = f"{base}...{git_ref}" if base else None
+    build_compdb(
+        repo_p, tmp, git_diff=git_diff, relpaths=changed_relpaths,
+        git_ref=git_ref, exclude=excl,
+    )
+    n = len(json.loads((tmp / "compile_commands.json").read_text()))
+    if n == 0:
+        shutil.rmtree(tmp, ignore_errors=True)
+        return None, None, [
+            "no compile_commands.json under repo; synthetic Ceph compdb had no matching source files",
+        ]
+    return str(tmp), tmp, [
+        f"synthetic Ceph compile database ({n} file(s)) — approximate flags; "
+        "a real build (-DCMAKE_EXPORT_COMPILE_COMMANDS=ON) is more accurate",
+    ]
+
+
+def refresh_ceph_compdb(repo: str, *, tracked: bool = True, force: bool = False,
+                        git_ref: str = "HEAD") -> dict:
+    """Build or refresh `.cert-review/compdb-cache` under a Ceph checkout."""
+    repo_p = Path(repo).expanduser().resolve()
+    if not is_ceph_tree(repo_p):
+        return {"error": "not a Ceph tree", "repo": str(repo_p)}
+    prof = P.load("ceph")
+    excl = prof.synthetic_compdb_excludes()
+    if tracked:
+        dest = ensure_cached_compdb(repo_p, git_ref=git_ref, exclude=excl, force=force)
+    else:
+        dest = None
+    if not dest:
+        return {"error": "no sources selected", "repo": str(repo_p)}
+    n = len(json.loads((dest / "compile_commands.json").read_text()))
+    meta = json.loads((dest / "meta.json").read_text())
+    return {
+        "repo": str(repo_p),
+        "compdb": str(dest),
+        "entries": n,
+        "tree_id": meta.get("tree_id"),
+        "current_link": str(repo_p / ".cert-review/compdb-cache/current"),
+    }
 
 
 def list_rules(lang: str | None = None, category: str | None = None, kind: str | None = None,
@@ -190,14 +278,17 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
     text = _diff_text(repo, base, head, diff_text)
     changed = diffutil.parse_unified_diff(text)
     ws = diffutil.prepare_diff_workspace(repo, text, content_ref=_diff_content_ref(repo, head, diff_text))
+    cdb_tmp: Path | None = None
     try:
         root_p = ws.root
         root = str(root_p)
         prof = P.load(profile)
         ctx = prof.diff_context_default() if diff_context is None else diff_context
         repo_p = str(Path(repo).expanduser().resolve()) if repo else None
+        cdb, cdb_tmp, cdb_notes = _resolve_compdb(
+            compdb, prof, repo, changed_relpaths=sorted(changed), base=base, head=head)
         files = engine.select_files(list(ws.abs_changed()), prof, None, root_p)
-        res = engine.check(files, prof, None, compdb, root,
+        res = engine.check(files, prof, None, cdb, root,
                            tuple(tools) if tools else None,
                            ws.abs_changed(), jobs, max_rules_per_location, min_confidence,
                            include_suppressed, standards, diff_context=ctx,
@@ -214,8 +305,14 @@ def check_diff(repo: str | None = None, base: str | None = None, head: str | Non
         d["changed_files"] = sorted(changed)
         d["root"] = str(Path(repo).expanduser().resolve()) if repo else root
         d["workspace"] = root
+        if cdb:
+            d["compdb"] = cdb
+        if cdb_notes:
+            d.setdefault("notes", []).extend(cdb_notes)
         return d
     finally:
+        if cdb_tmp:
+            shutil.rmtree(cdb_tmp, ignore_errors=True)
         ws.cleanup()
 
 
@@ -232,6 +329,7 @@ def review_packet(path: str | list[str] | None = None, repo: str | None = None,
         text = _diff_text(repo, base, head, diff_text)
         ws = diffutil.prepare_diff_workspace(repo, text,
                                              content_ref=_diff_content_ref(repo, head, diff_text))
+        cdb_tmp = None
         try:
             root = ws.root
             hunk_ctx = diffutil.hunks_with_context(text, context_lines)
@@ -243,17 +341,27 @@ def review_packet(path: str | list[str] | None = None, repo: str | None = None,
                 abs_changed = ws.abs_changed()
                 sel = engine.select_files(list(abs_changed), prof, None, root)
                 ctx = prof.diff_context_default() if diff_context is None else diff_context
-                res = engine.check(sel, prof, None, compdb, str(root),
+                changed = diffutil.parse_unified_diff(text)
+                cdb, cdb_tmp, cdb_notes = _resolve_compdb(
+                    compdb, prof, repo, changed_relpaths=sorted(changed), base=base, head=head)
+                res = engine.check(sel, prof, None, cdb, str(root),
                                    tuple(tools) if tools else None,
                                    abs_changed, 4, 2, min_confidence, False,
                                    standards, diff_context=ctx,
                                    compdb_search_root=repo)
                 existing = res.to_dict()["findings"]
+                pk_notes = cdb_notes
+            else:
+                pk_notes = []
             hunks = PK.build_hunks(ranges, max_hunk)
             pk = PK.build(hunks, prof, existing, max_rules_per_hunk)
             pk["static_findings"] = existing
+            if pk_notes:
+                pk["notes"] = pk_notes
             return pk
         finally:
+            if cdb_tmp:
+                shutil.rmtree(cdb_tmp, ignore_errors=True)
             ws.cleanup()
     if path:
         files = engine.select_files(_collect([path] if isinstance(path, str) else list(path)), prof)

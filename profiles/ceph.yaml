@@ -349,3 +349,7 @@ path_focus:
 # Defaults for check_diff / build_review_packet (MCP and CLI).
 diff_review:
   diff_context: 3
+  # When repo has no build/compile_commands.json, build an approximate DB for changed files.
+  synthetic_compdb: true
+  # Persist under <repo>/.cert-review/compdb-cache/<HEAD>/ and refresh when HEAD or dirty state changes.
+  synthetic_compdb_cache: true

@@ -1,7 +1,7 @@
 ---
 name: ceph-cert-review
 description: Adds Ceph context to the cert-review skill. Reviews Ceph C++23 and C code against SEI CERT with the ceph profile: ceph_assert is for invariants, dout/ldout are stream based, locks are ceph::mutex with lockdep, RefCountedObject uses intrusive references, buffer::list has its own bounds idioms, errors are negative errno ints, crimson and boost::asio callbacks outlive their frames. Use for "CERT review of this Ceph change", "check my ceph PR for memory/lifetime/bounds issues", or before submitting to ceph/ceph.
-compatibility: Needs the cert-review skill and MCP server. A Ceph build's compile_commands.json is strongly preferred; tools/ceph_compdb.py builds an approximate one for a partial checkout.
+compatibility: Needs the cert-review skill and MCP server. A Ceph build's compile_commands.json is best; without one, profile ceph auto-builds a synthetic compdb on check_diff, or use tools/ceph_compdb.py manually.
 license: Apache-2.0
 ---
 
@@ -23,9 +23,11 @@ tracker.ceph.com or ceph/ceph PRs from this skill.
   extensions (`src/CMakeLists.txt`). There is no checked-in `.clang-tidy`; the engine
   passes checks explicitly.
 - Compile database: a real Ceph build with `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON`
-  is best. For a partial checkout or a PR, `tools/ceph_compdb.py --ceph <root> --out <dir>`
-  with `src/...` dirs or `--git-diff base..HEAD`. Pass `compdb` to MCP `check_diff` (auto-find
-  uses `repo/build`, not the temp diff workspace). See [docs/execution.md](../../docs/execution.md).
+  is best. If the checkout has **no** `build/compile_commands.json`, MCP `check_diff` with
+  `profile: ceph` builds a **temporary synthetic** DB for changed files (see result `notes`).
+  Manual: `cert-review compdb --repo <root> --tracked` or `--git-diff base..HEAD`; legacy
+  `tools/ceph_compdb.py --ceph <root> --tracked`.
+  Auto-find still uses `repo/build`, not the temp diff workspace. See [docs/execution.md](../../docs/execution.md).
 - Review the diff, not the file: `check_diff` with `base` = the target branch. Profile `ceph`
   defaults to `diff_context: 3` for nearby-line findings.
 

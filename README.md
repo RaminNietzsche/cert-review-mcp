@@ -250,7 +250,8 @@ python3 tools/build_rules.py --src cert-src            # fails if counts differ 
 python3 tools/build_checker_map.py --codechecker <codechecker clone> --llvm <llvm-project clone>
 python3 tools/build_corpus.py && python3 tools/eval_accuracy.py
 python3 tools/build_guidelines.py --cppcheck <cppcheck 2.17.1 clone> --autosar autosar.txt  # MISRA/AUTOSAR
-python3 tools/ceph_compdb.py --ceph ~/ceph --out /tmp/ceph-compdb src/common   # cheap compile db
+cert-review compdb --repo ~/ceph --tracked                    # cached synthetic compile db
+python3 tools/ceph_compdb.py --ceph ~/ceph --tracked          # same (wrapper CLI)
 ```
 
 ## Limitations

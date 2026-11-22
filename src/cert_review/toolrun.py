@@ -500,7 +500,8 @@ def run_cppcheck(files: list[str], profile: Profile, root: Path | None, jobs: in
 
 def find_compdb(start: Path) -> Path | None:
     """Locate a directory containing compile_commands.json (start or build/ below it)."""
-    for d in (start, start / "build", start / "build-clang"):
+    cached = start / ".cert-review" / "compdb-cache" / "current"
+    for d in (start, start / "build", start / "build-clang", cached):
         if (d / "compile_commands.json").exists():
             return d
     return None

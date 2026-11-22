@@ -2,7 +2,28 @@
 
 ## Unreleased
 
+## 1.3.2 (2026-11-22)
+
+### Added
+
+- `cert-review compdb --repo <ceph> --tracked`: cached synthetic `compile_commands.json` under
+  `<repo>/.cert-review/compdb-cache/<tree-id>/` (refreshes when `HEAD` or dirty worktree changes).
+- `cert_review.ceph_compdb`: shared library; `git show` materializes sources missing on disk;
+  headers (`.h`) in synthetic entries; RGW admin include paths and `WITH_RADOSGW_*` defs.
+- Ceph profile: `synthetic_compdb_cache` uses the cache when `head` matches the checkout;
+  otherwise a diff-scoped synthetic DB for the analysed ref.
+
+### Changed
+
+- `find_compdb` also checks `<repo>/.cert-review/compdb-cache/current`.
+
 ## 1.3.1 (2026-11-22)
+
+### Added
+
+- Ceph profile: when `repo` has no `compile_commands.json`, `check_diff` /
+  `build_review_packet` auto-build a temporary synthetic compdb (`diff_review.synthetic_compdb`).
+- `cert_review.ceph_compdb` module (CLI `tools/ceph_compdb.py` wraps it).
 
 ### Added
 

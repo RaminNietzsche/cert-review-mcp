@@ -132,6 +132,21 @@ class Profile:
     def diff_context_default(self) -> int:
         return int((self.raw.get("diff_review") or {}).get("diff_context", 0))
 
+    def synthetic_compdb_default(self) -> bool:
+        dr = self.raw.get("diff_review") or {}
+        if "synthetic_compdb" in dr:
+            return bool(dr["synthetic_compdb"])
+        return self.name == "ceph"
+
+    def synthetic_compdb_cache_default(self) -> bool:
+        dr = self.raw.get("diff_review") or {}
+        if "synthetic_compdb_cache" in dr:
+            return bool(dr["synthetic_compdb_cache"])
+        return self.name == "ceph"
+
+    def synthetic_compdb_excludes(self) -> tuple[str, ...]:
+        return tuple(self.raw.get("exclude_paths") or ())
+
 
 def _glob_tail(p: str, g: str) -> bool:
     # allow `src/tools/**/*.c`-style globs: treat ** as *

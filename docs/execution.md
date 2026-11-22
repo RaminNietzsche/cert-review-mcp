@@ -26,7 +26,14 @@ What the engine needs before its output is trustworthy, especially for **Ceph** 
      --git-diff d4f5ce..HEAD
    cert-review diff --repo "$CEPH" --base d4f5ce --profile ceph --compdb /tmp/ceph-compdb
    ```
-3. **MCP `check_diff`:** pass `compdb` explicitly. The server discovers `build/` under **`repo`**, not under the private diff workspace. Since 1.3.1, entries match by `src/...` paths so diff workspaces still use the database flags.
+3. **No `compile_commands.json` in the tree:** approximate database from current sources (not a substitute for cmake):
+   ```bash
+   cert-review compdb --repo "$CEPH" --tracked
+   # or: python3 tools/ceph_compdb.py --ceph "$CEPH" --tracked
+   ```
+   Writes `$CEPH/.cert-review/compdb-cache/<HEAD>/compile_commands.json`, symlink `current/`, and auto-refreshes when `HEAD` or dirty worktree changes. `find_compdb` and profile `ceph` use this cache before guessing flags. One-time cmake build with `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` is still the most complete option.
+   For a PR only: `--git-diff 'base..HEAD'` (includes files not checked out yet via `git show`).
+4. **MCP `check_diff`:** discovers `build/` under **`repo`**, not under the private diff workspace. Since 1.3.1, entries match by `src/...` paths so diff workspaces still use the database flags.
 
 ## What partial analysis means
 
