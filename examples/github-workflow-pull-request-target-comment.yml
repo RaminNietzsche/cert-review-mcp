@@ -3,7 +3,7 @@
 # Requires Docker on ubuntu-latest; image entrypoint is cert-review-mcp (stdio), not the CLI:
 #   docker run --entrypoint cert-review … review-pr …
 name: "Pull Request cert-review (MCP)"
-on:
+"on":
   pull_request_target:
     types: [opened, synchronize, reopened]
     paths:

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 1.4.4 (2026-11-23)
+
+### Added
+
+- Tests: `tests/test_github_footer.py` (API, CLI, workflow YAML, server.json),
+  MCP schema checks for `github_footer`, `tiny_git_repo` fixture in conftest.
+
+### Fixed
+
+- `pyproject.toml` version aligned with `__version__` (1.4.3).
+
 ## 1.4.3 (2026-11-23)
 
 ### Added
