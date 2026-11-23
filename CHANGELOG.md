@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 1.4.2 (2026-11-23)
+
+### Added
+
+- `format_pr_review` / `review-pr` optional **`github_footer`** (`pull_request_target`, `mcp`,
+  `github-action`): collapsible cert-review-mcp attribution for automated PR comments.
+- Example workflow `examples/github-workflow-pull-request-target-comment.yml` (same trigger style
+  as Ceph `pr-triage.yml`: `pull_request_target` + upsert via `<!-- cert-review -->`).
+
 ## 1.4.1 (2026-11-22)
 
 ### Fixed

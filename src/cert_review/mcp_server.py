@@ -605,11 +605,13 @@ def build_server() -> Any:
         profile: Profile = "ceph",
         functional_notes: Annotated[list[str] | None, Field(description="Extra functional review bullets; omit to auto-suggest from packet code.")] = None,
         root: Annotated[str | None, Field(description="Repo root for relative paths in the markdown.")] = None,
+        github_footer: Annotated[str | None, Field(description="Append collapsible footer: pull_request_target, mcp, or github-action. Omit to skip.")] = None,
     ) -> dict[str, Any]:
         return api.format_pr_review(
             title=title, scope=scope, profile=profile,
             check_result=check_result, packet=packet,
             functional_notes=functional_notes, root=root,
+            github_footer=github_footer,
         )
 
     @mcp.tool(
