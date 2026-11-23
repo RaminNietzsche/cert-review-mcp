@@ -638,6 +638,10 @@ def build_server() -> Any:
         baseline_path: BaselinePath = None,
         diff_context: Annotated[int | None, Field(ge=0, le=50, description="Omit to use profile default (ceph: 3).")] = None,
         functional_notes: Annotated[list[str] | None, Field(description="Extra functional bullets for the comment.")] = None,
+        github_footer: Annotated[
+            str | None,
+            Field(description="Append collapsible footer: pull_request_target, mcp, github-action. Omit when drafting for manual paste."),
+        ] = None,
     ) -> dict[str, Any]:
         return api.review_pr(
             _exists(repo), base, head, profile=profile, title=title, scope=scope,
@@ -646,6 +650,7 @@ def build_server() -> Any:
             min_confidence=min_confidence, standards=standards,
             baseline=_exists(baseline_path) if baseline_path else None,
             diff_context=diff_context, functional_notes=functional_notes,
+            github_footer=github_footer,
         )
 
     @mcp.tool(

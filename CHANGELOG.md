@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 1.4.3 (2026-11-23)
+
+### Added
+
+- MCP **`review_pr`**: `github_footer` parameter (parity with CLI / `format_pr_review`).
+- Docs: `pull_request_target` fork workflow (`docs/action.md`, `docs/docker.md` entrypoint note).
+- Canonical workflow copy under `ci/github/pr-cert-review-mcp.yml`.
+
+### Fixed
+
+- Example workflow aligned with production fork CI (`--entrypoint cert-review`, `find-comment` upsert).
+
 ## 1.4.2 (2026-11-23)
 
 ### Added
