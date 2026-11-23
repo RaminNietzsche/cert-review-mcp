@@ -33,14 +33,22 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           set -euo pipefail
-          docker pull raminnietzsche/cert-review-mcp:1.4.2
-          docker run --rm -w "$GITHUB_WORKSPACE" -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
-            raminnietzsche/cert-review-mcp:1.4.2 \
-            cert-review review-pr \
-              --repo "$GITHUB_WORKSPACE" --base "$BASE" --head "$HEAD" \
-              --title "$PR_TITLE" --profile ceph --min-confidence 0.5 \
-              --fail-on never --github-footer pull_request_target \
-              -o cert-review-pr-comment.md
+          IMAGE=raminnietzsche/cert-review-mcp:latest
+          docker pull "$IMAGE"
+          if ! docker run --rm -w "$GITHUB_WORKSPACE" -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+              "$IMAGE" cert-review review-pr \
+                --repo "$GITHUB_WORKSPACE" --base "$BASE" --head "$HEAD" \
+                --title "$PR_TITLE" --profile ceph --min-confidence 0.5 \
+                --fail-on never --github-footer pull_request_target \
+                -o cert-review-pr-comment.md 2>/dev/null; then
+            docker run --rm -w "$GITHUB_WORKSPACE" -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+              "$IMAGE" cert-review review-pr \
+                --repo "$GITHUB_WORKSPACE" --base "$BASE" --head "$HEAD" \
+                --title "$PR_TITLE" --profile ceph --min-confidence 0.5 \
+                --fail-on never -o cert-review-pr-comment.md
+            printf '\n<details>\n<summary>cert-review-mcp · auto-generated</summary>\n\nReport drafted with **[cert-review-mcp](https://github.com/RaminNietzsche/cert-review-mcp)** (`pull_request_target`).\n\n</details>\n' >> cert-review-pr-comment.md
+          fi
+          test -s cert-review-pr-comment.md
 
       - uses: peter-evans/create-or-update-comment@v4
         with:
